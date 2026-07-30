@@ -28,7 +28,7 @@ function HeSoTable({ title, data, loaiA, loaiB, labelA, labelB, onUpdate, onAdd,
           </select>
           <input placeholder="Hệ số" type="number" value={newRow.heSo} onChange={e => setNewRow(r => ({...r, heSo: e.target.value}))} className="border rounded px-2 py-1 text-xs w-20" />
           <input placeholder="Điều kiện" value={newRow.dieuKien} onChange={e => setNewRow(r => ({...r, dieuKien: e.target.value}))} className="border rounded px-2 py-1 text-xs flex-1" />
-          <input placeholder="Thứ tự" type="number" value={newRow.thuTu} onChange={e => setNewRow(r => ({...r, thuTu: Number(e.target.value)}))} className="border rounded px-2 py-1 text-xs w-16" />
+
 
         </div>
       )}

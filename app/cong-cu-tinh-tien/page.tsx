@@ -178,7 +178,7 @@ export default function CongCuTinhTienPage() {
   function tinhCuon() {
     if (!result || Number(panel.cuonGio) <= 0) return null
     const heSo = getHeSoCuon(result.klThucTe)
-    const thanhTien = heSo * 6000 * Number(panel.soLuong)
+    const thanhTien = heSo * 6000
     return { heSo, thanhTien: Math.round(thanhTien) }
   }
   const cuonResult = tinhCuon()

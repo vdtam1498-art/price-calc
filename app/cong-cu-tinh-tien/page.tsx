@@ -63,11 +63,13 @@ export default function CongCuTinhTienPage() {
     // Tính hệ số VL từ hesoGiaVL
     const getHSVL = (tenLoai: string) => hesoGiaVL.find((h:any) => h.tenLoai === tenLoai)?.heSo || 1
     let heSoVL = 1
+    const vl = panel.vatLieu.toUpperCase()
+    const isSUS = vl.includes('SUS')
+    const isHanwa = (donHang?.tenCongTy || '').toLowerCase().startsWith('hanwa')
     if (isUuDai) {
-      heSoVL = getHSVL('Ưu đãi')
+      // Inox không phải Hanwa → dùng hệ số KUĐ SUS dù là công ty ưu đãi
+      heSoVL = (isSUS && !isHanwa) ? getHSVL('Không ưu đãi SUS') : getHSVL('Ưu đãi')
     } else {
-      const vl = panel.vatLieu.toUpperCase()
-      const isSUS = vl.includes('SUS')
       heSoVL = isSUS ? getHSVL('Không ưu đãi SUS') : getHSVL('Không ưu đãi SS')
     }
 

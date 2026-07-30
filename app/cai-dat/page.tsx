@@ -157,7 +157,7 @@ export default function CaiDatPage() {
   async function crudHeSo(api: string, setter: any, action: string, id?: number, data?: any) {
     if (action === 'add') {
       const r = await fetch('/api/' + api, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
-      setter((p: any) => [...p, await r.json()])
+      r.json().then((d: any) => setter((p: any) => [...p, d]))
     } else if (action === 'update') {
       const r = await fetch('/api/' + api + '/' + id, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
       setter((p: any) => p.map((x: any) => x.id === id ? { ...x, ...data } : x))
@@ -225,7 +225,7 @@ export default function CaiDatPage() {
           </div>
         )}
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto max-h-64 overflow-y-auto">
           <table className="w-full text-xs">
             <thead>
               <tr className="text-left text-gray-400 border-b">
@@ -306,7 +306,7 @@ export default function CaiDatPage() {
             <button onClick={themCongTy} className="bg-blue-600 text-white px-3 py-1 rounded text-xs">Lưu</button>
           </div>
         )}
-        <table className="w-full text-xs">
+        <div className="max-h-60 overflow-y-auto"><table className="w-full text-xs">
           <thead><tr className="text-left text-gray-400 border-b">
             <th className="pb-1.5 pr-2">Tên công ty (EN)</th>
             <th className="pb-1.5 pr-2">Tiếng Nhật</th>
@@ -347,6 +347,7 @@ export default function CaiDatPage() {
             ))}
           </tbody>
         </table>
+        </div>
         {congTy.length === 0 && <p className="text-center text-gray-400 py-6">Chưa có công ty nào</p>}
       </div>
 

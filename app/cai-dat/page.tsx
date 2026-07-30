@@ -111,6 +111,130 @@ export default function CaiDatPage() {
         </table>
         {congTy.length === 0 && <p className="text-center text-gray-400 py-8">Chưa có công ty nào.</p>}
       </div>
+
+      {/* Bảng hệ số tấm bẻ */}
+      <div className="bg-white rounded-xl shadow p-6">
+        <h2 className="font-semibold text-gray-800 mb-1">Bảng hệ số tấm bẻ</h2>
+        <p className="text-xs text-gray-400 mb-4">Hệ số áp dụng khi tính tiền bẻ/uốn</p>
+        <div className="grid grid-cols-2 gap-4">
+          {/* Theo trọng lượng */}
+          <div className="border rounded-lg overflow-hidden">
+            <div className="bg-gray-50 px-3 py-2 border-b">
+              <p className="text-xs font-semibold text-gray-600">Theo trọng lượng</p>
+            </div>
+            <table className="w-full text-sm">
+              <thead><tr className="border-b bg-gray-50">
+                <th className="px-3 py-2 text-left text-xs text-gray-500">Hệ số</th>
+                <th className="px-3 py-2 text-left text-xs text-gray-500">Điều kiện</th>
+              </tr></thead>
+              <tbody>
+                <tr className="border-b hover:bg-gray-50"><td className="px-3 py-2 font-mono text-blue-600">1</td><td className="px-3 py-2 text-xs text-gray-600">&lt; 40 kg</td></tr>
+                <tr className="border-b hover:bg-gray-50"><td className="px-3 py-2 font-mono text-blue-600">1.5</td><td className="px-3 py-2 text-xs text-gray-600">40 – 100 kg</td></tr>
+                <tr className="hover:bg-gray-50"><td className="px-3 py-2 font-mono text-blue-600">2</td><td className="px-3 py-2 text-xs text-gray-600">&gt; 100 kg</td></tr>
+              </tbody>
+            </table>
+          </div>
+          {/* Theo chiều dài */}
+          <div className="border rounded-lg overflow-hidden">
+            <div className="bg-gray-50 px-3 py-2 border-b">
+              <p className="text-xs font-semibold text-gray-600">Theo chiều dài</p>
+            </div>
+            <table className="w-full text-sm">
+              <thead><tr className="border-b bg-gray-50">
+                <th className="px-3 py-2 text-left text-xs text-gray-500">Hệ số</th>
+                <th className="px-3 py-2 text-left text-xs text-gray-500">Điều kiện</th>
+              </tr></thead>
+              <tbody>
+                <tr className="border-b hover:bg-gray-50"><td className="px-3 py-2 font-mono text-blue-600">1</td><td className="px-3 py-2 text-xs text-gray-600">&lt; 3m</td></tr>
+                <tr className="border-b hover:bg-gray-50"><td className="px-3 py-2 font-mono text-blue-600">2.5</td><td className="px-3 py-2 text-xs text-gray-600">3 – 4m</td></tr>
+                <tr className="border-b hover:bg-gray-50"><td className="px-3 py-2 font-mono text-blue-600">3</td><td className="px-3 py-2 text-xs text-gray-600">4 – 5m</td></tr>
+                <tr className="border-b hover:bg-gray-50"><td className="px-3 py-2 font-mono text-blue-600">3.5</td><td className="px-3 py-2 text-xs text-gray-600">5 – 6m</td></tr>
+                <tr className="hover:bg-gray-50"><td className="px-3 py-2 font-mono text-blue-600">4.5</td><td className="px-3 py-2 text-xs text-gray-600">&gt; 6m</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* Bảng hệ số tấm Pitchi - Kakumaru */}
+      <div className="bg-white rounded-xl shadow p-6">
+        <h2 className="font-semibold text-gray-800 mb-1">Bảng hệ số tấm Pitchi - Kakumaru</h2>
+        <p className="text-xs text-gray-400 mb-4">Hệ số áp dụng khi tính tiền Pitchi/Kakumaru</p>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="border rounded-lg overflow-hidden">
+            <div className="bg-gray-50 px-3 py-2 border-b">
+              <p className="text-xs font-semibold text-gray-600">Theo trọng lượng</p>
+            </div>
+            <table className="w-full text-sm">
+              <thead><tr className="border-b bg-gray-50">
+                <th className="px-3 py-2 text-left text-xs text-gray-500">Hệ số</th>
+                <th className="px-3 py-2 text-left text-xs text-gray-500">Điều kiện</th>
+              </tr></thead>
+              <tbody>
+                <tr className="border-b hover:bg-gray-50"><td className="px-3 py-2 font-mono text-blue-600">1</td><td className="px-3 py-2 text-xs text-gray-600">&lt; 40 kg</td></tr>
+                <tr className="border-b hover:bg-gray-50"><td className="px-3 py-2 font-mono text-blue-600">1.5</td><td className="px-3 py-2 text-xs text-gray-600">40 – 100 kg</td></tr>
+                <tr className="hover:bg-gray-50"><td className="px-3 py-2 font-mono text-blue-600">2</td><td className="px-3 py-2 text-xs text-gray-600">&gt; 100 kg</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div className="border rounded-lg overflow-hidden">
+            <div className="bg-gray-50 px-3 py-2 border-b">
+              <p className="text-xs font-semibold text-gray-600">Theo chiều dài</p>
+            </div>
+            <table className="w-full text-sm">
+              <thead><tr className="border-b bg-gray-50">
+                <th className="px-3 py-2 text-left text-xs text-gray-500">Hệ số</th>
+                <th className="px-3 py-2 text-left text-xs text-gray-500">Điều kiện</th>
+              </tr></thead>
+              <tbody>
+                <tr className="border-b hover:bg-gray-50"><td className="px-3 py-2 font-mono text-blue-600">1</td><td className="px-3 py-2 text-xs text-gray-600">&lt; 3m</td></tr>
+                <tr className="border-b hover:bg-gray-50"><td className="px-3 py-2 font-mono text-blue-600">2.5</td><td className="px-3 py-2 text-xs text-gray-600">3 – 4m</td></tr>
+                <tr className="border-b hover:bg-gray-50"><td className="px-3 py-2 font-mono text-blue-600">3</td><td className="px-3 py-2 text-xs text-gray-600">4 – 5m</td></tr>
+                <tr className="border-b hover:bg-gray-50"><td className="px-3 py-2 font-mono text-blue-600">3.5</td><td className="px-3 py-2 text-xs text-gray-600">5 – 6m</td></tr>
+                <tr className="hover:bg-gray-50"><td className="px-3 py-2 font-mono text-blue-600">4.5</td><td className="px-3 py-2 text-xs text-gray-600">&gt; 6m</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* Bảng hệ số gia công */}
+      <div className="bg-white rounded-xl shadow p-6">
+        <h2 className="font-semibold text-gray-800 mb-1">Bảng hệ số gia công</h2>
+        <p className="text-xs text-gray-400 mb-4">Hệ số nhân theo loại gia công</p>
+        <div className="border rounded-lg overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-gray-50 border-b">
+                <th className="px-4 py-2 text-left text-xs text-gray-500">Pitchi</th>
+                <th className="px-4 py-2 text-left text-xs text-gray-500">Nón</th>
+                <th className="px-4 py-2 text-left text-xs text-gray-500">Nón lệch</th>
+                <th className="px-4 py-2 text-left text-xs text-gray-500">Kakumaru</th>
+                <th className="px-4 py-2 text-left text-xs text-gray-500">Kakumaru lệch</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="hover:bg-gray-50">
+                <td className="px-4 py-3 font-mono text-blue-600">1</td>
+                <td className="px-4 py-3 font-mono text-blue-600">1.25</td>
+                <td className="px-4 py-3 font-mono text-blue-600">1.5</td>
+                <td className="px-4 py-3 font-mono text-blue-600">2</td>
+                <td className="px-4 py-3 font-mono text-blue-600">2.5</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Bảng hệ số cuộn */}
+      <div className="bg-white rounded-xl shadow p-6">
+        <h2 className="font-semibold text-gray-800 mb-1">Bảng hệ số cuộn</h2>
+        <p className="text-xs text-gray-400 mb-4">Đang cập nhật...</p>
+        <div className="border rounded-lg p-8 text-center text-gray-300">
+          <p className="text-sm">Chưa có dữ liệu</p>
+        </div>
+      </div>
+
     </div>
   )
 }

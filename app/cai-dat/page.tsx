@@ -127,7 +127,7 @@ export default function CaiDatPage() {
   async function themBangGia() {
     const r = await fetch('/api/bang-gia', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newBG) })
     const d = await r.json(); setBangGia(p => [...p, d]); setShowAddBG(false)
-    setNewBG({ vatLieu: '', doDay: '', donGiaVL: 0, tienBe: 0, giaCat: 0, donGiaLo: 0, donGiaLoTappu: 0, giaVat: 0, tyTrong: 7.85 })
+    setNewBG({ vatLieu: '', doDay: '', donGia: 0, giaUon: 0, giaCat: 0, giaMoLo: 0, giaTappu: 0, giaVat: 0, tyTrong: 7.85 })
   }
   async function suaBangGia(id: number, data: any) {
     const r = await fetch('/api/bang-gia/' + id, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
@@ -213,9 +213,6 @@ export default function CaiDatPage() {
             {[
               { key: 'vatLieu', ph: 'Vật liệu' }, { key: 'doDay', ph: 'Dày(mm)', type: 'number' },
               { key: 'donGia', ph: 'Đơn giá', type: 'number' },
-              { key: 'giaUon', ph: 'Giá uốn', type: 'number' }, { key: 'giaCat', ph: 'Giá cắt', type: 'number' },
-              { key: 'giaMoLo', ph: 'Giá mở lỗ', type: 'number' }, { key: 'giaTappu', ph: 'Tappu/Sara', type: 'number' },
-              { key: 'giaVat', ph: 'Giá vát', type: 'number' }, { key: 'tyTrong', ph: 'Tỷ trọng', type: 'number' },
             ].map(f => (
               <input key={f.key} type={f.type || 'text'} placeholder={f.ph} value={(newBG as any)[f.key]}
                 onChange={e => setNewBG(p => ({...p, [f.key]: f.type === 'number' ? Number(e.target.value) : e.target.value}))}
@@ -249,10 +246,20 @@ export default function CaiDatPage() {
                 <tr key={row.id} className="border-b hover:bg-gray-50">
                   {editingBG?.id === row.id ? (
                     <>
-                      {['vatLieu','doDay','donGia','giaUon','giaCat','giaMoLo','giaTappu','giaVat','tyTrong'].map(k => (
+                      {['vatLieu','doDay','donGia'].map(k => (
                         <td key={k} className="py-1 pr-2">
                           <input type={k === 'vatLieu' ? 'text' : 'number'} value={editingBG[k]}
                             onChange={e => setEditingBG((p: any) => ({...p, [k]: k === 'vatLieu' ? e.target.value : Number(e.target.value)}))}
+                            className="border rounded px-1.5 py-0.5 w-full text-xs" />
+                        </td>
+                      ))}
+                      <td className="py-1 pr-2"><input readOnly value={editingBG.donGia ? (editingBG.donGia*1.1).toFixed(1) : ''} className="border rounded px-1.5 py-0.5 w-full text-xs bg-green-50 text-green-600" /></td>
+                      <td className="py-1 pr-2"><input readOnly value={editingBG.donGia ? (editingBG.donGia*1.2).toFixed(1) : ''} className="border rounded px-1.5 py-0.5 w-full text-xs bg-orange-50 text-orange-500" /></td>
+                      <td className="py-1 pr-2"><input readOnly value={editingBG.donGia ? (editingBG.donGia*1.3).toFixed(1) : ''} className="border rounded px-1.5 py-0.5 w-full text-xs bg-red-50 text-red-500" /></td>
+                      {['giaUon','giaCat','giaMoLo','giaTappu','giaVat','tyTrong'].map(k => (
+                        <td key={k} className="py-1 pr-2">
+                          <input type="number" value={editingBG[k]}
+                            onChange={e => setEditingBG((p: any) => ({...p, [k]: Number(e.target.value)}))}
                             className="border rounded px-1.5 py-0.5 w-full text-xs" />
                         </td>
                       ))}

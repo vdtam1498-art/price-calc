@@ -155,11 +155,11 @@ export default function CongCuTinhTienPage() {
     const soLuong = Number(panel.soLuong)
     const soLanAn = Number(panel.pitchiSoLan)
     const thoiGianPhut = heTam * heGC * 1.5 * soLanAn
-    const thoiGian = thoiGianPhut / 60
+    const thoiGianGio = thoiGianPhut / 60
     const thanhTien = soLuong <= 5
-      ? (1500 / soLuong) + 100 * thoiGian
-      : (1500 / 5) + 100 * thoiGian
-    return { thoiGian: thoiGian.toFixed(3), thanhTien: Math.round(thanhTien) }
+      ? (1500 / soLuong) + 100 * thoiGianPhut
+      : (1500 / 5) + 100 * thoiGianPhut
+    return { thoiGian: thoiGianGio.toFixed(3), thanhTien: Math.round(thanhTien) }
   }
   const pitchiResult = tinhPitchi()
 

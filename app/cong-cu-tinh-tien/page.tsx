@@ -149,8 +149,11 @@ export default function CongCuTinhTienPage() {
             <span className="text-sm font-bold text-blue-600">{donHang.maDon}</span>
             {donHang.tenCongTy && <>
               <span className="text-xs text-gray-400">·</span>
-              <span className="text-xs text-gray-600">{donHang.tenCongTy}</span>
-              {congTy?.isUuDai && <span className="bg-green-100 text-green-700 text-xs px-1.5 py-0.5 rounded">Ưu đãi</span>}
+              <div className="flex items-center gap-1">
+                <span className="text-xs text-gray-700 font-medium">{donHang.tenCongTy}</span>
+                {congTy?.tiengNhat && <span className="text-xs text-gray-400">({congTy.tiengNhat})</span>}
+                {congTy?.isUuDai && <span className="bg-green-100 text-green-700 text-xs px-1.5 py-0.5 rounded">Ưu đãi</span>}
+              </div>
             </>}
           </div>
           <div className="flex gap-2">

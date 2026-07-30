@@ -89,6 +89,7 @@ export default function CaiDatPage() {
   // Bảng giá form
   const [showAddBG, setShowAddBG] = useState(false)
   const [importing, setImporting] = useState(false)
+  const [searchBG, setSearchBG] = useState('')
   const [importResult, setImportResult] = useState<any>(null)
   const [newBG, setNewBG] = useState({ vatLieu: '', doDay: '', donGia: 0, giaUon: 0, giaCat: 0, giaMoLo: 0, giaTappu: 0, giaVat: 0, tyTrong: 7.85 })
   const [editingBG, setEditingBG] = useState<any>(null)
@@ -212,6 +213,11 @@ export default function CaiDatPage() {
     }
   }
 
+  const filteredBG = bangGia.filter(r =>
+    r.vatLieu.toLowerCase().includes(searchBG.toLowerCase()) ||
+    String(r.doDay).includes(searchBG)
+  )
+
   if (loading) return <div className="p-8 text-gray-400 text-sm">Đang tải...</div>
 
   return (
@@ -255,6 +261,9 @@ export default function CaiDatPage() {
                 ✓ Đã import {importResult.inserted}/{importResult.total} dòng
               </span>
             )}
+            <input value={searchBG} onChange={e => setSearchBG(e.target.value)}
+              placeholder="Tìm vật liệu, độ dày..."
+              className="border rounded px-2 py-1 text-xs w-40 focus:outline-none focus:ring-1 focus:ring-blue-400" />
             <label className={`text-xs px-3 py-1 rounded cursor-pointer border ${importing ? 'bg-gray-100 text-gray-400' : 'bg-purple-50 text-purple-600 border-purple-200 hover:bg-purple-100'}`}>
               {importing ? '⏳ Đang import...' : '📥 Import Excel'}
               <input type="file" accept=".xlsx,.xls" className="hidden" onChange={handleImportExcel} disabled={importing} />
@@ -302,7 +311,7 @@ export default function CaiDatPage() {
               </tr>
             </thead>
             <tbody>
-              {bangGia.map(row => (
+              {filteredBG.map(row => (
                 <tr key={row.id} className="border-b hover:bg-gray-50">
                   {editingBG?.id === row.id ? (
                     <>
@@ -333,11 +342,11 @@ export default function CaiDatPage() {
                   ) : (
                     <>
                       <td className="py-1.5 pr-2 font-medium">{row.vatLieu}</td>
-                      <td className="py-1.5 pr-2">{row.doDay}</td>
-                      <td className="py-1.5 pr-2 font-mono">{row.donGia}</td>
-                      <td className="py-1.5 pr-2 text-green-600 font-mono">{row.uuDai || (row.donGia * 1.1).toFixed(1)}</td>
-                      <td className="py-1.5 pr-2 text-orange-500 font-mono">{row.khongUuDai || (row.donGia * 1.2).toFixed(1)}</td>
-                      <td className="py-1.5 pr-2 text-red-500 font-mono">{row.datNgoai || (row.donGia * 1.3).toFixed(1)}</td>
+                      <td className="py-1.5 pr-2 font-mono">{Number(row.doDay).toFixed(1)}</td>
+                      <td className="py-1.5 pr-2 font-mono">{row.donGia > 0 ? row.donGia : <span className="text-gray-400 italic text-xs">Đặt ngoài</span>}</td>
+                      <td className="py-1.5 pr-2 text-green-600 font-mono">{row.donGia > 0 ? (row.donGia * 1.1).toFixed(1) : <span className="text-gray-300">—</span>}</td>
+                      <td className="py-1.5 pr-2 text-orange-500 font-mono">{row.donGia > 0 ? (row.donGia * 1.2).toFixed(1) : <span className="text-gray-300">—</span>}</td>
+                      <td className="py-1.5 pr-2 text-red-500 font-mono">{row.donGia > 0 ? (row.donGia * 1.3).toFixed(1) : <span className="text-gray-300">—</span>}</td>
                       <td className="py-1.5 pr-2 font-mono">{row.giaUon}</td>
                       <td className="py-1.5 pr-2 font-mono">{row.giaCat}</td>
                       <td className="py-1.5 pr-2 font-mono">{row.giaMoLo}</td>

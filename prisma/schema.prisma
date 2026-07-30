@@ -67,3 +67,32 @@ model Panel {
   allIn         Float    @default(0)
   createdAt     DateTime @default(now())
 }
+
+model HeSoBe {
+  id        Int    @id @default(autoincrement())
+  loai      String // "trong_luong" hoặc "chieu_dai"
+  heSo      Float
+  dieuKien  String // VD: "< 40 kg", "3 - 4m"
+  thuTu     Int    @default(0)
+}
+
+model HeSoGiaCong {
+  id       Int    @id @default(autoincrement())
+  tenLoai  String // Pitchi, Non, NonLech, Kakumaru, KakumaruLech
+  heSo     Float
+}
+
+model HeSoCuon {
+  id        Int    @id @default(autoincrement())
+  tenLoai   String
+  heSo      Float
+  dieuKien  String @default("")
+}
+
+model HeSoPitchiKakumaru {
+  id        Int    @id @default(autoincrement())
+  loai      String // "trong_luong" hoặc "chieu_dai"
+  heSo      Float
+  dieuKien  String
+  thuTu     Int    @default(0)
+}

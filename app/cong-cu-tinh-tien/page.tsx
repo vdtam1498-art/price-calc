@@ -143,8 +143,24 @@ export default function CongCuTinhTienPage() {
 
         {/* Header */}
         <div className="flex justify-between items-center">
-          <span className="text-sm font-semibold text-gray-700">Công cụ tính tiền</span>
+  <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-gray-700">Công cụ tính tiền</span>
+            <span className="text-xs text-gray-400">|</span>
+            <span className="text-sm font-bold text-blue-600">{donHang.maDon}</span>
+            {donHang.tenCongTy && <>
+              <span className="text-xs text-gray-400">·</span>
+              <span className="text-xs text-gray-600">{donHang.tenCongTy}</span>
+              {congTy?.isUuDai && <span className="bg-green-100 text-green-700 text-xs px-1.5 py-0.5 rounded">Ưu đãi</span>}
+            </>}
+          </div>
           <div className="flex gap-2">
+            <button onClick={async () => {
+              if (donHang.panels.length > 0) {
+                if (!confirm('Đơn đã có ' + donHang.panels.length + ' tấm. Huỷ sẽ xoá toàn bộ. Tiếp tục?')) return
+              }
+              await fetch('/api/don-hang/' + donHang.id, { method: 'DELETE' })
+              setDonHang(null)
+            }} className="border bg-white text-red-500 border-red-200 px-3 py-1.5 rounded-lg text-xs hover:bg-red-50">✕ Huỷ đơn</button>
             <button onClick={() => setDonHang(null)} className="border bg-white px-3 py-1.5 rounded-lg text-xs hover:bg-gray-50">🗂 Lưu đơn hàng</button>
             <button className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-blue-700">↓ Xuất Sheet</button>
           </div>

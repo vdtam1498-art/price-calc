@@ -7,7 +7,7 @@ import { calculatePanel } from '@/lib/calculate'
 const emptyPanel = (maDon?: string, soTam?: number) => ({
   tenTam: maDon && soTam !== undefined ? maDon + '-' + (soTam + 1) : '', vatLieu: '', doDay: '', x: '0', y: '0', soLuong: 1, maKhach: '',
   loNho: 0, loLon: 0, soLoTappu: 0, soLoSara: 0,
-  pitchiSoLan: 0, pitchiGio: 0, loaiGiaCong: 'Pitchi', cuonGio: 0, vatMm: 0,
+  pitchiSoLan: 0, pitchiChieuDai: 0, pitchiGio: 0, loaiGiaCong: 'Pitchi', cuonGio: 0, vatMm: 0,
   be: [{ soDuong: 1, daiMm: 0, donGia: 0 }]
 })
 
@@ -125,8 +125,8 @@ export default function CongCuTinhTienPage() {
   const thanhTien = "mt-auto pt-2"
 
 
-  function getHeSoPitchi(klThucTe: number, x: number, y: number) {
-    const maxCD = Math.max(Number(x), Number(y)) / 1000
+  function getHeSoPitchi(klThucTe: number, chieuDaiMm: number) {
+    const maxCD = Number(chieuDaiMm) / 1000
     const tlRows = hesoPitchiDB.filter((r:any) => r.loai === 'trong_luong').sort((a:any,b:any) => a.thuTu-b.thuTu)
     const cdRows = hesoPitchiDB.filter((r:any) => r.loai === 'chieu_dai').sort((a:any,b:any) => a.thuTu-b.thuTu)
     let hsTL = 2
@@ -150,15 +150,16 @@ export default function CongCuTinhTienPage() {
   }
   function tinhPitchi() {
     if (!result || Number(panel.pitchiSoLan) <= 0) return null
-    const heTam = getHeSoPitchi(result.klThucTe, Number(panel.x), Number(panel.y))
+    const heTam = getHeSoPitchi(result.klThucTe, Number(panel.pitchiChieuDai))
     const heGC = getHeSoLoaiGC(panel.loaiGiaCong || 'Pitchi')
     const soLuong = Number(panel.soLuong)
     const soLanAn = Number(panel.pitchiSoLan)
-    const thoiGian = heTam * heGC * 1.5 * soLanAn
+    const thoiGianPhut = heTam * heGC * 1.5 * soLanAn
+    const thoiGian = thoiGianPhut / 60
     const thanhTien = soLuong <= 5
       ? (1500 / soLuong) + 100 * thoiGian
       : (1500 / 5) + 100 * thoiGian
-    return { thoiGian: thoiGian.toFixed(2), thanhTien: Math.round(thanhTien) }
+    return { thoiGian: thoiGian.toFixed(3), thanhTien: Math.round(thanhTien) }
   }
   const pitchiResult = tinhPitchi()
 

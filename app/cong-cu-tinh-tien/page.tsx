@@ -438,8 +438,16 @@ export default function CongCuTinhTienPage() {
               <select value={panel.loaiGiaCong} onChange={e => setPanel((p:any) => ({...p, loaiGiaCong: e.target.value}))} className={inp}>
                 {hesoGiaCongDB.map((r:any) => <option key={r.id} value={r.tenLoai}>{r.tenLoai} (×{r.heSo})</option>)}
               </select>
-              <label className="text-xs text-gray-400 mt-1.5">Số lần ấn (N)</label>
-              <input type="number" value={panel.pitchiSoLan} onChange={e => setPanel((p:any) => ({...p, pitchiSoLan: e.target.value}))} className={inp} />
+              <div className="grid grid-cols-2 gap-1 mt-1.5">
+                <div>
+                  <label className="text-xs text-gray-400">Số lần ấn (N)</label>
+                  <input type="number" value={panel.pitchiSoLan} onChange={e => setPanel((p:any) => ({...p, pitchiSoLan: e.target.value}))} className={inp} />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-400">Chiều dài ấn (mm)</label>
+                  <input type="number" value={panel.pitchiChieuDai} onChange={e => setPanel((p:any) => ({...p, pitchiChieuDai: e.target.value}))} className={inp} />
+                </div>
+              </div>
               <label className="text-xs text-gray-400 mt-1.5">Thời gian (H)</label>
               <input readOnly value={pitchiResult ? pitchiResult.thoiGian : '0'} className={inpRo} />
               <div className={thanhTien}>

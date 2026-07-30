@@ -309,10 +309,10 @@ export default function CaiDatPage() {
       <div className="bg-white rounded-xl shadow p-5">
         <div className="flex justify-between items-center mb-3">
           <h2 className="font-semibold text-gray-800 text-sm">Danh sách công ty ưu đãi</h2>
-          <div className="flex gap-2">
+          {!locked && <div className="flex gap-2">
             {showAddCT && <button onClick={themCongTy} className="text-xs bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">💾 Lưu</button>}
             <button onClick={() => setShowAddCT(!showAddCT)} className="text-xs bg-blue-50 text-blue-600 border border-blue-200 px-2 py-1 rounded hover:bg-blue-100">{showAddCT ? '✕ Huỷ' : '+ Thêm'}</button>
-          </div>
+          </div>}
         </div>
         {showAddCT && (
           <div className="flex gap-2 mb-3 p-3 bg-gray-50 rounded-lg flex-wrap">
@@ -358,10 +358,10 @@ export default function CaiDatPage() {
                     <td className="py-1.5 pr-2 text-green-600 font-mono">{ct.heSo_4_5mm}</td>
                     <td className="py-1.5 pr-2 text-orange-500 font-mono">{ct.heSo_duoi4_5mm}</td>
                     <td className="py-1.5 pr-2"><span className={ct.isUuDai ? 'text-green-500 font-medium' : 'text-gray-400'}>{ct.isUuDai ? '✓ Ưu đãi' : 'Thường'}</span></td>
-                    <td className="py-1.5"><div className="flex gap-1">
+                    {!locked && <td className="py-1.5"><div className="flex gap-1">
                       <button onClick={() => setEditingCT(ct)} className="text-blue-400 hover:text-blue-600">✏️</button>
                       <button onClick={() => xoaCongTy(ct.id)} className="text-red-400 hover:text-red-600">✕</button>
-                    </div></td>
+                    </div></td>}
                   </>
                 )}
               </tr>

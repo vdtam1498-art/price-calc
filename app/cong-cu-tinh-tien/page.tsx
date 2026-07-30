@@ -20,10 +20,12 @@ export default function CongCuTinhTienPage() {
   const [panel, setPanel] = useState<any>(emptyPanel())
   const [result, setResult] = useState<any>(null)
   const [saving, setSaving] = useState(false)
+  const [hesoGiaVL, setHesoGiaVL] = useState<any[]>([])
 
   useEffect(() => {
     fetch('/api/bang-gia').then(r => r.json()).then(setBangGia)
     fetch('/api/cong-ty').then(r => r.json()).then(setCongTyList)
+    fetch('/api/heso-gia-vl').then(r => r.json()).then(setHesoGiaVL)
   }, [])
 
   // Danh sách vật liệu unique từ database, nhóm theo loại

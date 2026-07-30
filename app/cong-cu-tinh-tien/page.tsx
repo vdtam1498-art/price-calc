@@ -2,10 +2,10 @@
 import { useEffect, useState } from 'react'
 import { calculatePanel } from '@/lib/calculate'
 
-const VAT_LIEU_OPTIONS = ['SPCC','SPHC','SS400','SUS304','SUS316','AL']
 
-const emptyPanel = () => ({
-  tenTam: '', vatLieu: 'SPCC', doDay: '', x: '500', y: '300', soLuong: 1, maKhach: '',
+
+const emptyPanel = (maDon?: string, soTam?: number) => ({
+  tenTam: maDon && soTam !== undefined ? maDon + '-' + (soTam + 1) : '', vatLieu: '', doDay: '', x: '500', y: '300', soLuong: 1, maKhach: '',
   loNho: 0, loLon: 0, soLoTappu: 0, soLoSara: 0,
   pitchiSoLan: 0, pitchiGio: 0, cuonGio: 0, vatMm: 0,
   be: [{ soDuong: 1, daiMm: 0, donGia: 0 }]
@@ -25,6 +25,15 @@ export default function CongCuTinhTienPage() {
     fetch('/api/bang-gia').then(r => r.json()).then(setBangGia)
     fetch('/api/cong-ty').then(r => r.json()).then(setCongTyList)
   }, [])
+
+  // Danh sách vật liệu unique từ database, nhóm theo loại
+  const vatLieuList = Array.from(new Set(bangGia.map((r:any) => r.vatLieu)))
+  const nhomThep = vatLieuList.filter((v:any) => !v.toUpperCase().includes('SUS') && !v.toUpperCase().startsWith('A'))
+  const nhomInox = vatLieuList.filter((v:any) => v.toUpperCase().includes('SUS'))
+  const nhomNhom = vatLieuList.filter((v:any) => v.toUpperCase().startsWith('A') && !v.toUpperCase().includes('SUS'))
+
+  // Độ dày theo vật liệu đã chọn
+  const doDayList = bangGia.filter((r:any) => r.vatLieu === panel.vatLieu).map((r:any) => r.doDay).sort((a:number,b:number) => a-b)
 
   const bgRow = bangGia.find(r => r.vatLieu === panel.vatLieu && r.doDay === Number(panel.doDay))
   const congTy = congTyList.find(c => c.tenCongTy === donHang?.tenCongTy)
@@ -61,7 +70,9 @@ export default function CongCuTinhTienPage() {
       body: JSON.stringify(form)
     })
     if (!res.ok) return alert('Mã đơn đã tồn tại hoặc có lỗi!')
-    setDonHang(await res.json())
+    const dh = await res.json()
+    setDonHang(dh)
+    setPanel(emptyPanel(dh.maDon, 0))
   }
 
   async function luuTam() {
@@ -84,7 +95,7 @@ export default function CongCuTinhTienPage() {
     })
     const updated = await fetch('/api/don-hang/' + donHang.id).then(r => r.json())
     setDonHang(updated)
-    setPanel(emptyPanel())
+    setPanel(emptyPanel(donHang?.maDon, donHang?.panels?.length || 0))
     setSaving(false)
   }
 
@@ -205,15 +216,24 @@ export default function CongCuTinhTienPage() {
             <div>
               <label className="text-xs text-gray-400">Vật liệu</label>
               <select value={panel.vatLieu} onChange={e => setPanel((p:any) => ({...p, vatLieu: e.target.value, doDay: ''}))} className={inp}>
-                {VAT_LIEU_OPTIONS.map(v => <option key={v}>{v}</option>)}
+                <option value="">-- Chọn --</option>
+                {nhomThep.length > 0 && <optgroup label="⚙️ Thép">
+                  {nhomThep.map((v:any) => <option key={v} value={v}>{v}</option>)}
+                </optgroup>}
+                {nhomInox.length > 0 && <optgroup label="✨ Inox">
+                  {nhomInox.map((v:any) => <option key={v} value={v}>{v}</option>)}
+                </optgroup>}
+                {nhomNhom.length > 0 && <optgroup label="🔩 Nhôm">
+                  {nhomNhom.map((v:any) => <option key={v} value={v}>{v}</option>)}
+                </optgroup>}
               </select>
             </div>
             <div>
               <label className="text-xs text-gray-400">Độ dày (MM)</label>
               <select value={panel.doDay} onChange={e => setPanel((p:any) => ({...p, doDay: e.target.value}))} className={inp}>
                 <option value="">-- Chọn độ dày --</option>
-                {bangGia.filter(r => r.vatLieu === panel.vatLieu).map(r => (
-                  <option key={r.doDay} value={r.doDay}>{r.doDay}</option>
+                {doDayList.map((d:any) => (
+                  <option key={d} value={d}>{Number(d).toFixed(1)}</option>
                 ))}
               </select>
             </div>

@@ -209,16 +209,20 @@ export default function CaiDatPage() {
         </div>
 
         {showAddBG && (
-          <div className="grid grid-cols-9 gap-1.5 mb-3 p-3 bg-gray-50 rounded-lg">
-            {[
-              { key: 'vatLieu', ph: 'Vật liệu' }, { key: 'doDay', ph: 'Dày(mm)', type: 'number' },
-              { key: 'donGia', ph: 'Đơn giá', type: 'number' },
-            ].map(f => (
-              <input key={f.key} type={f.type || 'text'} placeholder={f.ph} value={(newBG as any)[f.key]}
-                onChange={e => setNewBG(p => ({...p, [f.key]: f.type === 'number' ? Number(e.target.value) : e.target.value}))}
-                className="border rounded px-2 py-1 text-xs" />
-            ))}
-            <button onClick={themBangGia} className="col-span-9 bg-blue-600 text-white py-1 rounded text-xs">Lưu</button>
+          <div className="grid grid-cols-12 gap-1.5 mb-3 p-3 bg-gray-50 rounded-lg">
+            <input placeholder="Vật liệu" value={newBG.vatLieu} onChange={e => setNewBG(p => ({...p, vatLieu: e.target.value}))} className="border rounded px-2 py-1 text-xs" />
+            <input placeholder="Dày(mm)" type="number" value={newBG.doDay} onChange={e => setNewBG(p => ({...p, doDay: Number(e.target.value)}))} className="border rounded px-2 py-1 text-xs" />
+            <input placeholder="Đơn giá" type="number" value={newBG.donGia || ''} onChange={e => setNewBG(p => ({...p, donGia: Number(e.target.value)}))} className="border rounded px-2 py-1 text-xs" />
+            <input readOnly value={newBG.donGia ? (newBG.donGia*1.1).toFixed(1) : ''} placeholder="Ưu đãi ×1.1" className="border rounded px-2 py-1 text-xs bg-green-50 text-green-600 cursor-not-allowed" />
+            <input readOnly value={newBG.donGia ? (newBG.donGia*1.2).toFixed(1) : ''} placeholder="KUĐ ×1.2" className="border rounded px-2 py-1 text-xs bg-orange-50 text-orange-500 cursor-not-allowed" />
+            <input readOnly value={newBG.donGia ? (newBG.donGia*1.3).toFixed(1) : ''} placeholder="Đặt ngoài ×1.3" className="border rounded px-2 py-1 text-xs bg-red-50 text-red-500 cursor-not-allowed" />
+            <input placeholder="Giá uốn" type="number" value={newBG.giaUon || ''} onChange={e => setNewBG(p => ({...p, giaUon: Number(e.target.value)}))} className="border rounded px-2 py-1 text-xs" />
+            <input placeholder="Giá cắt" type="number" value={newBG.giaCat || ''} onChange={e => setNewBG(p => ({...p, giaCat: Number(e.target.value)}))} className="border rounded px-2 py-1 text-xs" />
+            <input placeholder="Mở lỗ" type="number" value={newBG.giaMoLo || ''} onChange={e => setNewBG(p => ({...p, giaMoLo: Number(e.target.value)}))} className="border rounded px-2 py-1 text-xs" />
+            <input placeholder="Tappu/Sara" type="number" value={newBG.giaTappu || ''} onChange={e => setNewBG(p => ({...p, giaTappu: Number(e.target.value)}))} className="border rounded px-2 py-1 text-xs" />
+            <input placeholder="Giá vát" type="number" value={newBG.giaVat || ''} onChange={e => setNewBG(p => ({...p, giaVat: Number(e.target.value)}))} className="border rounded px-2 py-1 text-xs" />
+            <input placeholder="Tỷ trọng" type="number" value={newBG.tyTrong || ''} onChange={e => setNewBG(p => ({...p, tyTrong: Number(e.target.value)}))} className="border rounded px-2 py-1 text-xs" />
+            <button onClick={themBangGia} className="col-span-12 bg-blue-600 text-white py-1 rounded text-xs mt-1">+ Lưu dòng mới</button>
           </div>
         )}
 

@@ -479,8 +479,12 @@ export default function CongCuTinhTienPage() {
             {/* Cuộn */}
             <div className="border rounded-lg p-2 flex flex-col">
               <p className="text-xs font-bold text-blue-600 mb-1.5">● CUỘN</p>
-              <label className="text-xs text-gray-400">Số lần cuộn</label>
-              <input type="number" value={panel.cuonGio} onChange={e => setPanel((p:any) => ({...p, cuonGio: e.target.value}))} className={inp} />
+              <label className="flex items-center gap-1.5 text-xs text-gray-600 cursor-pointer select-none py-1">
+                <input type="checkbox" checked={Number(panel.cuonGio) > 0}
+                  onChange={e => setPanel((p:any) => ({...p, cuonGio: e.target.checked ? 1 : 0}))}
+                  className="w-3.5 h-3.5 accent-blue-600 cursor-pointer" />
+                <span className={Number(panel.cuonGio) > 0 ? 'text-blue-600 font-medium' : ''}>Có cuộn</span>
+              </label>
               <label className="text-xs text-gray-400 mt-1.5">Thời gian (H)</label>
               <input readOnly value={cuonResult ? cuonResult.heSo : '0'} className={inpRo} />
               <label className="text-xs text-gray-400 mt-1.5">Đơn giá (¥/giờ)</label>

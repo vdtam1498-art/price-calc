@@ -5,7 +5,7 @@ import { calculatePanel } from '@/lib/calculate'
 
 
 const emptyPanel = (maDon?: string, soTam?: number) => ({
-  tenTam: maDon && soTam !== undefined ? maDon + '-' + (soTam + 1) : '', vatLieu: '', doDay: '', x: '500', y: '300', soLuong: 1, maKhach: '',
+  tenTam: maDon && soTam !== undefined ? maDon + '-' + (soTam + 1) : '', vatLieu: '', doDay: '', x: '0', y: '0', soLuong: 1, maKhach: '',
   loNho: 0, loLon: 0, soLoTappu: 0, soLoSara: 0,
   pitchiSoLan: 0, pitchiGio: 0, cuonGio: 0, vatMm: 0,
   be: [{ soDuong: 1, daiMm: 0, donGia: 0 }]
@@ -109,7 +109,7 @@ export default function CongCuTinhTienPage() {
     })
     const updated = await fetch('/api/don-hang/' + donHang.id).then(r => r.json())
     setDonHang(updated)
-    setPanel(emptyPanel(donHang?.maDon, donHang?.panels?.length || 0))
+    setPanel(emptyPanel(updated.maDon, updated.panels.length))
     setSaving(false)
   }
 
@@ -224,8 +224,7 @@ export default function CongCuTinhTienPage() {
           <div className="grid grid-cols-6 gap-2 mb-2">
             <div className="col-span-1">
               <label className="text-xs text-gray-400">Tên tấm *</label>
-              <input value={panel.tenTam} onChange={e => setPanel((p:any) => ({...p, tenTam: e.target.value}))}
-                placeholder="VD: Tấm đáy, Tấm cạnh trái..." className={inp} />
+              <input readOnly value={panel.tenTam} className={inp + ' bg-gray-50 cursor-not-allowed'} />
             </div>
             <div>
               <label className="text-xs text-gray-400">Vật liệu</label>

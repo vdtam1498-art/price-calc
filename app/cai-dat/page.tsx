@@ -125,7 +125,8 @@ export default function CaiDatPage() {
 
   // CRUD bang gia
   async function themBangGia() {
-    const r = await fetch('/api/bang-gia', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newBG) })
+    const payload = { ...newBG, doDay: Number(newBG.doDay) }
+    const r = await fetch('/api/bang-gia', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
     const d = await r.json(); setBangGia(p => [...p, d]); setShowAddBG(false)
     setNewBG({ vatLieu: '', doDay: '', donGia: 0, giaUon: 0, giaCat: 0, giaMoLo: 0, giaTappu: 0, giaVat: 0, tyTrong: 7.85 })
   }
@@ -211,7 +212,7 @@ export default function CaiDatPage() {
         {showAddBG && (
           <div className="grid grid-cols-12 gap-1.5 mb-3 p-3 bg-gray-50 rounded-lg">
             <input placeholder="Vật liệu" value={newBG.vatLieu} onChange={e => setNewBG(p => ({...p, vatLieu: e.target.value}))} className="border rounded px-2 py-1 text-xs" />
-            <input placeholder="Dày(mm)" type="number" value={newBG.doDay} onChange={e => setNewBG(p => ({...p, doDay: Number(e.target.value)}))} className="border rounded px-2 py-1 text-xs" />
+            <input placeholder="Dày(mm)" type="number" value={newBG.doDay} onChange={e => setNewBG(p => ({...p, doDay: e.target.value}))} className="border rounded px-2 py-1 text-xs" />
             <input placeholder="Đơn giá" type="number" value={newBG.donGia || ''} onChange={e => setNewBG(p => ({...p, donGia: Number(e.target.value)}))} className="border rounded px-2 py-1 text-xs" />
             <input readOnly value={newBG.donGia ? (newBG.donGia*1.1).toFixed(1) : ''} placeholder="Ưu đãi ×1.1" className="border rounded px-2 py-1 text-xs bg-green-50 text-green-600 cursor-not-allowed" />
             <input readOnly value={newBG.donGia ? (newBG.donGia*1.2).toFixed(1) : ''} placeholder="KUĐ ×1.2" className="border rounded px-2 py-1 text-xs bg-orange-50 text-orange-500 cursor-not-allowed" />
@@ -222,7 +223,7 @@ export default function CaiDatPage() {
             <input placeholder="Tappu/Sara" type="number" value={newBG.giaTappu || ''} onChange={e => setNewBG(p => ({...p, giaTappu: Number(e.target.value)}))} className="border rounded px-2 py-1 text-xs" />
             <input placeholder="Giá vát" type="number" value={newBG.giaVat || ''} onChange={e => setNewBG(p => ({...p, giaVat: Number(e.target.value)}))} className="border rounded px-2 py-1 text-xs" />
             <input placeholder="Tỷ trọng" type="number" value={newBG.tyTrong || ''} onChange={e => setNewBG(p => ({...p, tyTrong: Number(e.target.value)}))} className="border rounded px-2 py-1 text-xs" />
-            <button onClick={themBangGia} className="col-span-12 bg-blue-600 text-white py-1 rounded text-xs mt-1">+ Lưu dòng mới</button>
+
           </div>
         )}
 
@@ -308,7 +309,10 @@ export default function CaiDatPage() {
       <div className="bg-white rounded-xl shadow p-5">
         <div className="flex justify-between items-center mb-3">
           <h2 className="font-semibold text-gray-800 text-sm">Danh sách công ty ưu đãi</h2>
-          <button onClick={() => setShowAddCT(!showAddCT)} className="text-xs bg-blue-50 text-blue-600 border border-blue-200 px-2 py-1 rounded hover:bg-blue-100">+ Thêm</button>
+          <div className="flex gap-2">
+            {showAddCT && <button onClick={themCongTy} className="text-xs bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">💾 Lưu</button>}
+            <button onClick={() => setShowAddCT(!showAddCT)} className="text-xs bg-blue-50 text-blue-600 border border-blue-200 px-2 py-1 rounded hover:bg-blue-100">{showAddCT ? '✕ Huỷ' : '+ Thêm'}</button>
+          </div>
         </div>
         {showAddCT && (
           <div className="flex gap-2 mb-3 p-3 bg-gray-50 rounded-lg flex-wrap">
@@ -320,7 +324,7 @@ export default function CaiDatPage() {
               <input type="checkbox" checked={newCT.isUuDai} onChange={e => setNewCT(p => ({...p, isUuDai: e.target.checked}))} />
               Ưu đãi
             </label>
-            <button onClick={themCongTy} className="bg-blue-600 text-white px-3 py-1 rounded text-xs">Lưu</button>
+
           </div>
         )}
         <div className="max-h-60 overflow-y-auto"><table className="w-full text-xs">

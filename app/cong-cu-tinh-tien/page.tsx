@@ -110,24 +110,24 @@ export default function CongCuTinhTienPage() {
         </div>
         <div className="space-y-3">
           <div>
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Mã đơn hàng *</label>
+            <label className="text-xs text-gray-500">Mã đơn hàng *</label>
             <input value={form.maDon} onChange={e => setForm(f => ({...f, maDon: e.target.value}))}
               onKeyDown={e => e.key === 'Enter' && taoDon()}
               placeholder="VD: 123456 hoặc 080605-1"
-              className="w-full mt-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              className="w-full mt-1 border rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500" />
           </div>
           <div>
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Tên công ty</label>
+            <label className="text-xs text-gray-500">Tên công ty</label>
             <input value={form.tenCongTy} onChange={e => setForm(f => ({...f, tenCongTy: e.target.value}))}
               list="cong-ty-list" placeholder="Nhập hoặc chọn công ty..."
-              className="w-full mt-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              className="w-full mt-1 border rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500" />
             <datalist id="cong-ty-list">{congTyList.map(c => <option key={c.id} value={c.tenCongTy} />)}</datalist>
           </div>
           <div>
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Ghi chú đơn</label>
+            <label className="text-xs text-gray-500">Ghi chú đơn</label>
             <input value={form.ghiChu} onChange={e => setForm(f => ({...f, ghiChu: e.target.value}))}
               placeholder="Không có lưu ý"
-              className="w-full mt-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              className="w-full mt-1 border rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500" />
           </div>
           <button onClick={taoDon} className="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition">
             › Tạo đơn &amp; bắt đầu tính
@@ -153,7 +153,7 @@ export default function CongCuTinhTienPage() {
         {/* THÔNG SỐ TẤM */}
         <div className="bg-white rounded-xl shadow-sm border p-3">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-xs font-bold text-gray-500 uppercase tracking-widest border-l-2 border-blue-500 pl-2">Thông số tấm</span>
+            <span className="text-xs font-bold text-gray-500 border-l-2 border-blue-500 pl-2">Thông số tấm</span>
             {panel.vatLieu && <span className="text-xs border border-orange-300 text-orange-600 px-2 py-0.5 rounded-full">Sắt thép — {panel.vatLieu}</span>}
           </div>
           <div className="grid grid-cols-6 gap-2 mb-2">
@@ -211,7 +211,7 @@ export default function CongCuTinhTienPage() {
         {/* GIA CÔNG */}
         <div className="bg-white rounded-xl shadow-sm border p-3">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-xs font-bold text-gray-500 uppercase tracking-widest border-l-2 border-blue-500 pl-2">Gia công</span>
+            <span className="text-xs font-bold text-gray-500 border-l-2 border-blue-500 pl-2">Gia công</span>
             <span className="text-xs border border-orange-300 text-orange-600 px-2 py-0.5 rounded-full">GC: ¥ {result ? fmt(result.tongGiaCong) : 0}</span>
           </div>
 
@@ -363,7 +363,7 @@ export default function CongCuTinhTienPage() {
       <div className="w-80 border-l bg-white flex flex-col overflow-hidden">
         <div className="flex-1 overflow-y-auto border-b">
           <div className="flex justify-between items-center px-3 py-2 border-b">
-            <span className="text-xs font-bold text-gray-500 uppercase border-l-2 border-blue-500 pl-2">Các tấm đã nhập</span>
+            <span className="text-xs font-bold text-gray-500 border-l-2 border-blue-500 pl-2">Các tấm đã nhập</span>
             <span className="text-xs font-mono bg-red-50 text-red-500 border border-red-200 px-1.5 py-0.5 rounded">
               ¥ {fmt(donHang.panels.reduce((s:number,p:any)=>s+p.allIn,0))}
             </span>
@@ -378,7 +378,7 @@ export default function CongCuTinhTienPage() {
           ) : (
             <div className="p-2">
               {donHang.panels.map((p:any, i:number) => (
-                <div key={p.id} className="flex justify-between items-center px-2 py-1.5 rounded hover:bg-gray-50 border-b last:border-0">
+                <div key={p.id} className="flex justify-between items-center px-2 py-1 rounded hover:bg-gray-50 border-b last:border-0">
                   <div>
                     <p className="text-xs font-semibold text-gray-700">{p.tenTam || 'Tấm '+(i+1)}</p>
                     <p className="text-xs text-gray-400">{p.vatLieu} {p.doDay}mm · ×{p.soLuong}</p>
@@ -392,7 +392,7 @@ export default function CongCuTinhTienPage() {
 
         <div className="p-3">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-xs font-bold text-gray-500 uppercase">Tổng kết tấm này</span>
+            <span className="text-xs font-bold text-gray-500">Tổng kết tấm này</span>
             <span className="text-xs bg-gray-100 px-1.5 py-0.5 rounded font-mono">SL = {panel.soLuong}</span>
           </div>
           <div className="grid grid-cols-2 gap-1.5 mb-2">

@@ -1,0 +1,69 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model BangGiaVL {
+  id              Int     @id @default(autoincrement())
+  vatLieu         String
+  doDay           Float
+  donGiaVL        Float
+  tienBe          Float   @default(0)
+  giaCat          Float   @default(0)
+  donGiaLo        Float   @default(0)
+  donGiaLoTappu   Float   @default(0)
+  giaVat          Float   @default(0)
+  tyTrong         Float   @default(7.85)
+
+  @@unique([vatLieu, doDay])
+}
+
+model CongTy {
+  id               Int     @id @default(autoincrement())
+  tenCongTy        String
+  tiengNhat        String  @default("")
+  heSo_4_5mm       Float   @default(44)
+  heSo_duoi4_5mm   Float   @default(64)
+  isUuDai          Boolean @default(false)
+}
+
+model DonHang {
+  id         Int      @id @default(autoincrement())
+  maDon      String   @unique
+  tenCongTy  String   @default("")
+  ghiChu     String   @default("")
+  ngayTao    DateTime @default(now())
+  tongTien   Float    @default(0)
+  panels     Panel[]
+}
+
+model Panel {
+  id            Int      @id @default(autoincrement())
+  donHangId     Int
+  donHang       DonHang  @relation(fields: [donHangId], references: [id], onDelete: Cascade)
+  tenTam        String
+  soLuong       Int      @default(1)
+  vatLieu       String
+  doDay         Float
+  x             Float
+  y             Float
+  maKhach       String   @default("")
+  loNho         Int      @default(0)
+  loLon         Int      @default(0)
+  soLoTappu     Int      @default(0)
+  soLoSara      Int      @default(0)
+  be            Json     @default("[]")
+  pitchiGio     Float    @default(0)
+  cuonGio       Float    @default(0)
+  vatMm         Float    @default(0)
+  giaVL         Float    @default(0)
+  giaCat        Float    @default(0)
+  giaCong       Float    @default(0)
+  gia1Tam       Float    @default(0)
+  allIn         Float    @default(0)
+  createdAt     DateTime @default(now())
+}

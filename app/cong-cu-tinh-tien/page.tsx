@@ -1,0 +1,431 @@
+'use client'
+import { useEffect, useState } from 'react'
+import { calculatePanel } from '@/lib/calculate'
+
+const VAT_LIEU_OPTIONS = ['SPCC','SPHC','SS400','SUS304','SUS316','AL']
+
+const emptyPanel = () => ({
+  tenTam: '', vatLieu: 'SPCC', doDay: '', x: '500', y: '300', soLuong: 1, maKhach: '',
+  loNho: 0, loLon: 0, soLoTappu: 0, soLoSara: 0,
+  pitchiSoLan: 0, pitchiGio: 0, cuonGio: 0, vatMm: 0,
+  be: [{ soDuong: 1, daiMm: 0, donGia: 0 }]
+})
+
+export default function CongCuTinhTienPage() {
+  const [donHang, setDonHang] = useState<any>(null)
+  const [bangGia, setBangGia] = useState<any[]>([])
+  const [congTyList, setCongTyList] = useState<any[]>([])
+  const [form, setForm] = useState({ maDon: '', tenCongTy: '', ghiChu: '' })
+  const [panel, setPanel] = useState<any>(emptyPanel())
+  const [result, setResult] = useState<any>(null)
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    fetch('/api/bang-gia').then(r => r.json()).then(setBangGia)
+    fetch('/api/cong-ty').then(r => r.json()).then(setCongTyList)
+  }, [])
+
+  const bgRow = bangGia.find(r => r.vatLieu === panel.vatLieu && r.doDay === Number(panel.doDay))
+  const congTy = congTyList.find(c => c.tenCongTy === donHang?.tenCongTy)
+  const isUuDai = congTy?.isUuDai || false
+  const loQuyDoi = Number(panel.loNho) + Number(panel.loLon) * 1.5
+
+  const heSoLabel = () => {
+    if (!bgRow) return '—'
+    const vl = panel.vatLieu.toUpperCase()
+    const isSat = ['SPCC','SPHC','SS400','SECC','SGCC'].some((v:string) => vl.includes(v))
+    if (isSat) return isUuDai ? '×1.1' : '×1.2'
+    if (vl.includes('304') && isUuDai) return '×1.1'
+    return '×1.15'
+  }
+
+  useEffect(() => {
+    if (!panel.vatLieu || !panel.doDay || !panel.x || !panel.y) { setResult(null); return }
+    const beRows = panel.be.map((b: any) => ({ soDuong: Number(b.soDuong), daiMm: Number(b.daiMm), donGia: Number(b.donGia) }))
+    const res = calculatePanel({
+      vatLieu: panel.vatLieu, doDay: Number(panel.doDay),
+      x: Number(panel.x), y: Number(panel.y), soLuong: Number(panel.soLuong),
+      isUuDai, loNho: Number(panel.loNho), loLon: Number(panel.loLon),
+      soLoTappu: Number(panel.soLoTappu), soLoSara: Number(panel.soLoSara),
+      be: beRows, pitchiGio: Number(panel.pitchiGio), cuonGio: Number(panel.cuonGio),
+      vatMm: Number(panel.vatMm), giaCongVatDonGia: bgRow?.giaVat || 1800,
+    }, bangGia)
+    setResult(res)
+  }, [panel, bangGia, isUuDai, bgRow])
+
+  async function taoDon() {
+    if (!form.maDon) return alert('Vui lòng nhập mã đơn hàng')
+    const res = await fetch('/api/don-hang', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(form)
+    })
+    if (!res.ok) return alert('Mã đơn đã tồn tại hoặc có lỗi!')
+    setDonHang(await res.json())
+  }
+
+  async function luuTam() {
+    if (!result || !donHang) return
+    setSaving(true)
+    await fetch('/api/panels', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        donHangId: donHang.id,
+        tenTam: panel.tenTam || ('Tấm ' + (donHang.panels.length + 1)),
+        soLuong: Number(panel.soLuong), vatLieu: panel.vatLieu,
+        doDay: Number(panel.doDay), x: Number(panel.x), y: Number(panel.y),
+        maKhach: panel.maKhach, loNho: Number(panel.loNho), loLon: Number(panel.loLon),
+        soLoTappu: Number(panel.soLoTappu), soLoSara: Number(panel.soLoSara),
+        be: panel.be, pitchiGio: Number(panel.pitchiGio), cuonGio: Number(panel.cuonGio),
+        vatMm: Number(panel.vatMm),
+        giaVL: result.tienVL, giaCat: result.tienCatLaser,
+        giaCong: result.tongGiaCong, gia1Tam: result.gia1Tam, allIn: result.allIn,
+      })
+    })
+    const updated = await fetch('/api/don-hang/' + donHang.id).then(r => r.json())
+    setDonHang(updated)
+    setPanel(emptyPanel())
+    setSaving(false)
+  }
+
+  const fmt = (n: number) => Math.round(n).toLocaleString()
+
+  const inp = "w-full mt-1 border rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-400"
+  const inpRo = "w-full mt-1 border rounded px-2 py-1 text-xs bg-gray-50 text-gray-400"
+  const inpGreen = "w-full mt-1 border rounded px-2 py-1 text-xs bg-green-50 text-green-700 font-mono"
+  const thanhTien = "mt-auto pt-2"
+
+  if (!donHang) return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md">
+        <div className="text-center mb-6">
+          <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="1.5">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+              <polyline points="14,2 14,8 20,8"/><line x1="12" y1="18" x2="12" y2="12"/>
+              <line x1="9" y1="15" x2="15" y2="15"/>
+            </svg>
+          </div>
+          <h2 className="text-lg font-bold text-gray-800">Tạo đơn hàng mới</h2>
+          <p className="text-gray-400 text-xs mt-1">Nhập thông tin đơn hàng để bắt đầu tính giá từng tấm</p>
+        </div>
+        <div className="space-y-3">
+          <div>
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Mã đơn hàng *</label>
+            <input value={form.maDon} onChange={e => setForm(f => ({...f, maDon: e.target.value}))}
+              onKeyDown={e => e.key === 'Enter' && taoDon()}
+              placeholder="VD: 123456 hoặc 080605-1"
+              className="w-full mt-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div>
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Tên công ty</label>
+            <input value={form.tenCongTy} onChange={e => setForm(f => ({...f, tenCongTy: e.target.value}))}
+              list="cong-ty-list" placeholder="Nhập hoặc chọn công ty..."
+              className="w-full mt-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <datalist id="cong-ty-list">{congTyList.map(c => <option key={c.id} value={c.tenCongTy} />)}</datalist>
+          </div>
+          <div>
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Ghi chú đơn</label>
+            <input value={form.ghiChu} onChange={e => setForm(f => ({...f, ghiChu: e.target.value}))}
+              placeholder="Không có lưu ý"
+              className="w-full mt-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <button onClick={taoDon} className="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition">
+            › Tạo đơn &amp; bắt đầu tính
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+
+  return (
+    <div className="flex h-screen overflow-hidden bg-gray-100 text-xs">
+      <div className="flex-1 overflow-y-auto p-3 space-y-3">
+
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <span className="text-sm font-semibold text-gray-700">Công cụ tính tiền</span>
+          <div className="flex gap-2">
+            <button onClick={() => setDonHang(null)} className="border bg-white px-3 py-1.5 rounded-lg text-xs hover:bg-gray-50">🗂 Lưu đơn hàng</button>
+            <button className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-blue-700">↓ Xuất Sheet</button>
+          </div>
+        </div>
+
+        {/* THÔNG SỐ TẤM */}
+        <div className="bg-white rounded-xl shadow-sm border p-3">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-xs font-bold text-gray-500 uppercase tracking-widest border-l-2 border-blue-500 pl-2">Thông số tấm</span>
+            {panel.vatLieu && <span className="text-xs border border-orange-300 text-orange-600 px-2 py-0.5 rounded-full">Sắt thép — {panel.vatLieu}</span>}
+          </div>
+          <div className="grid grid-cols-6 gap-2 mb-2">
+            <div className="col-span-1">
+              <label className="text-xs text-gray-400">Tên tấm *</label>
+              <input value={panel.tenTam} onChange={e => setPanel((p:any) => ({...p, tenTam: e.target.value}))}
+                placeholder="VD: Tấm đáy, Tấm cạnh trái..." className={inp} />
+            </div>
+            <div>
+              <label className="text-xs text-gray-400">Vật liệu</label>
+              <select value={panel.vatLieu} onChange={e => setPanel((p:any) => ({...p, vatLieu: e.target.value, doDay: ''}))} className={inp}>
+                {VAT_LIEU_OPTIONS.map(v => <option key={v}>{v}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs text-gray-400">Độ dày (MM)</label>
+              <select value={panel.doDay} onChange={e => setPanel((p:any) => ({...p, doDay: e.target.value}))} className={inp}>
+                <option value="">-- Chọn độ dày --</option>
+                {bangGia.filter(r => r.vatLieu === panel.vatLieu).map(r => (
+                  <option key={r.doDay} value={r.doDay}>{r.doDay}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs text-gray-400">X — Dài (MM)</label>
+              <input type="number" value={panel.x} onChange={e => setPanel((p:any) => ({...p, x: e.target.value}))} className={inp} />
+            </div>
+            <div>
+              <label className="text-xs text-gray-400">Y — Rộng (MM)</label>
+              <input type="number" value={panel.y} onChange={e => setPanel((p:any) => ({...p, y: e.target.value}))} className={inp} />
+            </div>
+            <div>
+              <label className="text-xs text-gray-400">Số lượng</label>
+              <input type="number" value={panel.soLuong} onChange={e => setPanel((p:any) => ({...p, soLuong: e.target.value}))} className={inp} />
+            </div>
+          </div>
+          <div className="grid grid-cols-7 gap-2">
+            {[
+              { label: 'Tỷ trọng (G/CM³)', value: bgRow?.tyTrong || '7.85', cls: inpGreen },
+              { label: 'Hệ số ưu đãi', value: heSoLabel(), cls: inpRo },
+              { label: 'Đơn giá VL (¥/KG)', value: bgRow ? bgRow.donGiaVL : 'Chưa có giá', cls: inpRo },
+              { label: 'KL báo giá / tấm (KG)', value: result ? result.klBaoGia.toFixed(3) + ' kg' : '0.000 kg', cls: inpGreen },
+              { label: 'KL thực tế / tấm (KG)', value: result ? result.klThucTe.toFixed(3) + ' kg' : '0.000 kg', cls: inpGreen },
+              { label: 'KL tổng thực tế (KG)', value: result ? (result.klThucTe * Number(panel.soLuong)).toFixed(3) + ' kg' : '0.000 kg', cls: inpGreen },
+              { label: 'Tiền vật liệu', value: result ? '¥ ' + fmt(result.tienVL) : '¥ 0', cls: inpGreen },
+            ].map((f, i) => (
+              <div key={i}>
+                <label className="text-xs text-gray-400">{f.label}</label>
+                <input readOnly value={f.value} className={f.cls} />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* GIA CÔNG */}
+        <div className="bg-white rounded-xl shadow-sm border p-3">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-xs font-bold text-gray-500 uppercase tracking-widest border-l-2 border-blue-500 pl-2">Gia công</span>
+            <span className="text-xs border border-orange-300 text-orange-600 px-2 py-0.5 rounded-full">GC: ¥ {result ? fmt(result.tongGiaCong) : 0}</span>
+          </div>
+
+          {/* Row 1: 4 card cùng chiều cao */}
+          <div className="grid grid-cols-4 gap-2 mb-2">
+            {/* Lỗ cắt */}
+            <div className="border rounded-lg p-2 flex flex-col">
+              <p className="text-xs font-bold text-blue-600 mb-1.5">● LỖ CẮT</p>
+              <label className="text-xs text-gray-400">Lỗ nhỏ (&lt;Ø30)</label>
+              <input type="number" value={panel.loNho} onChange={e => setPanel((p:any) => ({...p, loNho: e.target.value}))} className={inp} />
+              <label className="text-xs text-gray-400 mt-1.5">Lỗ lớn (≥Ø30)</label>
+              <input type="number" value={panel.loLon} onChange={e => setPanel((p:any) => ({...p, loLon: e.target.value}))} className={inp} />
+              <label className="text-xs text-gray-400 mt-1.5">Lỗ quy đổi</label>
+              <input readOnly value={loQuyDoi || ''} className={inpRo} />
+              <label className="text-xs text-gray-400 mt-1.5">Đơn giá (¥/lỗ)</label>
+              <input readOnly value="— theo độ dày" className={inpRo} />
+              <div className={thanhTien}>
+                <p className="text-xs text-gray-400">Thành tiền</p>
+                <div className="bg-orange-50 rounded px-2 py-1 font-mono text-orange-600 font-semibold">¥ {result ? fmt(result.tienLoCat) : 0}</div>
+              </div>
+            </div>
+
+            {/* Tappu */}
+            <div className="border rounded-lg p-2 flex flex-col">
+              <p className="text-xs font-bold text-blue-600 mb-1.5">● LỖ TAPPU</p>
+              <label className="text-xs text-gray-400">Số lỗ</label>
+              <input type="number" value={panel.soLoTappu} onChange={e => setPanel((p:any) => ({...p, soLoTappu: e.target.value}))} className={inp} />
+              <label className="text-xs text-gray-400 mt-1.5">Đơn giá (¥/lỗ)</label>
+              <input readOnly value="— theo độ dày" className={inpRo} />
+              <div className={thanhTien}>
+                <p className="text-xs text-gray-400">Thành tiền</p>
+                <div className="bg-orange-50 rounded px-2 py-1 font-mono text-orange-600 font-semibold">¥ {result ? fmt(result.tienTappu) : 0}</div>
+              </div>
+            </div>
+
+            {/* Sara */}
+            <div className="border rounded-lg p-2 flex flex-col">
+              <p className="text-xs font-bold text-blue-600 mb-1.5">● LỖ SARA</p>
+              <label className="text-xs text-gray-400">Số lỗ</label>
+              <input type="number" value={panel.soLoSara} onChange={e => setPanel((p:any) => ({...p, soLoSara: e.target.value}))} className={inp} />
+              <label className="text-xs text-gray-400 mt-1.5">Đơn giá (¥/lỗ)</label>
+              <input readOnly value="— theo độ dày" className={inpRo} />
+              <div className={thanhTien}>
+                <p className="text-xs text-gray-400">Thành tiền</p>
+                <div className="bg-orange-50 rounded px-2 py-1 font-mono text-orange-600 font-semibold">¥ {result ? fmt(result.tienSara) : 0}</div>
+              </div>
+            </div>
+
+            {/* Cắt Laser */}
+            <div className="border rounded-lg p-2 flex flex-col">
+              <p className="text-xs font-bold text-blue-600 mb-1.5">● CẮT LASER / CNC</p>
+              <label className="text-xs text-gray-400">Đơn giá cắt (¥/M)</label>
+              <input readOnly value={bgRow ? bgRow.giaCat : '— theo bảng giá'} className={inpRo} />
+              <div className={thanhTien}>
+                <p className="text-xs text-gray-400">Thành tiền cắt</p>
+                <div className="bg-orange-50 rounded px-2 py-1 font-mono text-orange-600 font-semibold">¥ {result ? fmt(result.tienCatLaser) : 0}</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Row 2: Bẻ/Uốn + Pitchi + Cuộn + Gia công vát cùng 1 hàng */}
+          <div className="grid grid-cols-4 gap-2">
+            {/* Bẻ/Uốn */}
+            <div className="border rounded-lg p-2 flex flex-col">
+              <div className="flex justify-between items-center mb-1.5">
+                <p className="text-xs font-bold text-blue-600">● BẺ / UỐN</p>
+                <button onClick={() => setPanel((p:any) => ({...p, be: [...p.be, { soDuong: 1, daiMm: 0, donGia: 0 }]}))}
+                  className="text-xs text-blue-500 border border-blue-300 px-1.5 py-0.5 rounded hover:bg-blue-50">+ Thêm</button>
+              </div>
+              <div className="grid grid-cols-4 gap-1 mb-1">
+                <p className="text-xs text-gray-400">Số đường</p>
+                <p className="text-xs text-gray-400">Dài (MM)</p>
+                <p className="text-xs text-gray-400">ĐG (¥/M)</p>
+                <p className="text-xs text-gray-400">Hệ số</p>
+              </div>
+              {panel.be.map((b:any, i:number) => (
+                <div key={i} className="grid grid-cols-4 gap-1 mb-1 items-center">
+                  <input type="number" value={b.soDuong}
+                    onChange={e => setPanel((p:any) => { const be=[...p.be]; be[i].soDuong=Number(e.target.value); return {...p,be} })}
+                    className="border rounded px-1 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-400" />
+                  <input type="number" value={b.daiMm}
+                    onChange={e => setPanel((p:any) => { const be=[...p.be]; be[i].daiMm=Number(e.target.value); return {...p,be} })}
+                    className="border rounded px-1 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-400" />
+                  <div className="flex gap-0.5 items-center">
+                    <input type="number" value={b.donGia}
+                      onChange={e => setPanel((p:any) => { const be=[...p.be]; be[i].donGia=Number(e.target.value); return {...p,be} })}
+                      className="border rounded px-1 py-1 text-xs w-full focus:outline-none focus:ring-1 focus:ring-blue-400" />
+                    {panel.be.length > 1 && (
+                      <button onClick={() => setPanel((p:any) => ({...p, be: p.be.filter((_:any,j:number)=>j!==i)}))}
+                        className="text-red-400 hover:text-red-600 text-xs">✕</button>
+                    )}
+                  </div>
+                  <span className="text-xs text-orange-500 font-mono font-semibold">
+                    {(() => { const m=b.daiMm/1000; const hsCD=m<3?1:m<4?2.5:m<5?3:m<6?3.5:4.5; const klT=result?.klThucTe||0; const hsKL=klT<40?1:klT<100?1.5:2; return Math.max(hsKL,hsCD) })()}
+                  </span>
+                </div>
+              ))}
+              <div className={thanhTien}>
+                <p className="text-xs text-gray-400">Tổng tiền bẻ</p>
+                <div className="bg-orange-50 rounded px-2 py-1 font-mono text-orange-600 font-semibold">¥ {result ? fmt(result.tienBe) : 0}</div>
+              </div>
+            </div>
+
+            {/* Pitchi */}
+            <div className="border rounded-lg p-2 flex flex-col">
+              <p className="text-xs font-bold text-blue-600 mb-1.5">● PITCHI</p>
+              <label className="text-xs text-gray-400">Số lần ấn (N)</label>
+              <input type="number" value={panel.pitchiSoLan} onChange={e => setPanel((p:any) => ({...p, pitchiSoLan: e.target.value}))} className={inp} />
+              <label className="text-xs text-gray-400 mt-1.5">Thời gian (H)</label>
+              <input type="number" value={panel.pitchiGio} onChange={e => setPanel((p:any) => ({...p, pitchiGio: e.target.value}))} className={inp} />
+              <label className="text-xs text-gray-400 mt-1.5">Đơn giá (¥/giờ)</label>
+              <input readOnly value="6000" className={inpRo} />
+              <div className={thanhTien}>
+                <p className="text-xs text-gray-400">Thành tiền</p>
+                <div className="bg-orange-50 rounded px-2 py-1 font-mono text-orange-600 font-semibold">¥ {result ? fmt(result.tienPitchi) : 0}</div>
+              </div>
+            </div>
+
+            {/* Cuộn */}
+            <div className="border rounded-lg p-2 flex flex-col">
+              <p className="text-xs font-bold text-blue-600 mb-1.5">● CUỘN</p>
+              <label className="text-xs text-gray-400">Thời gian (H)</label>
+              <input type="number" value={panel.cuonGio} onChange={e => setPanel((p:any) => ({...p, cuonGio: e.target.value}))} className={inp} />
+              <label className="text-xs text-gray-400 mt-1.5">Đơn giá (¥/giờ)</label>
+              <input readOnly value="6000" className={inpRo} />
+              <div className={thanhTien}>
+                <p className="text-xs text-gray-400">Thành tiền (× SL)</p>
+                <div className="bg-orange-50 rounded px-2 py-1 font-mono text-orange-600 font-semibold">¥ {result ? fmt(result.tienCuon) : 0}</div>
+              </div>
+            </div>
+
+            {/* Gia công vát */}
+            <div className="border rounded-lg p-2 flex flex-col">
+              <p className="text-xs font-bold text-blue-600 mb-1.5">● GIA CÔNG VÁT</p>
+              <label className="text-xs text-gray-400">Chiều dài vát (MM)</label>
+              <input type="number" value={panel.vatMm} onChange={e => setPanel((p:any) => ({...p, vatMm: e.target.value}))} className={inp} />
+              <label className="text-xs text-gray-400 mt-1.5">Đơn giá vát (¥/M)</label>
+              <input readOnly value={bgRow ? '— theo bảng giá' : '— theo bảng giá'} className={inpRo} />
+              <div className={thanhTien}>
+                <p className="text-xs text-gray-400">Thành tiền vát</p>
+                <div className="bg-orange-50 rounded px-2 py-1 font-mono text-orange-600 font-semibold">¥ {result ? fmt(result.tienVat) : 0}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* RIGHT PANEL */}
+      <div className="w-80 border-l bg-white flex flex-col overflow-hidden">
+        <div className="flex-1 overflow-y-auto border-b">
+          <div className="flex justify-between items-center px-3 py-2 border-b">
+            <span className="text-xs font-bold text-gray-500 uppercase border-l-2 border-blue-500 pl-2">Các tấm đã nhập</span>
+            <span className="text-xs font-mono bg-red-50 text-red-500 border border-red-200 px-1.5 py-0.5 rounded">
+              ¥ {fmt(donHang.panels.reduce((s:number,p:any)=>s+p.allIn,0))}
+            </span>
+          </div>
+          {donHang.panels.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-10 text-gray-300">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/>
+              </svg>
+              <p className="text-xs mt-2">Chưa có tấm nào</p>
+            </div>
+          ) : (
+            <div className="p-2">
+              {donHang.panels.map((p:any, i:number) => (
+                <div key={p.id} className="flex justify-between items-center px-2 py-1.5 rounded hover:bg-gray-50 border-b last:border-0">
+                  <div>
+                    <p className="text-xs font-semibold text-gray-700">{p.tenTam || 'Tấm '+(i+1)}</p>
+                    <p className="text-xs text-gray-400">{p.vatLieu} {p.doDay}mm · ×{p.soLuong}</p>
+                  </div>
+                  <span className="text-xs font-mono text-red-500 font-semibold">¥{fmt(p.allIn)}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="p-3">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-xs font-bold text-gray-500 uppercase">Tổng kết tấm này</span>
+            <span className="text-xs bg-gray-100 px-1.5 py-0.5 rounded font-mono">SL = {panel.soLuong}</span>
+          </div>
+          <div className="grid grid-cols-2 gap-1.5 mb-2">
+            <div className="bg-gray-50 rounded p-1.5">
+              <p className="text-xs text-gray-400">GIÁ VL</p>
+              <p className="font-mono font-bold text-xs">¥ {result ? fmt(result.tienVL) : 0}</p>
+            </div>
+            <div className="bg-gray-50 rounded p-1.5">
+              <p className="text-xs text-gray-400">GIÁ CẮT</p>
+              <p className="font-mono font-bold text-xs">¥ {result ? fmt(result.tienCatLaser) : 0}</p>
+              <p className="text-xs text-gray-400">Laser + Lỗ cắt</p>
+            </div>
+            <div className="bg-gray-50 rounded p-1.5">
+              <p className="text-xs text-gray-400">GIA CÔNG</p>
+              <p className="font-mono font-bold text-xs">¥ {result ? fmt(result.tongGiaCong) : 0}</p>
+              <p className="text-xs text-gray-400">Tappu+Sara+Bẻ+Cuộn</p>
+            </div>
+            <div className="bg-gray-50 rounded p-1.5">
+              <p className="text-xs text-gray-400">GIÁ 1 TẤM</p>
+              <p className="font-mono font-bold text-xs">¥ {result ? fmt(result.gia1Tam) : 0}</p>
+            </div>
+          </div>
+          <div className="bg-red-50 border border-red-100 rounded-xl p-2 mb-2 text-center">
+            <p className="text-xs text-gray-400">ALL-IN</p>
+            <p className="text-xl font-bold text-red-500 font-mono">¥ {result ? fmt(result.allIn) : 0}</p>
+            <p className="text-xs text-gray-400">Giá 1 tấm × {panel.soLuong} × tổng</p>
+          </div>
+          <button onClick={luuTam} disabled={!result || saving}
+            className="w-full bg-green-500 text-white py-2 rounded-xl text-xs font-semibold hover:bg-green-600 disabled:opacity-40 transition">
+            {saving ? '⏳ Đang lưu...' : '✓ Lưu tấm & tính tiếp'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}

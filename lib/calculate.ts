@@ -40,7 +40,7 @@ export function calculatePanel(input: PanelInput, bangGia: BangGiaRow[]): PanelR
   const klThucTe = ((x + 10) * (y + 10) * doDay * ty) / 1_000_000
   const donGiaVLFinal = r.donGia > 0 ? r.donGia * heSoVL : 0
   const tienVL = donGiaVLFinal > 0 ? klThucTe * donGiaVLFinal : 0
-  const tienCatLaser = r.giaCat > 0 ? r.giaCat * ((x + y) / 1000) * 2 : 0
+  const tienCatLaser = r.giaCat > 0 ? r.giaCat * input.doDay * ((x + y) / 1000) * 2 : 0
   const tienLoCat = (input.loNho + input.loLon * 1.5) * (r.giaMoLo || 0)
   const tienTappu = input.soLoTappu * (r.giaTappu || 0)
   const tienSara = input.soLoSara * (r.giaTappu || 0)

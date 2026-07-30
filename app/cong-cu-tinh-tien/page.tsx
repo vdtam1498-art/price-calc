@@ -50,9 +50,13 @@ export default function CongCuTinhTienPage() {
 
   const heSoLabel = () => {
     if (!bgRow) return '—'
-    if (isUuDai) return '×' + (hesoGiaVL.find((h:any) => h.tenLoai === 'Ưu đãi')?.heSo || 1.1)
     const vl = panel.vatLieu.toUpperCase()
     const isSUS = vl.includes('SUS')
+    const isHanwa = (donHang?.tenCongTy || '').toLowerCase().startsWith('hanwa')
+    if (isUuDai) {
+      const key = (isSUS && !isHanwa) ? 'Không ưu đãi SUS' : 'Ưu đãi'
+      return '×' + (hesoGiaVL.find((h:any) => h.tenLoai === key)?.heSo || (isSUS && !isHanwa ? 1.15 : 1.1))
+    }
     const key = isSUS ? 'Không ưu đãi SUS' : 'Không ưu đãi SS'
     return '×' + (hesoGiaVL.find((h:any) => h.tenLoai === key)?.heSo || 1.2)
   }
@@ -332,7 +336,7 @@ export default function CongCuTinhTienPage() {
             {[
               { label: 'Tỷ trọng (G/CM³)', value: bgRow?.tyTrong || '7.85', cls: inpGreen },
               { label: 'Hệ số ưu đãi', value: heSoLabel(), cls: inpRo },
-              { label: 'Đơn giá VL (¥/KG)', value: bgRow ? bgRow.donGiaVL : 'Chưa có giá', cls: inpRo },
+              { label: 'Đơn giá VL (¥/KG)', value: bgRow?.donGia > 0 ? bgRow.donGia + ' ¥/kg' : 'Đặt ngoài', cls: inpRo },
               { label: 'KL báo giá / tấm (KG)', value: result ? result.klBaoGia.toFixed(3) + ' kg' : '0.000 kg', cls: inpGreen },
               { label: 'KL thực tế / tấm (KG)', value: result ? result.klThucTe.toFixed(3) + ' kg' : '0.000 kg', cls: inpGreen },
               { label: 'KL tổng thực tế (KG)', value: result ? (result.klThucTe * Number(panel.soLuong)).toFixed(3) + ' kg' : '0.000 kg', cls: inpGreen },

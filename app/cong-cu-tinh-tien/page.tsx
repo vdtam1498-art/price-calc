@@ -397,28 +397,28 @@ export default function CongCuTinhTienPage() {
           </div>
           <div className="grid grid-cols-2 gap-1.5 mb-2">
             <div className="bg-gray-50 rounded p-1.5">
-              <p className="text-xs text-gray-400">GIÁ VL</p>
+              <p className="text-xs font-bold text-blue-600">GIÁ VL</p>
               <p className="font-mono font-bold text-xs">¥ {result ? fmt(result.tienVL) : 0}</p>
             </div>
             <div className="bg-gray-50 rounded p-1.5">
-              <p className="text-xs text-gray-400">GIÁ CẮT</p>
+              <p className="text-xs font-bold text-blue-600">GIÁ CẮT</p>
               <p className="font-mono font-bold text-xs">¥ {result ? fmt(result.tienCatLaser) : 0}</p>
-              <p className="text-xs text-gray-400">Laser + Lỗ cắt</p>
+              
             </div>
             <div className="bg-gray-50 rounded p-1.5">
-              <p className="text-xs text-gray-400">GIA CÔNG</p>
+              <p className="text-xs font-bold text-blue-600">GIA CÔNG</p>
               <p className="font-mono font-bold text-xs">¥ {result ? fmt(result.tongGiaCong) : 0}</p>
-              <p className="text-xs text-gray-400">Tappu+Sara+Bẻ+Cuộn</p>
+              
             </div>
             <div className="bg-gray-50 rounded p-1.5">
-              <p className="text-xs text-gray-400">GIÁ 1 TẤM</p>
+              <p className="text-xs font-bold text-blue-600">GIÁ 1 TẤM</p>
               <p className="font-mono font-bold text-xs">¥ {result ? fmt(result.gia1Tam) : 0}</p>
             </div>
           </div>
           <div className="bg-red-50 border border-red-100 rounded-xl p-2 mb-2 text-center">
-            <p className="text-xs text-gray-400">ALL-IN</p>
+            <p className="text-xs text-gray-400">Tổng tiền</p>
             <p className="text-xl font-bold text-red-500 font-mono">¥ {result ? fmt(result.allIn) : 0}</p>
-            <p className="text-xs text-gray-400">Giá 1 tấm × {panel.soLuong} × tổng</p>
+            
           </div>
           <button onClick={luuTam} disabled={!result || saving}
             className="w-full bg-green-500 text-white py-2 rounded-xl text-xs font-semibold hover:bg-green-600 disabled:opacity-40 transition">

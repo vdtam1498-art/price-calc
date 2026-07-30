@@ -15,7 +15,10 @@ function HeSoTable({ title, data, loaiA, loaiB, labelA, labelB, onUpdate, onAdd,
     <div className="bg-white rounded-xl shadow p-5">
       <div className="flex justify-between items-center mb-3">
         <h2 className="font-semibold text-gray-800 text-sm">{title}</h2>
-        {!locked && <button onClick={() => setShowAdd(!showAdd)} className="text-xs bg-blue-50 text-blue-600 border border-blue-200 px-2 py-1 rounded hover:bg-blue-100">+ Thêm dòng</button>}
+        {!locked && <div className="flex gap-2">
+        {showAdd && <button onClick={() => { onAdd({...newRow, heSo: Number(newRow.heSo)}); setShowAdd(false); setNewRow({ loai: loaiA, heSo: '', dieuKien: '', thuTu: 0 }) }} className="text-xs bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">💾 Lưu</button>}
+        <button onClick={() => setShowAdd(!showAdd)} className="text-xs bg-blue-50 text-blue-600 border border-blue-200 px-2 py-1 rounded hover:bg-blue-100">{showAdd ? '✕ Huỷ' : '+ Thêm dòng'}</button>
+      </div>}
       </div>
       {showAdd && !locked && (
         <div className="flex gap-2 mb-3 p-2 bg-gray-50 rounded-lg">
@@ -26,8 +29,7 @@ function HeSoTable({ title, data, loaiA, loaiB, labelA, labelB, onUpdate, onAdd,
           <input placeholder="Hệ số" type="number" value={newRow.heSo} onChange={e => setNewRow(r => ({...r, heSo: e.target.value}))} className="border rounded px-2 py-1 text-xs w-20" />
           <input placeholder="Điều kiện" value={newRow.dieuKien} onChange={e => setNewRow(r => ({...r, dieuKien: e.target.value}))} className="border rounded px-2 py-1 text-xs flex-1" />
           <input placeholder="Thứ tự" type="number" value={newRow.thuTu} onChange={e => setNewRow(r => ({...r, thuTu: Number(e.target.value)}))} className="border rounded px-2 py-1 text-xs w-16" />
-          <button onClick={() => { onAdd({...newRow, heSo: Number(newRow.heSo)}); setShowAdd(false); setNewRow({ loai: loaiA, heSo: '', dieuKien: '', thuTu: 0 }) }}
-            className="bg-blue-600 text-white px-3 py-1 rounded text-xs">Lưu</button>
+
         </div>
       )}
       <div className="grid grid-cols-2 gap-3">
@@ -206,7 +208,7 @@ export default function CaiDatPage() {
             <h2 className="font-semibold text-gray-800 text-sm">Bảng giá vật liệu</h2>
             <p className="text-xs text-gray-400">Đơn giá ¥/kg theo VL + độ dày · Ưu đãi ×1.1 · Không ưu đãi ×1.2</p>
           </div>
-          <button onClick={() => setShowAddBG(!showAddBG)} className="text-xs bg-blue-50 text-blue-600 border border-blue-200 px-2 py-1 rounded hover:bg-blue-100">+ Thêm</button>
+          <div className="flex gap-2">{showAddBG && <button onClick={themBangGia} className="text-xs bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">💾 Lưu</button>}<button onClick={() => setShowAddBG(!showAddBG)} className="text-xs bg-blue-50 text-blue-600 border border-blue-200 px-2 py-1 rounded hover:bg-blue-100">{showAddBG ? "✕ Huỷ" : "+ Thêm"}</button></div>
         </div>
 
         {showAddBG && (

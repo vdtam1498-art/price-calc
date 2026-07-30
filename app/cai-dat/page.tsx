@@ -218,6 +218,23 @@ export default function CaiDatPage() {
     String(r.doDay).includes(searchBG)
   )
 
+
+  function isSUS(vatLieu: string) {
+    const v = vatLieu.toUpperCase()
+    return v.includes('SUS') || v.includes('AL') || v.includes('BON')
+  }
+  function tinhGia(donGia: number, vatLieu: string) {
+    if (donGia <= 0) return null
+    const sus = isSUS(vatLieu)
+    return {
+      uuDai: (donGia * 1.1).toFixed(1),
+      khongUuDaiSUS: (donGia * 1.15).toFixed(1),
+      khongUuDaiSS: (donGia * 1.2).toFixed(1),
+      datNgoaiSUS: (donGia * 1.2).toFixed(1),
+      datNgoaiSS: (donGia * 1.3).toFixed(1),
+    }
+  }
+
   if (loading) return <div className="p-8 text-gray-400 text-sm">Đang tải...</div>
 
   return (
@@ -299,8 +316,10 @@ export default function CaiDatPage() {
                 <th className="pb-1.5 pr-2">Dày(mm)</th>
                 <th className="pb-1.5 pr-2">Đơn giá</th>
                 <th className="pb-1.5 pr-2 text-green-600">Ưu đãi ×1.1</th>
-                <th className="pb-1.5 pr-2 text-orange-500">Không ưu đãi ×1.2</th>
-                <th className="pb-1.5 pr-2 text-red-500">Đặt ngoài ×1.3</th>
+                <th className="pb-1.5 pr-2 text-orange-400">KUĐ SUS ×1.15</th>
+                <th className="pb-1.5 pr-2 text-orange-600">KUĐ SS ×1.2</th>
+                <th className="pb-1.5 pr-2 text-red-400">Đặt ngoài SUS ×1.2</th>
+                <th className="pb-1.5 pr-2 text-red-600">Đặt ngoài SS ×1.3</th>
                 <th className="pb-1.5 pr-2">Giá uốn(¥/m)</th>
                 <th className="pb-1.5 pr-2">Giá cắt(¥/m)</th>
                 <th className="pb-1.5 pr-2">Giá mở lỗ(¥)</th>
@@ -344,9 +363,13 @@ export default function CaiDatPage() {
                       <td className="py-1.5 pr-2 font-medium">{row.vatLieu}</td>
                       <td className="py-1.5 pr-2 font-mono">{Number(row.doDay).toFixed(1)}</td>
                       <td className="py-1.5 pr-2 font-mono">{row.donGia > 0 ? row.donGia : <span className="text-gray-400 italic text-xs">Đặt ngoài</span>}</td>
-                      <td className="py-1.5 pr-2 text-green-600 font-mono">{row.donGia > 0 ? (row.donGia * 1.1).toFixed(1) : <span className="text-gray-300">—</span>}</td>
-                      <td className="py-1.5 pr-2 text-orange-500 font-mono">{row.donGia > 0 ? (row.donGia * 1.2).toFixed(1) : <span className="text-gray-300">—</span>}</td>
-                      <td className="py-1.5 pr-2 text-red-500 font-mono">{row.donGia > 0 ? (row.donGia * 1.3).toFixed(1) : <span className="text-gray-300">—</span>}</td>
+                      {(() => { const g = tinhGia(row.donGia, row.vatLieu); return (<>
+                        <td className="py-1.5 pr-2 text-green-600 font-mono">{g ? g.uuDai : <span className="text-gray-300">—</span>}</td>
+                        <td className="py-1.5 pr-2 text-orange-400 font-mono">{g ? g.khongUuDaiSUS : <span className="text-gray-300">—</span>}</td>
+                        <td className="py-1.5 pr-2 text-orange-600 font-mono">{g ? g.khongUuDaiSS : <span className="text-gray-300">—</span>}</td>
+                        <td className="py-1.5 pr-2 text-red-400 font-mono">{g ? g.datNgoaiSUS : <span className="text-gray-300">—</span>}</td>
+                        <td className="py-1.5 pr-2 text-red-600 font-mono">{g ? g.datNgoaiSS : <span className="text-gray-300">—</span>}</td>
+                      </>)})()} 
                       <td className="py-1.5 pr-2 font-mono">{row.giaUon}</td>
                       <td className="py-1.5 pr-2 font-mono">{row.giaCat}</td>
                       <td className="py-1.5 pr-2 font-mono">{row.giaMoLo}</td>

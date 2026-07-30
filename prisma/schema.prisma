@@ -13,8 +13,10 @@ model BangGiaVL {
   doDay           Float
   donGia          Float   @default(0)
   uuDai           Float   @default(0)
-  khongUuDai      Float   @default(0)
-  datNgoai        Float   @default(0)
+  khongUuDaiSUS   Float   @default(0)
+  khongUuDaiSS    Float   @default(0)
+  datNgoaiSUS     Float   @default(0)
+  datNgoaiSS      Float   @default(0)
   giaUon          Float   @default(0)
   giaCat          Float   @default(0)
   giaMoLo         Float   @default(0)

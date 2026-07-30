@@ -84,6 +84,8 @@ export default function CaiDatPage() {
   const [hesoPitchi, setHesoPitchi] = useState<any[]>([])
   const [hesoGiaCong, setHesoGiaCong] = useState<any[]>([])
   const [hesoCuon, setHesoCuon] = useState<any[]>([])
+  const [hesoGiaVL, setHesoGiaVL] = useState<any[]>([])
+  const [editingHGVL, setEditingHGVL] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
   // Bảng giá form
@@ -116,9 +118,10 @@ export default function CaiDatPage() {
       fetch('/api/heso-pitchi').then(r => r.json()),
       fetch('/api/heso-gia-cong').then(r => r.json()),
       fetch('/api/heso-cuon').then(r => r.json()),
-    ]).then(([bg, ct, hb, hp, hg, hc]) => {
+      fetch('/api/heso-gia-vl').then(r => r.json()),
+    ]).then(([bg, ct, hb, hp, hg, hc, hgvl]) => {
       setBangGia(bg); setCongTy(ct); setHesoBe(hb)
-      setHesoPitchi(hp); setHesoGiaCong(hg); setHesoCuon(hc)
+      setHesoPitchi(hp); setHesoGiaCong(hg); setHesoCuon(hc); setHesoGiaVL(hgvl)
       setLoading(false)
     })
   }, [])
@@ -219,19 +222,17 @@ export default function CaiDatPage() {
   )
 
 
-  function isSUS(vatLieu: string) {
-    const v = vatLieu.toUpperCase()
-    return v.includes('SUS') || v.includes('AL') || v.includes('BON')
+  function getHS(tenLoai: string) {
+    return hesoGiaVL.find((h: any) => h.tenLoai === tenLoai)?.heSo || 1
   }
-  function tinhGia(donGia: number, vatLieu: string) {
+  function tinhGia(donGia: number) {
     if (donGia <= 0) return null
-    const sus = isSUS(vatLieu)
     return {
-      uuDai: (donGia * 1.1).toFixed(1),
-      khongUuDaiSUS: (donGia * 1.15).toFixed(1),
-      khongUuDaiSS: (donGia * 1.2).toFixed(1),
-      datNgoaiSUS: (donGia * 1.2).toFixed(1),
-      datNgoaiSS: (donGia * 1.3).toFixed(1),
+      uuDai:          (donGia * getHS('Ưu đãi')).toFixed(1),
+      khongUuDaiSUS:  (donGia * getHS('Không ưu đãi SUS')).toFixed(1),
+      khongUuDaiSS:   (donGia * getHS('Không ưu đãi SS')).toFixed(1),
+      datNgoaiSUS:    (donGia * getHS('Đặt ngoài SUS')).toFixed(1),
+      datNgoaiSS:     (donGia * getHS('Đặt ngoài SS')).toFixed(1),
     }
   }
 
@@ -270,7 +271,7 @@ export default function CaiDatPage() {
         <div className="flex justify-between items-center mb-3">
           <div>
             <h2 className="font-semibold text-gray-800 text-sm">Bảng giá vật liệu</h2>
-            <p className="text-xs text-gray-400">Đơn giá ¥/kg theo VL + độ dày · Ưu đãi ×1.1 · Không ưu đãi ×1.2</p>
+            
           </div>
           <div className="flex gap-2 items-center">
             {importResult && (
@@ -295,7 +296,7 @@ export default function CaiDatPage() {
             <input placeholder="Vật liệu" value={newBG.vatLieu} onChange={e => setNewBG(p => ({...p, vatLieu: e.target.value}))} className="border rounded px-2 py-1 text-xs" />
             <input placeholder="Dày(mm)" type="number" value={newBG.doDay} onChange={e => setNewBG(p => ({...p, doDay: e.target.value}))} className="border rounded px-2 py-1 text-xs" />
             <input placeholder="Đơn giá" type="number" value={newBG.donGia || ''} onChange={e => setNewBG(p => ({...p, donGia: Number(e.target.value)}))} className="border rounded px-2 py-1 text-xs" />
-            <input readOnly value={newBG.donGia ? (newBG.donGia*1.1).toFixed(1) : ''} placeholder="Ưu đãi ×1.1" className="border rounded px-2 py-1 text-xs bg-green-50 text-green-600 cursor-not-allowed" />
+            <input readOnly value={newBG.donGia ? (newBG.donGia*1.1).toFixed(1) : ''} placeholder="Ưu đãi" className="border rounded px-2 py-1 text-xs bg-green-50 text-green-600 cursor-not-allowed" />
             <input readOnly value={newBG.donGia ? (newBG.donGia*1.2).toFixed(1) : ''} placeholder="KUĐ ×1.2" className="border rounded px-2 py-1 text-xs bg-orange-50 text-orange-500 cursor-not-allowed" />
             <input readOnly value={newBG.donGia ? (newBG.donGia*1.3).toFixed(1) : ''} placeholder="Đặt ngoài ×1.3" className="border rounded px-2 py-1 text-xs bg-red-50 text-red-500 cursor-not-allowed" />
             <input placeholder="Giá uốn" type="number" value={newBG.giaUon || ''} onChange={e => setNewBG(p => ({...p, giaUon: Number(e.target.value)}))} className="border rounded px-2 py-1 text-xs" />
@@ -316,10 +317,10 @@ export default function CaiDatPage() {
                 <th className="pb-1.5 pr-2">Dày(mm)</th>
                 <th className="pb-1.5 pr-2">Đơn giá</th>
                 <th className="pb-1.5 pr-2 text-green-600">Ưu đãi ×1.1</th>
-                <th className="pb-1.5 pr-2 text-orange-400">KUĐ SUS ×1.15</th>
-                <th className="pb-1.5 pr-2 text-orange-600">KUĐ SS ×1.2</th>
-                <th className="pb-1.5 pr-2 text-red-400">Đặt ngoài SUS ×1.2</th>
-                <th className="pb-1.5 pr-2 text-red-600">Đặt ngoài SS ×1.3</th>
+                <th className="pb-1.5 pr-2 text-orange-400">KUĐ SUS</th>
+                <th className="pb-1.5 pr-2 text-orange-600">KUĐ SS</th>
+                <th className="pb-1.5 pr-2 text-red-400">Đặt ngoài SUS</th>
+                <th className="pb-1.5 pr-2 text-red-600">Đặt ngoài SS</th>
                 <th className="pb-1.5 pr-2">Giá uốn(¥/m)</th>
                 <th className="pb-1.5 pr-2">Giá cắt(¥/m)</th>
                 <th className="pb-1.5 pr-2">Giá mở lỗ(¥)</th>
@@ -363,7 +364,7 @@ export default function CaiDatPage() {
                       <td className="py-1.5 pr-2 font-medium">{row.vatLieu}</td>
                       <td className="py-1.5 pr-2 font-mono">{Number(row.doDay).toFixed(1)}</td>
                       <td className="py-1.5 pr-2 font-mono">{row.donGia > 0 ? row.donGia : <span className="text-gray-400 italic text-xs">Đặt ngoài</span>}</td>
-                      {(() => { const g = tinhGia(row.donGia, row.vatLieu); return (<>
+                      {(() => { const g = tinhGia(row.donGia); return (<>
                         <td className="py-1.5 pr-2 text-green-600 font-mono">{g ? g.uuDai : <span className="text-gray-300">—</span>}</td>
                         <td className="py-1.5 pr-2 text-orange-400 font-mono">{g ? g.khongUuDaiSUS : <span className="text-gray-300">—</span>}</td>
                         <td className="py-1.5 pr-2 text-orange-600 font-mono">{g ? g.khongUuDaiSS : <span className="text-gray-300">—</span>}</td>
@@ -457,6 +458,49 @@ export default function CaiDatPage() {
         </table>
         </div>
         {congTy.length === 0 && <p className="text-center text-gray-400 py-6">Chưa có công ty nào</p>}
+      </div>
+
+
+      {/* Bảng hệ số giá VL */}
+      <div className="bg-white rounded-xl shadow p-5">
+        <div className="flex justify-between items-center mb-3">
+          <h2 className="font-semibold text-gray-800 text-sm">Hệ số giá vật liệu</h2>
+          {!locked ? <span className="text-xs text-green-600">🔓 Có thể chỉnh sửa</span>
+            : <span className="text-xs text-gray-400">🔒 Cần mở khoá để sửa</span>}
+        </div>
+        <div className="border rounded-lg overflow-hidden">
+          <table className="w-full text-xs">
+            <thead><tr className="bg-gray-50 border-b">
+              <th className="px-4 py-2 text-left text-gray-500">Loại giá</th>
+              <th className="px-4 py-2 text-left text-gray-500">Hệ số</th>
+              <th className="px-4 py-2 text-left text-gray-500">Giá mẫu (đơn giá = 100)</th>
+              {!locked && <th className="px-4 py-2"></th>}
+            </tr></thead>
+            <tbody>
+              {hesoGiaVL.map((r: any) => (
+                <tr key={r.id} className="border-b hover:bg-gray-50">
+                  <td className="px-4 py-2 font-medium">{r.tenLoai}</td>
+                  <td className="px-4 py-2">
+                    {!locked && editingHGVL === r.id
+                      ? <input type="number" step="0.01" defaultValue={r.heSo}
+                          onBlur={async e => {
+                            const newHeSo = Number(e.target.value)
+                            await fetch('/api/heso-gia-vl/' + r.id, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ heSo: newHeSo }) })
+                            setHesoGiaVL((p: any) => p.map((x: any) => x.id === r.id ? {...x, heSo: newHeSo} : x))
+                            setEditingHGVL(null)
+                          }}
+                          className="border rounded px-2 py-0.5 w-20 text-xs" autoFocus />
+                      : <span className="font-mono text-blue-600 cursor-pointer" onClick={() => !locked && setEditingHGVL(r.id)}>
+                          ×{r.heSo}{!locked && ' ✏️'}
+                        </span>}
+                  </td>
+                  <td className="px-4 py-2 font-mono text-gray-500">{(100 * r.heSo).toFixed(1)}</td>
+                  {!locked && <td className="px-4 py-2 text-xs text-gray-400">click hệ số để sửa</td>}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Hệ số bẻ */}

@@ -101,3 +101,9 @@ model HeSoPitchiKakumaru {
   dieuKien  String
   thuTu     Int    @default(0)
 }
+
+model HeSoGiaVL {
+  id      Int    @id @default(autoincrement())
+  tenLoai String @unique
+  heSo    Float
+}

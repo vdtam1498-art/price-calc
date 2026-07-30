@@ -369,8 +369,8 @@ export default function CongCuTinhTienPage() {
                     onChange={e => setPanel((p:any) => { const be=[...p.be]; be[i].daiMm=Number(e.target.value); return {...p,be} })}
                     className="border rounded px-1 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-400" />
                   <div className="flex gap-0.5 items-center">
-                    <input type="number" value={b.donGia}
-                      onChange={e => setPanel((p:any) => { const be=[...p.be]; be[i].donGia=Number(e.target.value); return {...p,be} })}
+                    <input readOnly value={bgRow ? bgRow.giaUon : 0}
+                      
                       className="border rounded px-1 py-1 text-xs w-full focus:outline-none focus:ring-1 focus:ring-blue-400" />
                     {panel.be.length > 1 && (
                       <button onClick={() => setPanel((p:any) => ({...p, be: p.be.filter((_:any,j:number)=>j!==i)}))}

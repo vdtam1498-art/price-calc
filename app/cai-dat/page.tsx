@@ -316,7 +316,7 @@ export default function CaiDatPage() {
                 <th className="pb-1.5 pr-2">Vật liệu</th>
                 <th className="pb-1.5 pr-2">Dày(mm)</th>
                 <th className="pb-1.5 pr-2">Đơn giá</th>
-                <th className="pb-1.5 pr-2 text-green-600">Ưu đãi ×1.1</th>
+                <th className="pb-1.5 pr-2 text-green-600">Ưu đãi</th>
                 <th className="pb-1.5 pr-2 text-orange-400">KUĐ SUS</th>
                 <th className="pb-1.5 pr-2 text-orange-600">KUĐ SS</th>
                 <th className="pb-1.5 pr-2 text-red-400">Đặt ngoài SUS</th>

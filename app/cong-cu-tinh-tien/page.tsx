@@ -23,11 +23,13 @@ export default function CongCuTinhTienPage() {
   const [hesoGiaVL, setHesoGiaVL] = useState<any[]>([])
   const [hesoPitchiDB, setHesoPitchiDB] = useState<any[]>([])
   const [hesoGiaCongDB, setHesoGiaCongDB] = useState<any[]>([])
+  const [hesoCuonDB, setHesoCuonDB] = useState<any[]>([])
 
   useEffect(() => {
     fetch('/api/bang-gia').then(r => r.json()).then(setBangGia)
     fetch('/api/cong-ty').then(r => r.json()).then(setCongTyList)
     fetch('/api/heso-gia-vl').then(r => r.json()).then(setHesoGiaVL)
+    fetch('/api/heso-cuon').then(r => r.json()).then(setHesoCuonDB)
     fetch('/api/heso-pitchi').then(r => r.json()).then(setHesoPitchiDB)
     fetch('/api/heso-gia-cong').then(r => r.json()).then(setHesoGiaCongDB)
   }, [])
@@ -162,6 +164,24 @@ export default function CongCuTinhTienPage() {
     return { thoiGian: thoiGianGio.toFixed(3), thanhTien: Math.round(thanhTien) }
   }
   const pitchiResult = tinhPitchi()
+
+
+  function getHeSoCuon(klThucTe: number) {
+    const rows = hesoCuonDB.sort((a:any,b:any) => a.heSo-b.heSo)
+    if (klThucTe < 30) return rows[0]?.heSo || 0.4
+    if (klThucTe < 50) return rows[1]?.heSo || 0.5
+    if (klThucTe < 100) return rows[2]?.heSo || 0.75
+    if (klThucTe < 200) return rows[3]?.heSo || 1
+    if (klThucTe < 400) return rows[4]?.heSo || 1.5
+    return rows[5]?.heSo || 2
+  }
+  function tinhCuon() {
+    if (!result || Number(panel.cuonGio) <= 0) return null
+    const heSo = getHeSoCuon(result.klThucTe)
+    const thanhTien = heSo * 6000 * Number(panel.soLuong)
+    return { heSo, thanhTien: Math.round(thanhTien) }
+  }
+  const cuonResult = tinhCuon()
 
   if (!donHang) return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -459,13 +479,15 @@ export default function CongCuTinhTienPage() {
             {/* Cuộn */}
             <div className="border rounded-lg p-2 flex flex-col">
               <p className="text-xs font-bold text-blue-600 mb-1.5">● CUỘN</p>
-              <label className="text-xs text-gray-400">Thời gian (H)</label>
+              <label className="text-xs text-gray-400">Số lần cuộn</label>
               <input type="number" value={panel.cuonGio} onChange={e => setPanel((p:any) => ({...p, cuonGio: e.target.value}))} className={inp} />
+              <label className="text-xs text-gray-400 mt-1.5">Thời gian (H)</label>
+              <input readOnly value={cuonResult ? cuonResult.heSo : '0'} className={inpRo} />
               <label className="text-xs text-gray-400 mt-1.5">Đơn giá (¥/giờ)</label>
               <input readOnly value="6000" className={inpRo} />
               <div className={thanhTien}>
                 <p className="text-xs text-gray-400">Thành tiền (× SL)</p>
-                <div className="bg-orange-50 rounded px-2 py-1 font-mono text-orange-600 font-semibold">¥ {result ? fmt(result.tienCuon) : 0}</div>
+                <div className="bg-orange-50 rounded px-2 py-1 font-mono text-orange-600 font-semibold">¥ {cuonResult ? fmt(cuonResult.thanhTien) : 0}</div>
               </div>
             </div>
 

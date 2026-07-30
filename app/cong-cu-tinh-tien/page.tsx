@@ -71,8 +71,8 @@ export default function CongCuTinhTienPage() {
       isUuDai, heSoVL,
       loNho: Number(panel.loNho), loLon: Number(panel.loLon),
       soLoTappu: Number(panel.soLoTappu), soLoSara: Number(panel.soLoSara),
-      be: beRows, pitchiGio: Number(panel.pitchiGio), cuonGio: Number(panel.cuonGio),
-      vatMm: Number(panel.vatMm), giaCongVatDonGia: bgRow?.giaVat || 1800,
+      be: beRows.map((b:any) => ({...b, donGia: bgRow ? Number(bgRow.giaUon) : b.donGia})), pitchiGio: Number(panel.pitchiGio), cuonGio: Number(panel.cuonGio),
+      vatMm: Number(panel.vatMm), giaCongVatDonGia: Number(bgRow?.giaVat) || 1800,
     }, bangGia)
     setResult(res)
   }, [panel, bangGia, isUuDai, bgRow])
@@ -422,7 +422,7 @@ export default function CongCuTinhTienPage() {
               <label className="text-xs text-gray-400">Chiều dài vát (MM)</label>
               <input type="number" value={panel.vatMm} onChange={e => setPanel((p:any) => ({...p, vatMm: e.target.value}))} className={inp} />
               <label className="text-xs text-gray-400 mt-1.5">Đơn giá vát (¥/M)</label>
-              <input readOnly value={bgRow ? '— theo bảng giá' : '— theo bảng giá'} className={inpRo} />
+              <input readOnly value={bgRow ? bgRow.giaVat + ' ¥/m' : '— theo bảng giá'} className={inpRo} />
               <div className={thanhTien}>
                 <p className="text-xs text-gray-400">Thành tiền vát</p>
                 <div className="bg-orange-50 rounded px-2 py-1 font-mono text-orange-600 font-semibold">¥ {result ? fmt(result.tienVat) : 0}</div>

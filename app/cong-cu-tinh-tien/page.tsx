@@ -7,7 +7,7 @@ import { calculatePanel } from '@/lib/calculate'
 const emptyPanel = (maDon?: string, soTam?: number) => ({
   tenTam: maDon && soTam !== undefined ? maDon + '-' + (soTam + 1) : '', vatLieu: '', doDay: '', x: '0', y: '0', soLuong: 1, maKhach: '',
   loNho: 0, loLon: 0, soLoTappu: 0, soLoSara: 0,
-  pitchiSoLan: 0, pitchiGio: 0, cuonGio: 0, vatMm: 0,
+  pitchiSoLan: 0, pitchiGio: 0, loaiGiaCong: 'Pitchi', cuonGio: 0, vatMm: 0,
   be: [{ soDuong: 1, daiMm: 0, donGia: 0 }]
 })
 
@@ -21,11 +21,15 @@ export default function CongCuTinhTienPage() {
   const [result, setResult] = useState<any>(null)
   const [saving, setSaving] = useState(false)
   const [hesoGiaVL, setHesoGiaVL] = useState<any[]>([])
+  const [hesoPitchiDB, setHesoPitchiDB] = useState<any[]>([])
+  const [hesoGiaCongDB, setHesoGiaCongDB] = useState<any[]>([])
 
   useEffect(() => {
     fetch('/api/bang-gia').then(r => r.json()).then(setBangGia)
     fetch('/api/cong-ty').then(r => r.json()).then(setCongTyList)
     fetch('/api/heso-gia-vl').then(r => r.json()).then(setHesoGiaVL)
+    fetch('/api/heso-pitchi').then(r => r.json()).then(setHesoPitchiDB)
+    fetch('/api/heso-gia-cong').then(r => r.json()).then(setHesoGiaCongDB)
   }, [])
 
   // Danh sách vật liệu unique từ database, nhóm theo loại
@@ -391,15 +395,17 @@ export default function CongCuTinhTienPage() {
             {/* Pitchi */}
             <div className="border rounded-lg p-2 flex flex-col">
               <p className="text-xs font-bold text-blue-600 mb-1.5">● PITCHI</p>
-              <label className="text-xs text-gray-400">Số lần ấn (N)</label>
+              <label className="text-xs text-gray-400">Loại gia công</label>
+              <select value={panel.loaiGiaCong} onChange={e => setPanel((p:any) => ({...p, loaiGiaCong: e.target.value}))} className={inp}>
+                {hesoGiaCongDB.map((r:any) => <option key={r.id} value={r.tenLoai}>{r.tenLoai} (×{r.heSo})</option>)}
+              </select>
+              <label className="text-xs text-gray-400 mt-1.5">Số lần ấn (N)</label>
               <input type="number" value={panel.pitchiSoLan} onChange={e => setPanel((p:any) => ({...p, pitchiSoLan: e.target.value}))} className={inp} />
               <label className="text-xs text-gray-400 mt-1.5">Thời gian (H)</label>
-              <input type="number" value={panel.pitchiGio} onChange={e => setPanel((p:any) => ({...p, pitchiGio: e.target.value}))} className={inp} />
-              <label className="text-xs text-gray-400 mt-1.5">Đơn giá (¥/giờ)</label>
-              <input readOnly value="6000" className={inpRo} />
+              <input readOnly value={pitchiResult ? pitchiResult.thoiGian : '0'} className={inpRo} />
               <div className={thanhTien}>
                 <p className="text-xs text-gray-400">Thành tiền</p>
-                <div className="bg-orange-50 rounded px-2 py-1 font-mono text-orange-600 font-semibold">¥ {result ? fmt(result.tienPitchi) : 0}</div>
+                <div className="bg-orange-50 rounded px-2 py-1 font-mono text-orange-600 font-semibold">¥ {pitchiResult ? fmt(pitchiResult.thanhTien) : 0}</div>
               </div>
             </div>
 

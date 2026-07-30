@@ -16,6 +16,7 @@ export default function CongCuTinhTienPage() {
   const [bangGia, setBangGia] = useState<any[]>([])
   const [congTyList, setCongTyList] = useState<any[]>([])
   const [form, setForm] = useState({ maDon: '', tenCongTy: '', ghiChu: '' })
+  const [showCTDropdown, setShowCTDropdown] = useState(false)
   const [panel, setPanel] = useState<any>(emptyPanel())
   const [result, setResult] = useState<any>(null)
   const [saving, setSaving] = useState(false)
@@ -119,21 +120,20 @@ export default function CongCuTinhTienPage() {
           <div>
             <label className="text-xs text-gray-500">Tên công ty</label>
             <div className="relative mt-1">
-              <input value={form.tenCongTy} onChange={e => setForm(f => ({...f, tenCongTy: e.target.value}))}
+              <input value={form.tenCongTy}
+                onChange={e => { setForm(f => ({...f, tenCongTy: e.target.value})); setShowCTDropdown(true) }}
+                onFocus={() => setShowCTDropdown(true)}
+                onBlur={() => setTimeout(() => setShowCTDropdown(false), 200)}
                 placeholder="Nhập hoặc chọn công ty..."
                 className="w-full border rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500" />
-              {congTyList.filter(ct =>
-                form.tenCongTy === '' ||
-                ct.tenCongTy.toLowerCase().includes(form.tenCongTy.toLowerCase()) ||
-                (ct.tiengNhat && ct.tiengNhat.includes(form.tenCongTy))
-              ).length > 0 && form.tenCongTy !== (congTyList.find((ct:any) => ct.tenCongTy === form.tenCongTy)?.tenCongTy || '') ? (
+              {showCTDropdown ? (
                 <div className="absolute z-50 w-full bg-white border rounded-lg shadow-lg mt-1 max-h-48 overflow-y-auto">
                   {congTyList.filter(ct =>
                     form.tenCongTy === '' ||
                     ct.tenCongTy.toLowerCase().includes(form.tenCongTy.toLowerCase()) ||
                     (ct.tiengNhat && ct.tiengNhat.includes(form.tenCongTy))
                   ).map((ct:any) => (
-                    <div key={ct.id} onClick={() => setForm(f => ({...f, tenCongTy: ct.tenCongTy}))}
+                    <div key={ct.id} onClick={() => { setForm(f => ({...f, tenCongTy: ct.tenCongTy})); setShowCTDropdown(false) }}
                       className="px-3 py-2 hover:bg-blue-50 cursor-pointer border-b last:border-0">
                       <p className="text-xs font-medium text-gray-800">{ct.tenCongTy}</p>
                       {ct.tiengNhat && <p className="text-xs text-gray-400">{ct.tiengNhat}</p>}

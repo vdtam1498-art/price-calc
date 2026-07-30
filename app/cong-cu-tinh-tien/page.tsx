@@ -301,7 +301,7 @@ export default function CongCuTinhTienPage() {
               <label className="text-xs text-gray-400 mt-1.5">Lỗ quy đổi</label>
               <input readOnly value={loQuyDoi || ''} className={inpRo} />
               <label className="text-xs text-gray-400 mt-1.5">Đơn giá (¥/lỗ)</label>
-              <input readOnly value="— theo độ dày" className={inpRo} />
+              <input readOnly value={bgRow ? bgRow.giaMoLo + " ¥/lỗ" : "— theo độ dày"} className={inpRo} />
               <div className={thanhTien}>
                 <p className="text-xs text-gray-400">Thành tiền</p>
                 <div className="bg-orange-50 rounded px-2 py-1 font-mono text-orange-600 font-semibold">¥ {result ? fmt(result.tienLoCat) : 0}</div>
@@ -314,7 +314,7 @@ export default function CongCuTinhTienPage() {
               <label className="text-xs text-gray-400">Số lỗ</label>
               <input type="number" value={panel.soLoTappu} onChange={e => setPanel((p:any) => ({...p, soLoTappu: e.target.value}))} className={inp} />
               <label className="text-xs text-gray-400 mt-1.5">Đơn giá (¥/lỗ)</label>
-              <input readOnly value="— theo độ dày" className={inpRo} />
+              <input readOnly value={bgRow ? bgRow.giaTappu + " ¥/lỗ" : "— theo độ dày"} className={inpRo} />
               <div className={thanhTien}>
                 <p className="text-xs text-gray-400">Thành tiền</p>
                 <div className="bg-orange-50 rounded px-2 py-1 font-mono text-orange-600 font-semibold">¥ {result ? fmt(result.tienTappu) : 0}</div>
@@ -327,7 +327,7 @@ export default function CongCuTinhTienPage() {
               <label className="text-xs text-gray-400">Số lỗ</label>
               <input type="number" value={panel.soLoSara} onChange={e => setPanel((p:any) => ({...p, soLoSara: e.target.value}))} className={inp} />
               <label className="text-xs text-gray-400 mt-1.5">Đơn giá (¥/lỗ)</label>
-              <input readOnly value="— theo độ dày" className={inpRo} />
+              <input readOnly value={bgRow ? bgRow.giaTappu + " ¥/lỗ" : "— theo độ dày"} className={inpRo} />
               <div className={thanhTien}>
                 <p className="text-xs text-gray-400">Thành tiền</p>
                 <div className="bg-orange-50 rounded px-2 py-1 font-mono text-orange-600 font-semibold">¥ {result ? fmt(result.tienSara) : 0}</div>

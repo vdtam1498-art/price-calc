@@ -45,9 +45,13 @@ export function calculatePanel(input: PanelInput, bangGia: BangGiaRow[]): PanelR
   const tienTappu = input.soLoTappu * (r.giaTappu || 0)
   const tienSara = input.soLoSara * (r.giaTappu || 0)
   const hsKL = heSoKL(klThucTe)
+  const MIN_GIA_BE = 300
   let tienBe = 0
   for (const be of input.be) {
-    tienBe += be.soDuong * (be.daiMm / 1000) * be.donGia * Math.max(hsKL, heSoCD(be.daiMm))
+    if (be.daiMm <= 0 || be.donGia <= 0) continue
+    const giaMot = (be.daiMm / 1000) * be.donGia * Math.max(hsKL, heSoCD(be.daiMm))
+    const giaThucTe = Math.max(giaMot, MIN_GIA_BE)
+    tienBe += be.soDuong * giaThucTe
   }
   const tienPitchi = input.pitchiGio * 6000
   const tienCuon = input.cuonGio * 6000

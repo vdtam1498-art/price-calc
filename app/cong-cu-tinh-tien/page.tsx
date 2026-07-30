@@ -124,6 +124,44 @@ export default function CongCuTinhTienPage() {
   const inpGreen = "w-full mt-1 border rounded px-2 py-1 text-xs bg-green-50 text-green-700 font-mono"
   const thanhTien = "mt-auto pt-2"
 
+
+  function getHeSoPitchi(klThucTe: number, x: number, y: number) {
+    const maxCD = Math.max(Number(x), Number(y)) / 1000
+    const tlRows = hesoPitchiDB.filter((r:any) => r.loai === 'trong_luong').sort((a:any,b:any) => a.thuTu-b.thuTu)
+    const cdRows = hesoPitchiDB.filter((r:any) => r.loai === 'chieu_dai').sort((a:any,b:any) => a.thuTu-b.thuTu)
+    let hsTL = 2
+    if (klThucTe < 20) hsTL = tlRows[0]?.heSo || 0.8
+    else if (klThucTe < 40) hsTL = tlRows[1]?.heSo || 1
+    else if (klThucTe < 100) hsTL = tlRows[2]?.heSo || 1.5
+    else hsTL = tlRows[3]?.heSo || 2
+    let hsCD = 2.5
+    if (maxCD < 0.83) hsCD = cdRows[0]?.heSo || 0.75
+    else if (maxCD < 1.66) hsCD = cdRows[1]?.heSo || 1
+    else if (maxCD < 2.49) hsCD = cdRows[2]?.heSo || 1.25
+    else if (maxCD < 3.32) hsCD = cdRows[3]?.heSo || 1.5
+    else if (maxCD < 4.15) hsCD = cdRows[4]?.heSo || 1.75
+    else if (maxCD < 4.98) hsCD = cdRows[5]?.heSo || 2
+    else if (maxCD < 5.81) hsCD = cdRows[6]?.heSo || 2.25
+    else hsCD = cdRows[7]?.heSo || 2.5
+    return Math.max(hsTL, hsCD)
+  }
+  function getHeSoLoaiGC(loai: string) {
+    return hesoGiaCongDB.find((r:any) => r.tenLoai === loai)?.heSo || 1
+  }
+  function tinhPitchi() {
+    if (!result || Number(panel.pitchiSoLan) <= 0) return null
+    const heTam = getHeSoPitchi(result.klThucTe, Number(panel.x), Number(panel.y))
+    const heGC = getHeSoLoaiGC(panel.loaiGiaCong || 'Pitchi')
+    const soLuong = Number(panel.soLuong)
+    const soLanAn = Number(panel.pitchiSoLan)
+    const thoiGian = heTam * heGC * 1.5 * soLanAn
+    const thanhTien = soLuong <= 5
+      ? (1500 / soLuong) + 100 * thoiGian
+      : (1500 / 5) + 100 * thoiGian
+    return { thoiGian: thoiGian.toFixed(2), thanhTien: Math.round(thanhTien) }
+  }
+  const pitchiResult = tinhPitchi()
+
   if (!donHang) return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md">

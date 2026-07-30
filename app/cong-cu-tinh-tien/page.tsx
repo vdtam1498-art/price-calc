@@ -371,7 +371,7 @@ export default function CongCuTinhTienPage() {
                   <div className="flex gap-0.5 items-center">
                     <input readOnly value={bgRow ? bgRow.giaUon : 0}
                       
-                      className="border rounded px-1 py-1 text-xs w-full focus:outline-none focus:ring-1 focus:ring-blue-400" />
+                      className="border rounded px-1 py-1 text-xs w-full bg-gray-50 text-gray-400 cursor-not-allowed" />
                     {panel.be.length > 1 && (
                       <button onClick={() => setPanel((p:any) => ({...p, be: p.be.filter((_:any,j:number)=>j!==i)}))}
                         className="text-red-400 hover:text-red-600 text-xs">✕</button>

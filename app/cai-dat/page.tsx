@@ -86,7 +86,7 @@ export default function CaiDatPage() {
 
   // Bảng giá form
   const [showAddBG, setShowAddBG] = useState(false)
-  const [newBG, setNewBG] = useState({ vatLieu: '', doDay: '', donGiaVL: 0, tienBe: 0, giaCat: 0, donGiaLo: 0, donGiaLoTappu: 0, giaVat: 0, tyTrong: 7.85 })
+  const [newBG, setNewBG] = useState({ vatLieu: '', doDay: '', donGia: 0, giaUon: 0, giaCat: 0, giaMoLo: 0, giaTappu: 0, giaVat: 0, tyTrong: 7.85 })
   const [editingBG, setEditingBG] = useState<any>(null)
 
   // Công ty form
@@ -211,11 +211,11 @@ export default function CaiDatPage() {
         {showAddBG && (
           <div className="grid grid-cols-9 gap-1.5 mb-3 p-3 bg-gray-50 rounded-lg">
             {[
-              { key: 'vatLieu', ph: 'VL' }, { key: 'doDay', ph: 'Dày', type: 'number' },
-              { key: 'donGiaVL', ph: 'Đơn giá', type: 'number' }, { key: 'tienBe', ph: 'Bẻ', type: 'number' },
-              { key: 'giaCat', ph: 'Cắt', type: 'number' }, { key: 'donGiaLo', ph: 'Lỗ', type: 'number' },
-              { key: 'donGiaLoTappu', ph: 'Tappu', type: 'number' }, { key: 'giaVat', ph: 'Vát', type: 'number' },
-              { key: 'tyTrong', ph: 'Tỷ trọng', type: 'number' },
+              { key: 'vatLieu', ph: 'Vật liệu' }, { key: 'doDay', ph: 'Dày(mm)', type: 'number' },
+              { key: 'donGia', ph: 'Đơn giá', type: 'number' },
+              { key: 'giaUon', ph: 'Giá uốn', type: 'number' }, { key: 'giaCat', ph: 'Giá cắt', type: 'number' },
+              { key: 'giaMoLo', ph: 'Giá mở lỗ', type: 'number' }, { key: 'giaTappu', ph: 'Tappu/Sara', type: 'number' },
+              { key: 'giaVat', ph: 'Giá vát', type: 'number' }, { key: 'tyTrong', ph: 'Tỷ trọng', type: 'number' },
             ].map(f => (
               <input key={f.key} type={f.type || 'text'} placeholder={f.ph} value={(newBG as any)[f.key]}
                 onChange={e => setNewBG(p => ({...p, [f.key]: f.type === 'number' ? Number(e.target.value) : e.target.value}))}
@@ -231,11 +231,14 @@ export default function CaiDatPage() {
               <tr className="text-left text-gray-400 border-b">
                 <th className="pb-1.5 pr-2">Vật liệu</th>
                 <th className="pb-1.5 pr-2">Dày(mm)</th>
-                <th className="pb-1.5 pr-2 text-green-600">Đơn giá VL</th>
-                <th className="pb-1.5 pr-2 text-orange-500">Tiền bẻ(¥)</th>
-                <th className="pb-1.5 pr-2 text-red-500">Giá cắt(¥/m)</th>
-                <th className="pb-1.5 pr-2">Đơn giá lỗ(¥)</th>
-                <th className="pb-1.5 pr-2">Đơn giá tappu(¥)</th>
+                <th className="pb-1.5 pr-2">Đơn giá</th>
+                <th className="pb-1.5 pr-2 text-green-600">Ưu đãi ×1.1</th>
+                <th className="pb-1.5 pr-2 text-orange-500">Không ưu đãi ×1.2</th>
+                <th className="pb-1.5 pr-2 text-red-500">Đặt ngoài ×1.3</th>
+                <th className="pb-1.5 pr-2">Giá uốn(¥/m)</th>
+                <th className="pb-1.5 pr-2">Giá cắt(¥/m)</th>
+                <th className="pb-1.5 pr-2">Giá mở lỗ(¥)</th>
+                <th className="pb-1.5 pr-2">Giá Tappu/Sara(¥)</th>
                 <th className="pb-1.5 pr-2">Giá vát(¥)</th>
                 <th className="pb-1.5 pr-2">Tỷ trọng</th>
                 <th className="pb-1.5"></th>
@@ -246,7 +249,7 @@ export default function CaiDatPage() {
                 <tr key={row.id} className="border-b hover:bg-gray-50">
                   {editingBG?.id === row.id ? (
                     <>
-                      {['vatLieu','doDay','donGiaVL','tienBe','giaCat','donGiaLo','donGiaLoTappu','giaVat','tyTrong'].map(k => (
+                      {['vatLieu','doDay','donGia','giaUon','giaCat','giaMoLo','giaTappu','giaVat','tyTrong'].map(k => (
                         <td key={k} className="py-1 pr-2">
                           <input type={k === 'vatLieu' ? 'text' : 'number'} value={editingBG[k]}
                             onChange={e => setEditingBG((p: any) => ({...p, [k]: k === 'vatLieu' ? e.target.value : Number(e.target.value)}))}
@@ -264,11 +267,14 @@ export default function CaiDatPage() {
                     <>
                       <td className="py-1.5 pr-2 font-medium">{row.vatLieu}</td>
                       <td className="py-1.5 pr-2">{row.doDay}</td>
-                      <td className="py-1.5 pr-2 text-green-600 font-mono">{row.donGiaVL}</td>
-                      <td className="py-1.5 pr-2 font-mono">{row.tienBe}</td>
-                      <td className="py-1.5 pr-2 text-red-500 font-mono">{row.giaCat}</td>
-                      <td className="py-1.5 pr-2 font-mono">{row.donGiaLo}</td>
-                      <td className="py-1.5 pr-2 font-mono">{row.donGiaLoTappu}</td>
+                      <td className="py-1.5 pr-2 font-mono">{row.donGia}</td>
+                      <td className="py-1.5 pr-2 text-green-600 font-mono">{row.uuDai || (row.donGia * 1.1).toFixed(1)}</td>
+                      <td className="py-1.5 pr-2 text-orange-500 font-mono">{row.khongUuDai || (row.donGia * 1.2).toFixed(1)}</td>
+                      <td className="py-1.5 pr-2 text-red-500 font-mono">{row.datNgoai || (row.donGia * 1.3).toFixed(1)}</td>
+                      <td className="py-1.5 pr-2 font-mono">{row.giaUon}</td>
+                      <td className="py-1.5 pr-2 font-mono">{row.giaCat}</td>
+                      <td className="py-1.5 pr-2 font-mono">{row.giaMoLo}</td>
+                      <td className="py-1.5 pr-2 font-mono">{row.giaTappu}</td>
                       <td className="py-1.5 pr-2 font-mono">{row.giaVat}</td>
                       <td className="py-1.5 pr-2">{row.tyTrong}</td>
                       <td className="py-1.5">

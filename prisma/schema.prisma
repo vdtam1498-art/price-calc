@@ -11,11 +11,14 @@ model BangGiaVL {
   id              Int     @id @default(autoincrement())
   vatLieu         String
   doDay           Float
-  donGiaVL        Float
-  tienBe          Float   @default(0)
+  donGia          Float   @default(0)
+  uuDai           Float   @default(0)
+  khongUuDai      Float   @default(0)
+  datNgoai        Float   @default(0)
+  giaUon          Float   @default(0)
   giaCat          Float   @default(0)
-  donGiaLo        Float   @default(0)
-  donGiaLoTappu   Float   @default(0)
+  giaMoLo         Float   @default(0)
+  giaTappu        Float   @default(0)
   giaVat          Float   @default(0)
   tyTrong         Float   @default(7.85)
 

@@ -35,7 +35,7 @@ function HeSoTable({ title, data, loaiA, loaiB, labelA, labelB, onUpdate, onAdd,
           <div key={g.loai} className="border rounded-lg overflow-hidden">
             <div className="bg-gray-50 px-3 py-1.5 border-b"><p className="text-xs font-semibold text-gray-600">{g.label}</p></div>
             <table className="w-full text-xs">
-              <thead><tr className="border-b bg-gray-50">
+              <thead className="sticky top-0 bg-white z-10"><tr className="border-b bg-gray-50">
                 <th className="px-3 py-1.5 text-left text-gray-400">Hệ số</th>
                 <th className="px-3 py-1.5 text-left text-gray-400">Điều kiện</th>
                 {!locked && <th className="px-3 py-1.5"></th>}
@@ -227,7 +227,7 @@ export default function CaiDatPage() {
 
         <div className="overflow-x-auto max-h-64 overflow-y-auto">
           <table className="w-full text-xs">
-            <thead>
+            <thead className="sticky top-0 bg-white z-10">
               <tr className="text-left text-gray-400 border-b">
                 <th className="pb-1.5 pr-2">Vật liệu</th>
                 <th className="pb-1.5 pr-2">Dày(mm)</th>
@@ -307,7 +307,7 @@ export default function CaiDatPage() {
           </div>
         )}
         <div className="max-h-60 overflow-y-auto"><table className="w-full text-xs">
-          <thead><tr className="text-left text-gray-400 border-b">
+          <thead className="sticky top-0 bg-white z-10"><tr className="text-left text-gray-400 border-b">
             <th className="pb-1.5 pr-2">Tên công ty (EN)</th>
             <th className="pb-1.5 pr-2">Tiếng Nhật</th>
             <th className="pb-1.5 pr-2 text-green-600">Hệ số ≥4.5mm</th>
@@ -375,7 +375,7 @@ export default function CaiDatPage() {
         </div>
         <div className="border rounded-lg overflow-hidden">
           <table className="w-full text-xs">
-            <thead><tr className="bg-gray-50 border-b">
+            <thead className="sticky top-0 bg-white z-10"><tr className="bg-gray-50 border-b">
               {hesoGiaCong.map((r: any) => <th key={r.id} className="px-4 py-2 text-left text-gray-500">{r.tenLoai}</th>)}
             </tr></thead>
             <tbody><tr className="hover:bg-gray-50">
@@ -406,7 +406,7 @@ export default function CaiDatPage() {
           ? <div className="border rounded-lg p-6 text-center text-gray-300 text-xs">Chưa có dữ liệu — {locked ? 'mở khoá để thêm' : 'bấm + Thêm'}</div>
           : <div className="border rounded-lg overflow-hidden">
               <table className="w-full text-xs">
-                <thead><tr className="bg-gray-50 border-b">
+                <thead className="sticky top-0 bg-white z-10"><tr className="bg-gray-50 border-b">
                   <th className="px-3 py-2 text-left text-gray-400">Loại</th>
                   <th className="px-3 py-2 text-left text-gray-400">Hệ số</th>
                   <th className="px-3 py-2 text-left text-gray-400">Điều kiện</th>

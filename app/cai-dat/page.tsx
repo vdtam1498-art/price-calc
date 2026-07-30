@@ -88,6 +88,8 @@ export default function CaiDatPage() {
 
   // Bảng giá form
   const [showAddBG, setShowAddBG] = useState(false)
+  const [importing, setImporting] = useState(false)
+  const [importResult, setImportResult] = useState<any>(null)
   const [newBG, setNewBG] = useState({ vatLieu: '', doDay: '', donGia: 0, giaUon: 0, giaCat: 0, giaMoLo: 0, giaTappu: 0, giaVat: 0, tyTrong: 7.85 })
   const [editingBG, setEditingBG] = useState<any>(null)
 
@@ -126,6 +128,45 @@ export default function CaiDatPage() {
   }
 
   // CRUD bang gia
+  async function handleImportExcel(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setImporting(true)
+    setImportResult(null)
+    const XLSX = await import('xlsx')
+    const buf = await file.arrayBuffer()
+    const wb = XLSX.read(buf)
+    const ws = wb.Sheets[wb.SheetNames[0]]
+    const raw: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1 })
+    
+    // Bỏ dòng header, lấy từ dòng 2
+    const rows = raw.slice(1).filter(r => r[0] && r[1]).map(r => ({
+      vatLieu: String(r[0]).trim(),
+      doDay: Number(r[1]),
+      donGia: Number(r[2]) || 0,
+      giaUon: Number(r[3]) || 0,
+      giaCat: Number(r[4]) || 0,
+      giaMoLo: Number(r[5]) || 0,
+      giaTappu: Number(r[6]) || 0,
+      giaVat: Number(r[7]) || 0,
+      tyTrong: Number(r[8]) || 7.85,
+    }))
+    
+    const res = await fetch('/api/bang-gia/import', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rows })
+    })
+    const result = await res.json()
+    setImportResult({ ...result, total: rows.length })
+    
+    // Reload bảng giá
+    const bg = await fetch('/api/bang-gia').then(r => r.json())
+    setBangGia(bg)
+    setImporting(false)
+    e.target.value = ''
+  }
+
   async function themBangGia() {
     const payload = { ...newBG, doDay: Number(newBG.doDay) }
     const r = await fetch('/api/bang-gia', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
@@ -208,7 +249,19 @@ export default function CaiDatPage() {
             <h2 className="font-semibold text-gray-800 text-sm">Bảng giá vật liệu</h2>
             <p className="text-xs text-gray-400">Đơn giá ¥/kg theo VL + độ dày · Ưu đãi ×1.1 · Không ưu đãi ×1.2</p>
           </div>
-          <div className="flex gap-2">{showAddBG && <button onClick={themBangGia} className="text-xs bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">💾 Lưu</button>}<button onClick={() => setShowAddBG(!showAddBG)} className="text-xs bg-blue-50 text-blue-600 border border-blue-200 px-2 py-1 rounded hover:bg-blue-100">{showAddBG ? "✕ Huỷ" : "+ Thêm"}</button></div>
+          <div className="flex gap-2 items-center">
+            {importResult && (
+              <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded">
+                ✓ Đã import {importResult.inserted}/{importResult.total} dòng
+              </span>
+            )}
+            <label className={`text-xs px-3 py-1 rounded cursor-pointer border ${importing ? 'bg-gray-100 text-gray-400' : 'bg-purple-50 text-purple-600 border-purple-200 hover:bg-purple-100'}`}>
+              {importing ? '⏳ Đang import...' : '📥 Import Excel'}
+              <input type="file" accept=".xlsx,.xls" className="hidden" onChange={handleImportExcel} disabled={importing} />
+            </label>
+            {showAddBG && <button onClick={themBangGia} className="text-xs bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">💾 Lưu</button>}
+            <button onClick={() => setShowAddBG(!showAddBG)} className="text-xs bg-blue-50 text-blue-600 border border-blue-200 px-2 py-1 rounded hover:bg-blue-100">{showAddBG ? "✕ Huỷ" : "+ Thêm"}</button>
+          </div>
         </div>
 
         {showAddBG && (

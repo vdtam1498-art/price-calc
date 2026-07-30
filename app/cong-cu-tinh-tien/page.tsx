@@ -42,20 +42,32 @@ export default function CongCuTinhTienPage() {
 
   const heSoLabel = () => {
     if (!bgRow) return '—'
+    if (isUuDai) return '×' + (hesoGiaVL.find((h:any) => h.tenLoai === 'Ưu đãi')?.heSo || 1.1)
     const vl = panel.vatLieu.toUpperCase()
-    const isSat = ['SPCC','SPHC','SS400','SECC','SGCC'].some((v:string) => vl.includes(v))
-    if (isSat) return isUuDai ? '×1.1' : '×1.2'
-    if (vl.includes('304') && isUuDai) return '×1.1'
-    return '×1.15'
+    const isSUS = vl.includes('SUS')
+    const key = isSUS ? 'Không ưu đãi SUS' : 'Không ưu đãi SS'
+    return '×' + (hesoGiaVL.find((h:any) => h.tenLoai === key)?.heSo || 1.2)
   }
 
   useEffect(() => {
     if (!panel.vatLieu || !panel.doDay || !panel.x || !panel.y) { setResult(null); return }
     const beRows = panel.be.map((b: any) => ({ soDuong: Number(b.soDuong), daiMm: Number(b.daiMm), donGia: Number(b.donGia) }))
+    // Tính hệ số VL từ hesoGiaVL
+    const getHSVL = (tenLoai: string) => hesoGiaVL.find((h:any) => h.tenLoai === tenLoai)?.heSo || 1
+    let heSoVL = 1
+    if (isUuDai) {
+      heSoVL = getHSVL('Ưu đãi')
+    } else {
+      const vl = panel.vatLieu.toUpperCase()
+      const isSUS = vl.includes('SUS')
+      heSoVL = isSUS ? getHSVL('Không ưu đãi SUS') : getHSVL('Không ưu đãi SS')
+    }
+
     const res = calculatePanel({
       vatLieu: panel.vatLieu, doDay: Number(panel.doDay),
       x: Number(panel.x), y: Number(panel.y), soLuong: Number(panel.soLuong),
-      isUuDai, loNho: Number(panel.loNho), loLon: Number(panel.loLon),
+      isUuDai, heSoVL,
+      loNho: Number(panel.loNho), loLon: Number(panel.loLon),
       soLoTappu: Number(panel.soLoTappu), soLoSara: Number(panel.soLoSara),
       be: beRows, pitchiGio: Number(panel.pitchiGio), cuonGio: Number(panel.cuonGio),
       vatMm: Number(panel.vatMm), giaCongVatDonGia: bgRow?.giaVat || 1800,

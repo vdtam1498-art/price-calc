@@ -1,13 +1,14 @@
 
 export interface BangGiaRow {
-  id: number; vatLieu: string; doDay: number; donGiaVL: number
-  tienBe: number; giaCat: number; donGiaLo: number
-  donGiaLoTappu: number; giaVat: number; tyTrong: number
+  id: number; vatLieu: string; doDay: number; donGia: number
+  giaUon: number; giaCat: number; giaMoLo: number
+  giaTappu: number; giaVat: number; tyTrong: number
 }
 export interface BeRow { soDuong: number; daiMm: number; donGia: number }
 export interface PanelInput {
   vatLieu: string; doDay: number; x: number; y: number; soLuong: number
-  isUuDai: boolean; loNho: number; loLon: number; soLoTappu: number; soLoSara: number
+  isUuDai: boolean; heSoVL: number
+  loNho: number; loLon: number; soLoTappu: number; soLoSara: number
   be: BeRow[]; pitchiGio: number; cuonGio: number; vatMm: number; giaCongVatDonGia: number
 }
 export interface PanelResult {
@@ -15,13 +16,6 @@ export interface PanelResult {
   tienVL: number; tienCatLaser: number; tienLoCat: number; tienTappu: number
   tienSara: number; tienBe: number; tienPitchi: number; tienCuon: number
   tienVat: number; tongGiaCong: number; gia1Tam: number; allIn: number
-}
-function getHeSoVL(vatLieu: string, isUuDai: boolean): number {
-  const vl = vatLieu.toUpperCase()
-  const isSat = ['SPCC','SPHC','SS400','SECC','SGCC'].some(v => vl.includes(v))
-  if (isSat) return isUuDai ? 1.1 : 1.2
-  if (vl.includes('304') && isUuDai) return 1.1
-  return 1.15
 }
 function heSoKL(kg: number): number {
   if (kg < 40) return 1
@@ -40,16 +34,16 @@ export function calculatePanel(input: PanelInput, bangGia: BangGiaRow[]): PanelR
   const found = bangGia.find(r => r.vatLieu === input.vatLieu && r.doDay === input.doDay)
   if (found === undefined) return null
   const r = found
-  const { x, y, doDay, soLuong, isUuDai, vatLieu } = input
+  const { x, y, doDay, soLuong, heSoVL } = input
   const ty = r.tyTrong
   const klBaoGia = (x * y * doDay * ty) / 1_000_000
   const klThucTe = ((x + 10) * (y + 10) * doDay * ty) / 1_000_000
-  const donGiaVLFinal = r.donGiaVL * getHeSoVL(vatLieu, isUuDai)
-  const tienVL = klThucTe * donGiaVLFinal
-  const tienCatLaser = r.giaCat * doDay * ((x + y) / 1000) * 2
-  const tienLoCat = (input.loNho + input.loLon * 1.5) * r.donGiaLo
-  const tienTappu = input.soLoTappu * r.donGiaLoTappu
-  const tienSara = input.soLoSara * r.donGiaLoTappu
+  const donGiaVLFinal = r.donGia > 0 ? r.donGia * heSoVL : 0
+  const tienVL = donGiaVLFinal > 0 ? klThucTe * donGiaVLFinal : 0
+  const tienCatLaser = r.giaCat > 0 ? r.giaCat * ((x + y) / 1000) * 2 : 0
+  const tienLoCat = (input.loNho + input.loLon * 1.5) * (r.giaMoLo || 0)
+  const tienTappu = input.soLoTappu * (r.giaTappu || 0)
+  const tienSara = input.soLoSara * (r.giaTappu || 0)
   const hsKL = heSoKL(klThucTe)
   let tienBe = 0
   for (const be of input.be) {

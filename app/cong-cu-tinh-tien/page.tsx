@@ -118,10 +118,31 @@ export default function CongCuTinhTienPage() {
           </div>
           <div>
             <label className="text-xs text-gray-500">Tên công ty</label>
-            <input value={form.tenCongTy} onChange={e => setForm(f => ({...f, tenCongTy: e.target.value}))}
-              list="cong-ty-list" placeholder="Nhập hoặc chọn công ty..."
-              className="w-full mt-1 border rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            <datalist id="cong-ty-list">{congTyList.map(c => <option key={c.id} value={c.tenCongTy} />)}</datalist>
+            <div className="relative mt-1">
+              <input value={form.tenCongTy} onChange={e => setForm(f => ({...f, tenCongTy: e.target.value}))}
+                placeholder="Nhập hoặc chọn công ty..."
+                className="w-full border rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              {congTyList.filter(ct =>
+                form.tenCongTy === '' ||
+                ct.tenCongTy.toLowerCase().includes(form.tenCongTy.toLowerCase()) ||
+                (ct.tiengNhat && ct.tiengNhat.includes(form.tenCongTy))
+              ).length > 0 && form.tenCongTy !== (congTyList.find((ct:any) => ct.tenCongTy === form.tenCongTy)?.tenCongTy || '') ? (
+                <div className="absolute z-50 w-full bg-white border rounded-lg shadow-lg mt-1 max-h-48 overflow-y-auto">
+                  {congTyList.filter(ct =>
+                    form.tenCongTy === '' ||
+                    ct.tenCongTy.toLowerCase().includes(form.tenCongTy.toLowerCase()) ||
+                    (ct.tiengNhat && ct.tiengNhat.includes(form.tenCongTy))
+                  ).map((ct:any) => (
+                    <div key={ct.id} onClick={() => setForm(f => ({...f, tenCongTy: ct.tenCongTy}))}
+                      className="px-3 py-2 hover:bg-blue-50 cursor-pointer border-b last:border-0">
+                      <p className="text-xs font-medium text-gray-800">{ct.tenCongTy}</p>
+                      {ct.tiengNhat && <p className="text-xs text-gray-400">{ct.tiengNhat}</p>}
+                      {ct.isUuDai && <span className="text-xs bg-green-100 text-green-600 px-1 rounded">Ưu đãi</span>}
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+            </div>
           </div>
           <div>
             <label className="text-xs text-gray-500">Ghi chú đơn</label>

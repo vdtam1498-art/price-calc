@@ -420,8 +420,8 @@ export default function CongCuTinhTienPage() {
           <div className="grid grid-cols-7 gap-2">
             {[
               { label: 'Tỷ trọng (G/CM³)', value: bgRow?.tyTrong || '7.85', cls: inpGreen },
-              { label: 'Hệ số ưu đãi', value: heSoLabel(), cls: inpRo },
-              { label: 'Đơn giá VL (¥/KG)', value: bgRow?.donGia > 0 ? bgRow.donGia + ' ¥/kg' : (donGiaDatNgoai > 0 ? donGiaDatNgoai + ' ¥/kg (đặt ngoài ×' + ((panel.vatLieu.toUpperCase().includes('SUS') || panel.vatLieu.toUpperCase().startsWith('A')) ? '1.2' : '1.3') + ')' : 'Đặt ngoài — chưa nhập giá'), cls: inpRo },
+              { label: 'Hệ số ưu đãi', value: (bgRow?.donGia === 0 && donGiaDatNgoai > 0) ? '×' + ((panel.vatLieu.toUpperCase().includes('SUS') || panel.vatLieu.toUpperCase().startsWith('A')) ? '1.2' : '1.3') + ' (đặt ngoài)' : heSoLabel(), cls: inpRo },
+              { label: 'Đơn giá VL (¥/KG)', value: bgRow?.donGia > 0 ? bgRow.donGia + ' ¥/kg' : (donGiaDatNgoai > 0 ? donGiaDatNgoai + ' ¥/kg' : 'Đặt ngoài — chưa nhập giá'), cls: inpRo },
               { label: 'KL báo giá / tấm (KG)', value: result ? result.klBaoGia.toFixed(3) + ' kg' : '0.000 kg', cls: inpGreen },
               { label: 'KL thực tế / tấm (KG)', value: result ? result.klThucTe.toFixed(3) + ' kg' : '0.000 kg', cls: inpGreen },
               { label: 'KL tổng thực tế (KG)', value: result ? (result.klThucTe * Number(panel.soLuong)).toFixed(3) + ' kg' : '0.000 kg', cls: inpGreen },

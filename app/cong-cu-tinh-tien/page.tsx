@@ -176,7 +176,7 @@ export default function CongCuTinhTienPage() {
         doDay: Number(panel.doDay), x: Number(panel.x), y: Number(panel.y),
         maKhach: panel.maKhach, loNho: Number(panel.loNho), loLon: Number(panel.loLon),
         soLoTappu: Number(panel.soLoTappu), soLoSara: Number(panel.soLoSara),
-        be: panel.be, pitchiSoLan: Number(panel.pitchiSoLan), pitchiChieuDai: Number(panel.pitchiChieuDai), loaiGiaCong: panel.loaiGiaCong || 'Pitchi', pitchiGio: pitchiResult ? pitchiResult.thanhTien : 0, cuonGio: Number(panel.cuonGio),
+        be: panel.be, pitchiSoLan: Number(panel.pitchiSoLan), pitchiChieuDai: Number(panel.pitchiChieuDai), loaiGiaCong: panel.loaiGiaCong || 'Pitchi', pitchiGio: pitchiResult ? pitchiResult.thanhTien : 0, cuonGio: Number(panel.cuonGio), donGiaDatNgoai: donGiaDatNgoai || 0,
         vatMm: Number(panel.vatMm),
         giaVL: result.tienVL, giaCat: result.tienCatLaser,
         giaCong: result.tongGiaCong, gia1Tam: result.gia1Tam, allIn: result.allIn,
@@ -634,6 +634,11 @@ export default function CongCuTinhTienPage() {
                     pitchiGio: p.pitchiGio || 0, loaiGiaCong: p.loaiGiaCong || 'Pitchi',
                     cuonGio: p.cuonGio, vatMm: p.vatMm,
                   })
+                  if (p.donGiaDatNgoai > 0) {
+                    setDonGiaDatNgoai(p.donGiaDatNgoai)
+                    setInputDatNgoai(String(p.donGiaDatNgoai))
+                    setShowModalDatNgoai(false)
+                  }
                   window.scrollTo({ top: 0, behavior: 'smooth' })
                 }} className={editingPanelId === p.id ? 'flex justify-between items-center px-2 py-1 rounded border-b last:border-0 cursor-pointer bg-blue-50 border-l-2 border-l-blue-500' : 'flex justify-between items-center px-2 py-1 rounded border-b last:border-0 cursor-pointer hover:bg-gray-50'}>
                   <div>

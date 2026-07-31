@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 
 export async function POST(req: NextRequest) {
   const body = await req.json()
-  const { donHangId, donGiaVL, klThucTe, ...panelData } = body
+  const { donHangId, ...panelData } = body
   const panel = await prisma.panel.create({
     data: { donHangId: Number(donHangId), ...panelData },
   })

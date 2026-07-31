@@ -60,14 +60,17 @@ export default function DonBaoGiaPage() {
           {filtered.length === 0 ? (
             <div className="p-8 text-center text-gray-300 text-xs">Không có đơn nào</div>
           ) : filtered.map(d => (
-            <div key={d.id} onClick={() => setSelected(d)}
-              className={`p-3 border-b cursor-pointer hover:bg-gray-50 ${selected?.id === d.id ? 'bg-blue-50 border-l-2 border-l-blue-500' : ''}`}>
-              <div className="flex justify-between items-start">
+            <div key={d.id} className={`p-3 border-b hover:bg-gray-50 ${selected?.id === d.id ? 'bg-blue-50 border-l-2 border-l-blue-500' : ''}`}>
+              <div className="flex justify-between items-start cursor-pointer" onClick={() => setSelected(d)}>
                 <p className="font-bold text-sm text-gray-800">{d.maDon}</p>
                 <p className="text-xs font-mono text-red-500 font-semibold">¥ {fmt(d.panels.reduce((s:number,p:any)=>s+p.allIn,0))}</p>
               </div>
-              <p className="text-xs text-gray-500">{d.tenCongTy || '—'}</p>
-              <p className="text-xs text-gray-400">{new Date(d.ngayTao).toLocaleDateString('vi-VN')} · {d.panels.length} tấm</p>
+              <p className="text-xs text-gray-500 cursor-pointer" onClick={() => setSelected(d)}>{d.tenCongTy || '—'}</p>
+              <div className="flex justify-between items-center mt-1">
+                <p className="text-xs text-gray-400 cursor-pointer" onClick={() => setSelected(d)}>{new Date(d.ngayTao).toLocaleDateString('vi-VN')} · {d.panels.length} tấm</p>
+                <button onClick={e => { e.stopPropagation(); xoaDon(d.id, d.maDon) }}
+                  className="text-xs text-red-400 hover:text-red-600 border border-red-200 rounded px-1.5 py-0.5 hover:bg-red-50">✕ Xoá</button>
+              </div>
             </div>
           ))}
         </div>

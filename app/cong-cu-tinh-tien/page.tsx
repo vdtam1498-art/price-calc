@@ -169,6 +169,16 @@ export default function CongCuTinhTienPage() {
     setSaving(false)
   }
 
+  async function xoaTam(id: number) {
+    if (!confirm('Xoá tấm này?')) return
+    await fetch('/api/panels/' + id, { method: 'DELETE' })
+    const updated = await fetch('/api/don-hang/' + donHang.id).then(r => r.json())
+    setDonHang(updated)
+    if (editingPanelId === id) {
+      setEditingPanelId(null)
+      setPanel(emptyPanel(updated.maDon, updated.panels.length))
+    }
+  }
   const fmt = (n: number) => Math.round(n).toLocaleString()
 
   const inp = "w-full mt-1 border rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-400"
@@ -606,7 +616,11 @@ export default function CongCuTinhTienPage() {
                     <p className="text-xs font-semibold text-gray-700">{p.tenTam || 'Tấm '+(i+1)}</p>
                     <p className="text-xs text-gray-400">{p.vatLieu} {p.doDay}mm · ×{p.soLuong}</p>
                   </div>
-                  <span className="text-xs font-mono text-red-500 font-semibold">¥{fmt(p.allIn)}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-mono text-red-500 font-semibold">¥{fmt(p.allIn)}</span>
+                    <button onClick={e => { e.stopPropagation(); xoaTam(p.id) }}
+                      className="text-gray-300 hover:text-red-500 transition-colors text-sm leading-none">✕</button>
+                  </div>
                 </div>
               ))}
             </div>

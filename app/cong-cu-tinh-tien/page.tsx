@@ -85,7 +85,7 @@ export default function CongCuTinhTienPage() {
       isUuDai, heSoVL,
       loNho: Number(panel.loNho), loLon: Number(panel.loLon),
       soLoTappu: Number(panel.soLoTappu), soLoSara: Number(panel.soLoSara),
-      be: beRows.map((b:any) => ({...b, donGia: bgRow ? Number(bgRow.giaUon) : b.donGia})), pitchiGio: Number(panel.pitchiGio), cuonGio: Number(panel.cuonGio),
+      be: beRows.map((b:any) => ({...b, donGia: bgRow ? Number(bgRow.giaUon) : b.donGia})), tienPitchi: pitchiResult ? pitchiResult.thanhTien : 0, tienCuon: cuonResult ? cuonResult.thanhTien : 0,
       vatMm: Number(panel.vatMm), giaCongVatDonGia: Number(bgRow?.giaVat) || 1800,
     }, bangGia)
     setResult(res)

@@ -9,7 +9,7 @@ export interface PanelInput {
   vatLieu: string; doDay: number; x: number; y: number; soLuong: number
   isUuDai: boolean; heSoVL: number
   loNho: number; loLon: number; soLoTappu: number; soLoSara: number
-  be: BeRow[]; pitchiGio: number; cuonGio: number; vatMm: number; giaCongVatDonGia: number
+  be: BeRow[]; tienPitchi: number; tienCuon: number; vatMm: number; giaCongVatDonGia: number
 }
 export interface PanelResult {
   tyTrong: number; klBaoGia: number; klThucTe: number; donGiaVLFinal: number
@@ -53,8 +53,8 @@ export function calculatePanel(input: PanelInput, bangGia: BangGiaRow[]): PanelR
     const giaThucTe = Math.max(giaMot, MIN_GIA_BE)
     tienBe += be.soDuong * giaThucTe
   }
-  const tienPitchi = input.pitchiGio * 6000
-  const tienCuon = input.cuonGio * 6000
+  const tienPitchi = input.tienPitchi
+  const tienCuon = input.tienCuon
   const tienVat = (input.vatMm / 1000) * input.giaCongVatDonGia
   const tongGiaCong = tienLoCat + tienTappu + tienSara + tienBe + tienPitchi + tienCuon + tienVat
   const gia1Tam = tienVL + tienCatLaser + tongGiaCong

@@ -4,8 +4,8 @@ import { calculatePanel } from '@/lib/calculate'
 
 
 
-const emptyPanel = (maDon?: string, soTam?: number) => ({
-  tenTam: maDon && soTam !== undefined ? maDon + '-' + (soTam + 1) : '', vatLieu: '', doDay: '', x: '0', y: '0', soLuong: 1, maKhach: '',
+const emptyPanel = (maDon?: string, nextNum?: number) => ({
+  tenTam: maDon && nextNum !== undefined ? maDon + '-' + nextNum : '', vatLieu: '', doDay: '', x: '0', y: '0', soLuong: 1, maKhach: '',
   loNho: 0, loLon: 0, soLoTappu: 0, soLoSara: 0,
   pitchiSoLan: 0, pitchiChieuDai: 0, pitchiGio: 0, loaiGiaCong: 'Pitchi', cuonGio: 0, vatMm: 0,
   be: [{ soDuong: 1, daiMm: 0, donGia: 0 }]
@@ -165,7 +165,7 @@ export default function CongCuTinhTienPage() {
     const updated = await fetch('/api/don-hang/' + donHang.id).then(r => r.json())
     setDonHang(updated)
     setEditingPanelId(null)
-    setPanel(emptyPanel(updated.maDon, updated.panels.length))
+    setPanel(emptyPanel(updated.maDon, updated.panels.length === 0 ? 1 : Math.max(...updated.panels.map((p:any) => { const n = parseInt(p.tenTam?.split('-').pop()); return isNaN(n) ? 0 : n })) + 1))
     setSaving(false)
   }
 
@@ -176,7 +176,7 @@ export default function CongCuTinhTienPage() {
     setDonHang(updated)
     if (editingPanelId === id) {
       setEditingPanelId(null)
-      setPanel(emptyPanel(updated.maDon, updated.panels.length))
+      setPanel(emptyPanel(updated.maDon, updated.panels.length === 0 ? 1 : Math.max(...updated.panels.map((p:any) => { const n = parseInt(p.tenTam?.split('-').pop()); return isNaN(n) ? 0 : n })) + 1))
     }
   }
   const fmt = (n: number) => Math.round(n).toLocaleString()

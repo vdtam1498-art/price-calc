@@ -326,6 +326,7 @@ export default function CongCuTinhTienPage() {
         gia1Tam: calcRes?.gia1Tam || 0,
         allIn: calcRes?.allIn || 0,
         pitchiGio: tienPitchi2, donGiaDatNgoai: 0,
+        donGiaVL: calcRes?.donGiaVLFinal || 0, klThucTe: calcRes?.klThucTe || 0,
       }
       await fetch('/api/panels', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
     }

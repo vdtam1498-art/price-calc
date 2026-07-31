@@ -343,9 +343,13 @@ export default function CaiDatPage() {
                             className="border rounded px-1.5 py-0.5 w-full text-xs" />
                         </td>
                       ))}
-                      <td className="py-1 pr-2"><input readOnly value={editingBG.donGia ? (editingBG.donGia*1.1).toFixed(1) : ''} className="border rounded px-1.5 py-0.5 w-full text-xs bg-green-50 text-green-600" /></td>
-                      <td className="py-1 pr-2"><input readOnly value={editingBG.donGia ? (editingBG.donGia*1.2).toFixed(1) : ''} className="border rounded px-1.5 py-0.5 w-full text-xs bg-orange-50 text-orange-500" /></td>
-                      <td className="py-1 pr-2"><input readOnly value={editingBG.donGia ? (editingBG.donGia*1.3).toFixed(1) : ''} className="border rounded px-1.5 py-0.5 w-full text-xs bg-red-50 text-red-500" /></td>
+                      {(() => { const g = tinhGia(editingBG.donGia); return (<>
+                        <td className="py-1 pr-2"><input readOnly value={g ? g.uuDai : ''} className="border rounded px-1.5 py-0.5 w-full text-xs bg-green-50 text-green-600" /></td>
+                        <td className="py-1 pr-2"><input readOnly value={g ? g.khongUuDaiSUS : ''} className="border rounded px-1.5 py-0.5 w-full text-xs bg-orange-50 text-orange-400" /></td>
+                        <td className="py-1 pr-2"><input readOnly value={g ? g.khongUuDaiSS : ''} className="border rounded px-1.5 py-0.5 w-full text-xs bg-orange-50 text-orange-600" /></td>
+                        <td className="py-1 pr-2"><input readOnly value={g ? g.datNgoaiSUS : ''} className="border rounded px-1.5 py-0.5 w-full text-xs bg-red-50 text-red-400" /></td>
+                        <td className="py-1 pr-2"><input readOnly value={g ? g.datNgoaiSS : ''} className="border rounded px-1.5 py-0.5 w-full text-xs bg-red-50 text-red-600" /></td>
+                      </>) })()}
                       {['giaUon','giaCat','giaMoLo','giaTappu','giaVat','tyTrong'].map(k => (
                         <td key={k} className="py-1 pr-2">
                           <input type="number" value={editingBG[k]}

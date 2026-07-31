@@ -179,7 +179,7 @@ export default function CongCuTinhTienPage() {
     if (!res.ok) return alert('Mã đơn đã tồn tại hoặc có lỗi!')
     const dh = await res.json()
     setDonHang(sortPanels(dh))
-    setPanel(emptyPanel(dh.maDon, 0))
+    setPanel(emptyPanel(dh.maDon, 1))
   }
 
   async function luuTam() {

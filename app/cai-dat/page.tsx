@@ -103,6 +103,7 @@ export default function CaiDatPage() {
 
   // Hệ số gia công editing
   const [editingGC, setEditingGC] = useState<any>(null)
+  const [editingCuon, setEditingCuon] = useState<any>(null)
 
   // Lock state cho 4 bảng hệ số
   const [locked, setLocked] = useState(true)
@@ -571,10 +572,26 @@ export default function CaiDatPage() {
                 <tbody>
                   {hesoCuon.map((r: any) => (
                     <tr key={r.id} className="border-b hover:bg-gray-50">
-                      <td className="px-3 py-1.5 font-mono text-blue-600">{r.heSo}</td>
-                      <td className="px-3 py-1.5 text-gray-500">{r.dieuKien}</td>
+                      <td className="px-3 py-1.5 font-mono text-blue-600">
+                        {!locked && editingCuon?.id === r.id
+                          ? <input type="number" value={editingCuon.heSo} onChange={e => setEditingCuon((p:any) => ({...p, heSo: Number(e.target.value)}))} className="border rounded px-1 py-0.5 w-16 text-xs" autoFocus />
+                          : r.heSo}
+                      </td>
+                      <td className="px-3 py-1.5 text-gray-500">
+                        {!locked && editingCuon?.id === r.id
+                          ? <input value={editingCuon.dieuKien} onChange={e => setEditingCuon((p:any) => ({...p, dieuKien: e.target.value}))} className="border rounded px-1 py-0.5 w-full text-xs" />
+                          : r.dieuKien}
+                      </td>
                       {!locked && <td className="px-3 py-1.5">
-                        <button onClick={() => crudHeSo('heso-cuon', setHesoCuon, 'delete', r.id)} className="text-red-400 hover:text-red-600">✕</button>
+                        {editingCuon?.id === r.id
+                          ? <div className="flex gap-1">
+                              <button onClick={() => { crudHeSo('heso-cuon', setHesoCuon, 'update', r.id, { heSo: editingCuon.heSo, dieuKien: editingCuon.dieuKien }); setEditingCuon(null) }} className="text-green-600 text-xs">✓</button>
+                              <button onClick={() => setEditingCuon(null)} className="text-gray-400 text-xs">✕</button>
+                            </div>
+                          : <div className="flex gap-1">
+                              <button onClick={() => setEditingCuon(r)} className="text-orange-400 hover:text-orange-600">✏️</button>
+                              <button onClick={() => crudHeSo('heso-cuon', setHesoCuon, 'delete', r.id)} className="text-red-400 hover:text-red-600">✕</button>
+                            </div>}
                       </td>}
                     </tr>
                   ))}

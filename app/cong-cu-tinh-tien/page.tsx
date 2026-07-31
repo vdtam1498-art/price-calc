@@ -805,7 +805,7 @@ export default function CongCuTinhTienPage() {
           <div className="space-y-1.5">
             <p><span className="text-red-600 font-bold">{congTy?.tiengNhat || donHang.tenCongTy}</span><span className="ml-1">&#40;&#x682a;&#41;&#12288;&#24481;&#20013;</span></p>
             <p>&#12356;&#12388;&#12418;&#12362;&#19990;&#35441;&#12395;&#12394;&#12387;&#12390;&#12362;&#12426;&#12414;&#12377;&#12290;</p>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between">
               <p>&#32435;&#26399;&#23455;&#20064;&#12288;
                 {tuVanNgay
                   ? <span className="ml-1">&#30456;&#35611;&#24517;&#35201;</span>
@@ -814,9 +814,9 @@ export default function CongCuTinhTienPage() {
                     &#12288;&#26085;&#12411;&#12393;</>
                 }
               </p>
-              <label className="flex items-center gap-1 text-xs text-gray-500 cursor-pointer">
+              <label className="flex items-center gap-1 text-xs text-gray-500 cursor-pointer ml-auto">
                 <input type="checkbox" checked={tuVanNgay} onChange={e => setTuVanNgay(e.target.checked)} className="accent-red-500" />
-                相談
+                Cần trao đổi thời gian giao
               </label>
             </div>
             <p>&#24403;&#22238;&#31572;&#37329;&#39069;&#12398;&#26377;&#21177;&#26399;&#38480;&#12399;2&#36913;&#38291;&#12414;&#12391;&#12392;&#12394;&#12426;&#12414;&#12377;&#12290;</p>

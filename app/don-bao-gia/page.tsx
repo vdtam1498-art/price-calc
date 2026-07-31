@@ -48,7 +48,7 @@ export default function DonBaoGiaPage() {
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Danh sách đơn */}
-      <div className="w-72 border-r bg-white flex flex-col">
+      <div className="w-80 border-r bg-white flex flex-col">
         <div className="p-3 border-b">
           <h2 className="font-bold text-gray-800 mb-2">📄 Đơn báo giá</h2>
           <input value={search} onChange={e => setSearch(e.target.value)}

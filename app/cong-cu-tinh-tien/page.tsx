@@ -25,6 +25,7 @@ export default function CongCuTinhTienPage() {
   const skipDatNgoaiDetect = React.useRef(false)
   const [showModalDatNgoai, setShowModalDatNgoai] = useState(false)
   const [inputDatNgoai, setInputDatNgoai] = useState('')
+  const [importing, setImporting] = useState(false)
   const [saving, setSaving] = useState(false)
   const [hesoGiaVL, setHesoGiaVL] = useState<any[]>([])
   const [hesoPitchiDB, setHesoPitchiDB] = useState<any[]>([])
@@ -193,6 +194,58 @@ export default function CongCuTinhTienPage() {
     setEditingPanelId(null)
     setPanel(emptyPanel(updated.maDon, updated.panels.length === 0 ? 1 : Math.max(...updated.panels.map((p:any) => { const n = parseInt(p.tenTam?.split('-').pop()); return isNaN(n) ? 0 : n })) + 1))
     setSaving(false)
+  }
+
+  function downloadTemplate() {
+    const headers = ['Tên tấm','Vật liệu','Độ dày','X (mm)','Y (mm)','Số lượng','Lỗ nhỏ','Lỗ lớn','Lỗ Tappu','Lỗ Sara','Pitchi - Số lần','Pitchi - Chiều dài (mm)','Loại gia công','Có cuộn (1/0)','Vát (mm)','Bẻ1 - Số đường','Bẻ1 - Dài (mm)','Bẻ2 - Số đường','Bẻ2 - Dài (mm)','Bẻ3 - Số đường','Bẻ3 - Dài (mm)']
+    const example = [donHang?.maDon+'-1','SPCC','1.2','500','300','1','0','0','0','0','0','0','Pitchi','0','0','1','500','0','0','0','0']
+    const csv = [headers.join(','), example.join(',')].join('
+')
+    const blob = new Blob(['﻿'+csv], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a'); a.href = url
+    a.download = 'template_nhap_tam.csv'; a.click()
+  }
+
+  async function handleImportExcel(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]; if (!file || !donHang) return
+    setImporting(true)
+    const XLSX = await import('xlsx')
+    const buf = await file.arrayBuffer()
+    const wb = XLSX.read(buf)
+    const ws = wb.Sheets[wb.SheetNames[0]]
+    const raw: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1 })
+    const rows = raw.slice(1).filter(r => r[0])
+    for (const r of rows) {
+      const beArr = []
+      for (let i = 15; i < r.length; i += 2) {
+        const soDuong = Number(r[i]) || 0
+        const daiMm = Number(r[i+1]) || 0
+        if (soDuong > 0 || daiMm > 0) beArr.push({ soDuong, daiMm, donGia: 0 })
+      }
+      if (beArr.length === 0) beArr.push({ soDuong: 1, daiMm: 0, donGia: 0 })
+      const body = {
+        donHangId: donHang.id,
+        tenTam: String(r[0] || ''),
+        vatLieu: String(r[1] || ''), doDay: Number(r[2]) || 0,
+        x: Number(r[3]) || 0, y: Number(r[4]) || 0, soLuong: Number(r[5]) || 1,
+        maKhach: '', loNho: Number(r[6]) || 0, loLon: Number(r[7]) || 0,
+        soLoTappu: Number(r[8]) || 0, soLoSara: Number(r[9]) || 0,
+        pitchiSoLan: Number(r[10]) || 0, pitchiChieuDai: Number(r[11]) || 0,
+        loaiGiaCong: String(r[12] || 'Pitchi'),
+        cuonGio: Number(r[13]) || 0, vatMm: Number(r[14]) || 0,
+        be: beArr,
+        giaVL: 0, giaCat: 0, giaCong: 0, gia1Tam: 0, allIn: 0,
+        pitchiGio: 0, donGiaDatNgoai: 0,
+      }
+      await fetch('/api/panels', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+    }
+    const updated = await fetch('/api/don-hang/' + donHang.id).then(r => r.json())
+    setDonHang(updated)
+    setPanel(emptyPanel(updated.maDon, updated.panels.length === 0 ? 1 : Math.max(...updated.panels.map((p:any) => { const n = parseInt(p.tenTam?.split('-').pop()); return isNaN(n) ? 0 : n })) + 1))
+    setImporting(false)
+    e.target.value = ''
+    alert('Import xong ' + rows.length + ' tấm!')
   }
 
   async function xoaTam(id: number) {
@@ -367,7 +420,11 @@ export default function CongCuTinhTienPage() {
               setDonHang(null)
             }} className="border bg-white text-red-500 border-red-200 px-3 py-1.5 rounded-lg text-xs hover:bg-red-50">✕ Huỷ đơn</button>
             <button onClick={() => setDonHang(null)} className="border bg-white px-3 py-1.5 rounded-lg text-xs hover:bg-gray-50">🗂 Lưu đơn hàng</button>
-            <button className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-blue-700">↓ Xuất Sheet</button>
+            <button onClick={downloadTemplate} className="border bg-white text-blue-600 border-blue-200 px-3 py-1.5 rounded-lg text-xs hover:bg-blue-50">📋 Tải template</button>
+            <label className={`text-xs px-3 py-1.5 rounded-lg cursor-pointer border ${importing ? 'bg-gray-100 text-gray-400 border-gray-200' : 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700'}`}>
+              {importing ? '⏳ Đang import...' : '↑ Import Excel'}
+              <input type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleImportExcel} disabled={importing} />
+            </label>
           </div>
         </div>
 

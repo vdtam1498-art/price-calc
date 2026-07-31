@@ -21,6 +21,12 @@ export default function DonBaoGiaPage() {
     (d.tenCongTy || '').toLowerCase().includes(search.toLowerCase())
   )
 
+  async function xoaDon(id: number, maDon: string) {
+    if (!confirm('Xoá đơn ' + maDon + '? Thao tác này không thể hoàn tác.')) return
+    await fetch('/api/don-hang/' + id, { method: 'DELETE' })
+    setDonHangs(prev => prev.filter(d => d.id !== id))
+    if (selected?.id === id) setSelected(null)
+  }
   const fmt = (n: number) => Math.round(n).toLocaleString()
 
   function exportCSV(dh: any) {

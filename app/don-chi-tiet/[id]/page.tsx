@@ -59,8 +59,8 @@ export default function DonChiTietPage() {
             ))}
           </div>
           <div className="grid grid-cols-4 gap-2">
-            {[['Đơn giá VL (¥/KG)', p.donGiaDatNgoai > 0 ? p.donGiaDatNgoai+' ¥/kg' : '—', inpRo],
-              ['KL thực tế (KG)', '—', inpGreen],
+            {[['Đơn giá VL (¥/KG)', p.donGiaVL > 0 ? p.donGiaVL.toFixed(1)+' ¥/kg' : '—', inpRo],
+              ['KL thực tế (KG)', p.klThucTe > 0 ? p.klThucTe.toFixed(3)+' kg' : '—', inpGreen],
               ['Tiền vật liệu', '¥'+fmt(p.giaVL), inpGreen],
               ['Giá cắt laser', '¥'+fmt(p.giaCat), inpGreen],
             ].map(([label, val, cls]) => (

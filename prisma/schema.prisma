@@ -68,6 +68,8 @@ model Panel {
   pitchiChieuDai Float   @default(0)
   loaiGiaCong   String   @default("Pitchi")
   donGiaDatNgoai Float  @default(0)
+  donGiaVL       Float  @default(0)
+  klThucTe       Float  @default(0)
   cuonGio       Float    @default(0)
   vatMm         Float    @default(0)
   giaVL         Float    @default(0)

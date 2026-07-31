@@ -194,7 +194,7 @@ export default function CongCuTinhTienPage() {
         soLoTappu: Number(panel.soLoTappu), soLoSara: Number(panel.soLoSara),
         be: panel.be, pitchiSoLan: Number(panel.pitchiSoLan), pitchiChieuDai: Number(panel.pitchiChieuDai), loaiGiaCong: panel.loaiGiaCong || 'Pitchi', pitchiGio: pitchiResult ? pitchiResult.thanhTien : 0, cuonGio: Number(panel.cuonGio), donGiaDatNgoai: donGiaDatNgoai || 0,
         vatMm: Number(panel.vatMm),
-        giaVL: result.tienVL, giaCat: result.tienCatLaser,
+        giaVL: result.tienVL, giaCat: result.tienCatLaser, donGiaVL: result.donGiaVLFinal || 0, klThucTe: result.klThucTe || 0,
         giaCong: result.tongGiaCong, gia1Tam: result.gia1Tam, allIn: result.allIn,
     })
     if (editingPanelId) {

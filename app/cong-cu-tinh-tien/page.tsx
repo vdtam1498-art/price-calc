@@ -1,5 +1,6 @@
 'use client'
 import React, { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { calculatePanel } from '@/lib/calculate'
 
 
@@ -13,6 +14,7 @@ const emptyPanel = (maDon?: string, nextNum?: number) => ({
 
 export default function CongCuTinhTienPage() {
   const [donHang, setDonHang] = useState<any>(null)
+  const searchParams = useSearchParams()
   const [bangGia, setBangGia] = useState<any[]>([])
   const [congTyList, setCongTyList] = useState<any[]>([])
   const [form, setForm] = useState({ maDon: '', tenCongTy: '', ghiChu: '', loaiDon: 'bao_gia' })
@@ -31,6 +33,15 @@ export default function CongCuTinhTienPage() {
   const [hesoPitchiDB, setHesoPitchiDB] = useState<any[]>([])
   const [hesoGiaCongDB, setHesoGiaCongDB] = useState<any[]>([])
   const [hesoCuonDB, setHesoCuonDB] = useState<any[]>([])
+
+  useEffect(() => {
+    const donId = searchParams.get('donId')
+    if (donId) {
+      fetch('/api/don-hang/' + donId).then(r => r.json()).then(dh => {
+        if (dh?.id) setDonHang(dh)
+      })
+    }
+  }, [searchParams])
 
   useEffect(() => {
     fetch('/api/bang-gia').then(r => r.json()).then(setBangGia)

@@ -1,8 +1,10 @@
 'use client'
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 export default function DonBaoGiaPage() {
   const [donHangs, setDonHangs] = useState<any[]>([])
+  const router = useRouter()
   const [selected, setSelected] = useState<any>(null)
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
@@ -68,8 +70,12 @@ export default function DonBaoGiaPage() {
               <p className="text-xs text-gray-500 cursor-pointer" onClick={() => setSelected(d)}>{d.tenCongTy || '—'}</p>
               <div className="flex justify-between items-center mt-1">
                 <p className="text-xs text-gray-400 cursor-pointer" onClick={() => setSelected(d)}>{new Date(d.ngayTao).toLocaleDateString('vi-VN')} · {d.panels.length} tấm</p>
-                <button onClick={e => { e.stopPropagation(); xoaDon(d.id, d.maDon) }}
-                  className="text-xs text-red-400 hover:text-red-600 border border-red-200 rounded px-1.5 py-0.5 hover:bg-red-50">✕ Xoá</button>
+                <div className="flex gap-1">
+                  <button onClick={e => { e.stopPropagation(); router.push('/cong-cu-tinh-tien?donId=' + d.id) }}
+                    className="text-xs text-blue-400 hover:text-blue-600 border border-blue-200 rounded px-1.5 py-0.5 hover:bg-blue-50">✏️ Sửa</button>
+                  <button onClick={e => { e.stopPropagation(); xoaDon(d.id, d.maDon) }}
+                    className="text-xs text-red-400 hover:text-red-600 border border-red-200 rounded px-1.5 py-0.5 hover:bg-red-50">✕ Xoá</button>
+                </div>
               </div>
             </div>
           ))}

@@ -41,6 +41,7 @@ model DonHang {
   maDon      String   @unique
   tenCongTy  String   @default("")
   ghiChu     String   @default("")
+  loaiDon    String   @default("bao_gia")
   ngayTao    DateTime @default(now())
   tongTien   Float    @default(0)
   panels     Panel[]

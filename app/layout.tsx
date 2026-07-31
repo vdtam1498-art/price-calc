@@ -6,6 +6,7 @@ import Sidebar from '@/components/layout/Sidebar'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
+  icons: { icon: '/logo.png', apple: '/logo.png' },
   title: 'OHTA Price Calculator',
   description: 'OFT by OHTA - Công cụ tính giá tấm kim loại',
 }

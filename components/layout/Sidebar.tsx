@@ -57,13 +57,8 @@ export default function Sidebar() {
       {/* Logo */}
       <div className="p-4 border-b border-white/10">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center font-bold">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-              <rect x="3" y="3" width="7" height="7" rx="1"/>
-              <rect x="14" y="3" width="7" height="7" rx="1"/>
-              <rect x="3" y="14" width="7" height="7" rx="1"/>
-              <rect x="14" y="14" width="7" height="7" rx="1"/>
-            </svg>
+          <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-white">
+            <img src="/logo.png" alt="OHTA Logo" className="w-7 h-7 object-contain" />
           </div>
           <div>
             <div className="font-bold text-sm">OHTA</div>

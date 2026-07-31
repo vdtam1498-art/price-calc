@@ -822,11 +822,8 @@ export default function CongCuTinhTienPage() {
         </div>
 
         {/* Dau bao gia */}
-        <div id="dau-bao-gia" className="bg-white rounded-xl shadow-sm border p-4 text-sm font-medium relative">
-          <button onClick={copyDauBaoGia} disabled={copyingImg}
-            className="absolute top-3 right-3 text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 disabled:opacity-50">
-            {copyingImg ? '⏳' : '📋 Copy ảnh'}
-          </button>
+        <div className="flex items-start gap-3">
+        <div id="dau-bao-gia" className="bg-white rounded-xl shadow-sm border p-4 text-sm font-medium w-1/2">
           <div className="space-y-2 text-[15px] leading-relaxed">
             <p><span className="text-red-600 font-bold">{congTy?.tiengNhat || donHang.tenCongTy}</span><span className="ml-1">&#40;&#x682a;&#41;&#12288;&#24481;&#20013;</span></p>
             <p>&#12356;&#12388;&#12418;&#12362;&#19990;&#35441;&#12395;&#12394;&#12387;&#12390;&#12362;&#12426;&#12414;&#12377;&#12290;</p>
@@ -839,10 +836,7 @@ export default function CongCuTinhTienPage() {
                     &#12288;&#26085;&#12411;&#12393;</>
                 }
               </p>
-              <label className="flex items-center gap-1 text-xs text-gray-500 cursor-pointer ml-auto">
-                <input type="checkbox" checked={tuVanNgay} onChange={e => setTuVanNgay(e.target.checked)} className="accent-red-500" />
-                Cần trao đổi thời gian giao
-              </label>
+
             </div>
             <p>&#24403;&#22238;&#31572;&#37329;&#39069;&#12398;&#26377;&#21177;&#26399;&#38480;&#12399;2&#36913;&#38291;&#12414;&#12391;&#12392;&#12394;&#12426;&#12414;&#12377;&#12290;</p>
             <p>&#12362;&#21839;&#12356;&#21512;&#12431;&#12379;&#12289;&#12372;&#27880;&#25991;&#12398;&#38555;&#12395;&#12399;&#19979;&#35352;&#30058;&#21495;&#12434;&#12362;&#30693;&#12425;&#12379;&#12367;&#12384;&#12373;&#12356;&#12290;</p>
@@ -853,6 +847,17 @@ export default function CongCuTinhTienPage() {
               ))}
             </div>
           </div>
+        </div>
+        <div className="flex flex-col gap-2 pt-1">
+          <button onClick={copyDauBaoGia} disabled={copyingImg}
+            className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 disabled:opacity-50 whitespace-nowrap">
+            {copyingImg ? '⏳' : '📋 Copy ảnh'}
+          </button>
+          <label className="flex items-center gap-1 text-xs text-gray-500 cursor-pointer whitespace-nowrap">
+            <input type="checkbox" checked={tuVanNgay} onChange={e => setTuVanNgay(e.target.checked)} className="accent-red-500" />
+            Cần trao đổi thời gian giao
+          </label>
+        </div>
         </div>
       </div>
 

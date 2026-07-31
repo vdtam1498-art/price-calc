@@ -801,8 +801,8 @@ export default function CongCuTinhTienPage() {
         </div>
 
         {/* Dau bao gia */}
-        <div className="bg-white rounded-xl shadow-sm border p-4 text-sm">
-          <div className="space-y-1.5">
+        <div className="bg-white rounded-xl shadow-sm border p-4 text-sm font-medium">
+          <div className="space-y-2 text-[15px] leading-relaxed">
             <p><span className="text-red-600 font-bold">{congTy?.tiengNhat || donHang.tenCongTy}</span><span className="ml-1">&#40;&#x682a;&#41;&#12288;&#24481;&#20013;</span></p>
             <p>&#12356;&#12388;&#12418;&#12362;&#19990;&#35441;&#12395;&#12394;&#12387;&#12390;&#12362;&#12426;&#12414;&#12377;&#12290;</p>
             <div className="flex items-center justify-between">

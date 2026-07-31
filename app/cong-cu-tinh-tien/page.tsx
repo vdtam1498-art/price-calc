@@ -15,7 +15,7 @@ export default function CongCuTinhTienPage() {
   const [donHang, setDonHang] = useState<any>(null)
   const [bangGia, setBangGia] = useState<any[]>([])
   const [congTyList, setCongTyList] = useState<any[]>([])
-  const [form, setForm] = useState({ maDon: '', tenCongTy: '', ghiChu: '' })
+  const [form, setForm] = useState({ maDon: '', tenCongTy: '', ghiChu: '', loaiDon: 'bao_gia' })
   const [showCTDropdown, setShowCTDropdown] = useState(false)
   const [panel, setPanel] = useState<any>(emptyPanel())
   const [result, setResult] = useState<any>(null)

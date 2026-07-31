@@ -8,7 +8,7 @@ export default function DonBaoGiaPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/don-hang')
+    fetch('/api/don-hang?loaiDon=bao_gia')
       .then(r => r.json())
       .then(data => { setDonHangs(data); setLoading(false) })
   }, [])

@@ -32,13 +32,22 @@ export default function DonBaoGiaPage() {
   const fmt = (n: number) => Math.round(n).toLocaleString()
 
   function exportCSV(dh: any) {
-    const header = ['Tên tấm','SL','Vật liệu','Dày(mm)','X(mm)','Y(mm)','Giá VL','Giá cắt','Gia công','Giá 1 tấm','ALL-IN']
-    const rows = dh.panels.map((p: any) => [
-      p.tenTam, p.soLuong, p.vatLieu, p.doDay, p.x, p.y,
-      Math.round(p.giaVL), Math.round(p.giaCat), Math.round(p.giaCong),
-      Math.round(p.gia1Tam), Math.round(p.allIn)
-    ])
-    const csv = [header, ...rows, ['','','','','','','','','Tổng cộng','', Math.round(dh.panels.reduce((s:number,p:any)=>s+p.allIn,0))]].map(r => r.join(',')).join('\n')
+    const header = ['エクスポート用','数量','材質','板厚','noと安全','曲げ','X','Y','','単価']
+    const rows = dh.panels.map((p: any) => {
+      const hasCuon = p.cuonGio > 0
+      const hasPitchi = (p.pitchiGio || 0) > 0
+      const hasUon = p.be && p.be.some((b:any) => b.daiMm > 0)
+      const hasTappu = p.soLoTappu > 0
+      const hasSara = p.soLoSara > 0
+      const gcList = []
+      if (hasCuon) gcList.push('r')
+      if (hasPitchi || hasUon) gcList.push('m')
+      if (hasTappu) gcList.push('t')
+      if (hasSara) gcList.push('s')
+      const gcStr = gcList.length >= 2 ? '*' : gcList.join('')
+      return [p.tenTam, p.soLuong, p.vatLieu, p.doDay, dh.maDon + '-', gcStr, p.x, p.y, '', Math.round(p.gia1Tam)]
+    })
+    const csv = [header, ...rows].map(r => r.join(',')).join('\n')
     const blob = new Blob(['\uFEFF'+csv], { type: 'text/csv;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a'); a.href = url

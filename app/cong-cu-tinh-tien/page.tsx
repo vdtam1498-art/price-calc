@@ -267,7 +267,14 @@ export default function CongCuTinhTienPage() {
               <div className="flex items-center gap-1">
                 <span className="text-xs text-gray-700 font-medium">{donHang.tenCongTy}</span>
                 {congTy?.tiengNhat && <span className="text-xs text-gray-400">({congTy.tiengNhat})</span>}
-                {congTy?.isUuDai && <span className="bg-green-100 text-green-700 text-xs px-1.5 py-0.5 rounded">Ưu đãi</span>}
+                {congTy?.isUuDai && (() => {
+                  const isSUS = panel.vatLieu.toUpperCase().includes('SUS')
+                  const isHanwa = (donHang.tenCongTy || '').toLowerCase().startsWith('hanwa')
+                  return <>
+                    <span className="bg-green-100 text-green-700 text-xs px-1.5 py-0.5 rounded">Ưu đãi</span>
+                    {isSUS && !isHanwa && <span className="bg-orange-100 text-orange-600 text-xs px-1.5 py-0.5 rounded">Không ưu đãi SUS</span>}
+                  </>
+                })()}
               </div>
             </>}
           </div>

@@ -27,6 +27,7 @@ export default function CongCuTinhTienPage() {
   const [inputDatNgoai, setInputDatNgoai] = useState('')
   const [importing, setImporting] = useState(false)
   const [ngayGiao, setNgayGiao] = useState('3-4')
+  const [tuVanNgay, setTuVanNgay] = useState(false)
   const [showModalHuy, setShowModalHuy] = useState(false)
   const [xoaTamId, setXoaTamId] = useState<number|null>(null)
   const [importResult, setImportResult] = useState<number|null>(null)
@@ -804,11 +805,20 @@ export default function CongCuTinhTienPage() {
           <div className="space-y-1.5">
             <p><span className="text-red-600 font-bold">{congTy?.tiengNhat || donHang.tenCongTy}</span><span className="ml-1">&#40;&#x682a;&#41;&#12288;&#24481;&#20013;</span></p>
             <p>&#12356;&#12388;&#12418;&#12362;&#19990;&#35441;&#12395;&#12394;&#12387;&#12390;&#12362;&#12426;&#12414;&#12377;&#12290;</p>
-            <p>&#32435;&#26399;&#23455;&#20064;&#12288;
-              <input value={ngayGiao} onChange={e => setNgayGiao(e.target.value)}
-                className="border-b border-gray-400 outline-none w-12 text-center text-sm bg-transparent mx-1" />
-              &#12288;&#26085;&#12411;&#12393;
-            </p>
+            <div className="flex items-center gap-2">
+              <p>&#32435;&#26399;&#23455;&#20064;&#12288;
+                {tuVanNgay
+                  ? <span className="ml-1">&#30456;&#35611;&#24517;&#35201;</span>
+                  : <><input value={ngayGiao} onChange={e => setNgayGiao(e.target.value)}
+                      className="border-b border-gray-400 outline-none w-12 text-center text-sm bg-transparent mx-1" />
+                    &#12288;&#26085;&#12411;&#12393;</>
+                }
+              </p>
+              <label className="flex items-center gap-1 text-xs text-gray-500 cursor-pointer">
+                <input type="checkbox" checked={tuVanNgay} onChange={e => setTuVanNgay(e.target.checked)} className="accent-red-500" />
+                相談
+              </label>
+            </div>
             <p>&#24403;&#22238;&#31572;&#37329;&#39069;&#12398;&#26377;&#21177;&#26399;&#38480;&#12399;2&#36913;&#38291;&#12414;&#12391;&#12392;&#12394;&#12426;&#12414;&#12377;&#12290;</p>
             <p>&#12362;&#21839;&#12356;&#21512;&#12431;&#12379;&#12289;&#12372;&#27880;&#25991;&#12398;&#38555;&#12395;&#12399;&#19979;&#35352;&#30058;&#21495;&#12434;&#12362;&#30693;&#12425;&#12379;&#12367;&#12384;&#12373;&#12356;&#12290;</p>
             <p className="mt-3">&#12300;&#12458;&#12458;&#12479;&#35211;&#31296;&#12418;&#12426;No.&#12288;&#12301;&#12288;<span className="text-red-600 font-bold text-base">{donHang.maDon}</span></p>

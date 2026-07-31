@@ -28,6 +28,7 @@ export default function CongCuTinhTienPage() {
   const [importing, setImporting] = useState(false)
   const [ngayGiao, setNgayGiao] = useState('3-4')
   const [tuVanNgay, setTuVanNgay] = useState(false)
+  const [copyingImg, setCopyingImg] = useState(false)
   const [showModalHuy, setShowModalHuy] = useState(false)
   const [xoaTamId, setXoaTamId] = useState<number|null>(null)
   const [importResult, setImportResult] = useState<number|null>(null)
@@ -348,6 +349,26 @@ export default function CongCuTinhTienPage() {
       setEditingPanelId(null)
       setPanel(emptyPanel(updated.maDon, updated.panels.length === 0 ? 1 : Math.max(...updated.panels.map((p:any) => { const n = parseInt(p.tenTam?.split('-').pop()); return isNaN(n) ? 0 : n })) + 1))
     }
+  }
+  async function copyDauBaoGia() {
+    const el = document.getElementById('dau-bao-gia')
+    if (!el) return
+    setCopyingImg(true)
+    try {
+      const h2c = (await import('html2canvas')).default
+      const canvas = await h2c(el, { scale: 3, backgroundColor: '#ffffff', useCORS: true })
+      canvas.toBlob(async (blob) => {
+        if (!blob) return
+        try {
+          await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+        } catch {
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a'); a.href = url
+          a.download = 'dau-bao-gia.png'; a.click()
+        }
+        setCopyingImg(false)
+      }, 'image/png')
+    } catch { setCopyingImg(false) }
   }
   function copyTam(p: any, donHang: any) {
     const gia1Tam = Math.round(p.gia1Tam)
@@ -801,7 +822,11 @@ export default function CongCuTinhTienPage() {
         </div>
 
         {/* Dau bao gia */}
-        <div className="bg-white rounded-xl shadow-sm border p-4 text-sm font-medium">
+        <div id="dau-bao-gia" className="bg-white rounded-xl shadow-sm border p-4 text-sm font-medium relative">
+          <button onClick={copyDauBaoGia} disabled={copyingImg}
+            className="absolute top-3 right-3 text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 disabled:opacity-50">
+            {copyingImg ? '⏳' : '📋 Copy ảnh'}
+          </button>
           <div className="space-y-2 text-[15px] leading-relaxed">
             <p><span className="text-red-600 font-bold">{congTy?.tiengNhat || donHang.tenCongTy}</span><span className="ml-1">&#40;&#x682a;&#41;&#12288;&#24481;&#20013;</span></p>
             <p>&#12356;&#12388;&#12418;&#12362;&#19990;&#35441;&#12395;&#12394;&#12387;&#12390;&#12362;&#12426;&#12414;&#12377;&#12290;</p>

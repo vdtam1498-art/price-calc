@@ -12,6 +12,7 @@
     "@auth/prisma-adapter": "^2.11.3",
     "@prisma/client": "^5.22.0",
     "@types/pg": "^8.20.0",
+    "html2canvas": "^1.4.1",
     "next": "14.2.35",
     "next-auth": "^4.24.15",
     "pg": "^8.22.0",

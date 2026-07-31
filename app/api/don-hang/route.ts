@@ -17,8 +17,6 @@ export async function GET(req: NextRequest) {
   if (tuNgay) where.ngayTao = { ...where.ngayTao, gte: new Date(tuNgay) }
   if (denNgay) where.ngayTao = { ...where.ngayTao, lte: new Date(denNgay) }
 
-  const { loaiDon: filterLoai } = Object.fromEntries(new URL(req.url).searchParams)
-  if (filterLoai) where.loaiDon = filterLoai
   const donHangs = await prisma.donHang.findMany({
     where,
     include: { panels: true },

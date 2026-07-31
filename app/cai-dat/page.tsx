@@ -529,19 +529,23 @@ export default function CaiDatPage() {
         <div className="border rounded-lg overflow-hidden">
           <table className="w-full text-xs">
             <thead className="sticky top-0 bg-white z-10"><tr className="bg-gray-50 border-b">
-              {hesoGiaCong.map((r: any) => <th key={r.id} className="px-4 py-2 text-left text-gray-500">{r.tenLoai}</th>)}
+              <th className="px-4 py-2 text-left text-gray-500">Loại gia công</th>
+              <th className="px-4 py-2 text-left text-gray-500">Hệ số</th>
             </tr></thead>
-            <tbody><tr className="hover:bg-gray-50">
+            <tbody>
               {hesoGiaCong.map((r: any) => (
-                <td key={r.id} className="px-4 py-2">
-                  {!locked && editingGC === r.id
-                    ? <input type="number" defaultValue={r.heSo}
-                        onBlur={e => { crudHeSo('heso-gia-cong', setHesoGiaCong, 'update', r.id, { heSo: Number(e.target.value) }); setEditingGC(null) }}
-                        className="border rounded px-1 py-0.5 w-16 text-xs" autoFocus />
-                    : <span className="font-mono text-blue-600 cursor-pointer" onClick={() => !locked && setEditingGC(r.id)}>{r.heSo}{!locked && ' ✏️'}</span>}
-                </td>
+                <tr key={r.id} className="border-b hover:bg-gray-50">
+                  <td className="px-4 py-2 font-medium">{r.tenLoai}</td>
+                  <td className="px-4 py-2">
+                    {!locked && editingGC === r.id
+                      ? <input type="number" defaultValue={r.heSo}
+                          onBlur={e => { crudHeSo('heso-gia-cong', setHesoGiaCong, 'update', r.id, { heSo: Number(e.target.value) }); setEditingGC(null) }}
+                          className="border rounded px-1 py-0.5 w-16 text-xs" autoFocus />
+                      : <span className="font-mono text-blue-600 cursor-pointer" onClick={() => !locked && setEditingGC(r.id)}>{r.heSo}{!locked && ' ✏️'}</span>}
+                  </td>
+                </tr>
               ))}
-            </tr></tbody>
+            </tbody>
           </table>
         </div>
       </div>
@@ -560,7 +564,6 @@ export default function CaiDatPage() {
           : <div className="border rounded-lg overflow-hidden">
               <table className="w-full text-xs">
                 <thead className="sticky top-0 bg-white z-10"><tr className="bg-gray-50 border-b">
-                  <th className="px-3 py-2 text-left text-gray-400">Loại</th>
                   <th className="px-3 py-2 text-left text-gray-400">Hệ số</th>
                   <th className="px-3 py-2 text-left text-gray-400">Điều kiện</th>
                   {!locked && <th className="px-3 py-2"></th>}
@@ -568,7 +571,6 @@ export default function CaiDatPage() {
                 <tbody>
                   {hesoCuon.map((r: any) => (
                     <tr key={r.id} className="border-b hover:bg-gray-50">
-                      <td className="px-3 py-1.5 font-medium">{r.tenLoai}</td>
                       <td className="px-3 py-1.5 font-mono text-blue-600">{r.heSo}</td>
                       <td className="px-3 py-1.5 text-gray-500">{r.dieuKien}</td>
                       {!locked && <td className="px-3 py-1.5">

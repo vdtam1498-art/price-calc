@@ -521,7 +521,7 @@ export default function CaiDatPage() {
         onDelete={(id: number) => crudHeSo('heso-pitchi', setHesoPitchi, 'delete', id)} />
 
       {/* Hệ số gia công + Cuộn */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-4 items-start">
       <div className="bg-white rounded-xl shadow p-5">
         <div className="flex justify-between items-center mb-3">
           <h2 className="font-semibold text-gray-800 text-sm">Bảng hệ số gia công</h2>
@@ -581,6 +581,7 @@ export default function CaiDatPage() {
                 </tbody>
               </table>
             </div>}
+      </div>
       </div>
     </div>
   )

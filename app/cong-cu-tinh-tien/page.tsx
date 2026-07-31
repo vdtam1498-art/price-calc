@@ -26,6 +26,9 @@ export default function CongCuTinhTienPage() {
   const [showModalDatNgoai, setShowModalDatNgoai] = useState(false)
   const [inputDatNgoai, setInputDatNgoai] = useState('')
   const [importing, setImporting] = useState(false)
+  const [showModalHuy, setShowModalHuy] = useState(false)
+  const [xoaTamId, setXoaTamId] = useState<number|null>(null)
+  const [importResult, setImportResult] = useState<number|null>(null)
   const [saving, setSaving] = useState(false)
   const [hesoGiaVL, setHesoGiaVL] = useState<any[]>([])
   const [hesoPitchiDB, setHesoPitchiDB] = useState<any[]>([])
@@ -331,11 +334,10 @@ export default function CongCuTinhTienPage() {
     setPanel(emptyPanel(updated.maDon, updated.panels.length === 0 ? 1 : Math.max(...updated.panels.map((p:any) => { const n = parseInt(p.tenTam?.split('-').pop()); return isNaN(n) ? 0 : n })) + 1))
     setImporting(false)
     e.target.value = ''
-    alert('Import xong ' + rows.length + ' tấm!')
+    setImportResult(rows.length)
   }
 
   async function xoaTam(id: number) {
-    if (!confirm('Xoá tấm này?')) return
     await fetch('/api/panels/' + id, { method: 'DELETE' })
     const updated = await fetch('/api/don-hang/' + donHang.id).then(r => r.json())
     setDonHang(sortPanels(updated))
@@ -515,13 +517,8 @@ export default function CongCuTinhTienPage() {
             </>}
           </div>
           <div className="flex gap-2">
-            <button onClick={async () => {
-              if (donHang.panels.length > 0) {
-                if (!confirm('Đơn đã có ' + donHang.panels.length + ' tấm. Huỷ sẽ xoá toàn bộ. Tiếp tục?')) return
-              }
-              await fetch('/api/don-hang/' + donHang.id, { method: 'DELETE' })
-              setDonHang(null)
-            }} className="border bg-white text-red-500 border-red-200 px-3 py-1.5 rounded-lg text-xs hover:bg-red-50">✕ Huỷ đơn</button>
+            <button onClick={() => setShowModalHuy(true)}
+              className="border bg-white text-red-500 border-red-200 px-3 py-1.5 rounded-lg text-xs hover:bg-red-50">✕ Huỷ đơn</button>
             <button onClick={() => setDonHang(null)} className="border bg-white px-3 py-1.5 rounded-lg text-xs hover:bg-gray-50">🗂 Lưu đơn hàng</button>
             <button onClick={downloadTemplate} className="border bg-white text-blue-600 border-blue-200 px-3 py-1.5 rounded-lg text-xs hover:bg-blue-50">📋 Tải template</button>
             <label className={`text-xs px-3 py-1.5 rounded-lg cursor-pointer border ${importing ? 'bg-gray-100 text-gray-400 border-gray-200' : 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700'}`}>
@@ -810,7 +807,7 @@ export default function CongCuTinhTienPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-mono text-red-500 font-semibold">¥{fmt(p.allIn)}</span>
-                    <button onClick={e => { e.stopPropagation(); xoaTam(p.id) }}
+                    <button onClick={e => { e.stopPropagation(); setXoaTamId(p.id) }}
                       className="text-gray-300 hover:text-red-500 transition-colors text-sm leading-none">✕</button>
                   </div>
                 </div>
@@ -819,6 +816,80 @@ export default function CongCuTinhTienPage() {
           )}
         </div>
 
+        {/* Modal Import thành công */}
+        {importResult !== null && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6 text-center">
+              <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2">
+                  <polyline points="20,6 9,17 4,12"/>
+                </svg>
+              </div>
+              <p className="font-bold text-gray-800 text-lg mb-1">Import thành công!</p>
+              <p className="text-sm text-gray-500 mb-5">Đã nhập <span className="font-bold text-green-600">{importResult} tấm</span> vào đơn hàng</p>
+              <button onClick={() => setImportResult(null)}
+                className="w-full py-2 rounded-lg bg-green-600 text-white text-sm font-medium hover:bg-green-700">
+                OK
+              </button>
+            </div>
+          </div>
+        )}
+        {/* Modal Xoá tấm */}
+        {xoaTamId && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2">
+                    <polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14H6L5,6"/>
+                    <path d="M10,11v6"/><path d="M14,11v6"/><path d="M9,6V4h6v2"/>
+                  </svg>
+                </div>
+                <div>
+                  <p className="font-bold text-gray-800">Xoá tấm này?</p>
+                  <p className="text-xs text-gray-400 mt-0.5">Thao tác không thể hoàn tác</p>
+                </div>
+              </div>
+              <div className="flex gap-2 justify-end">
+                <button onClick={() => setXoaTamId(null)}
+                  className="px-4 py-2 rounded-lg border text-xs text-gray-600 hover:bg-gray-50">Giữ lại</button>
+                <button onClick={async () => {
+                  const id = xoaTamId
+                  setXoaTamId(null)
+                  await xoaTam(id)
+                }} className="px-4 py-2 rounded-lg bg-red-500 text-white text-xs hover:bg-red-600">Xoá tấm</button>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* Modal Huỷ đơn */}
+        {showModalHuy && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2">
+                    <polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14H6L5,6"/><path d="M10,11v6"/><path d="M14,11v6"/>
+                    <path d="M9,6V4h6v2"/>
+                  </svg>
+                </div>
+                <div>
+                  <p className="font-bold text-gray-800">Huỷ đơn #{donHang.maDon}?</p>
+                  <p className="text-xs text-gray-400 mt-0.5">Đơn có {donHang.panels.length} tấm — toàn bộ sẽ bị xoá vĩnh viễn</p>
+                </div>
+              </div>
+              <div className="flex gap-2 justify-end">
+                <button onClick={() => setShowModalHuy(false)}
+                  className="px-4 py-2 rounded-lg border text-xs text-gray-600 hover:bg-gray-50">Giữ lại</button>
+                <button onClick={async () => {
+                  await fetch('/api/don-hang/' + donHang.id, { method: 'DELETE' })
+                  setShowModalHuy(false)
+                  setDonHang(null)
+                }} className="px-4 py-2 rounded-lg bg-red-500 text-white text-xs hover:bg-red-600">Xoá đơn</button>
+              </div>
+            </div>
+          </div>
+        )}
         {/* Modal Đặt ngoài */}
         {showModalDatNgoai && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">

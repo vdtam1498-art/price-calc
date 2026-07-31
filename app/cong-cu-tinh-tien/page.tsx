@@ -661,12 +661,17 @@ export default function CongCuTinhTienPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6">
               <p className="font-bold text-gray-800 mb-1">Giá đặt ngoài</p>
-              <p className="text-xs text-gray-400 mb-4">
+              <p className="text-xs text-gray-400 mb-2">
                 Vật liệu <span className="font-medium text-gray-700">{panel.vatLieu} {panel.doDay}mm</span> chưa có đơn giá.<br/>
                 Nhập đơn giá gốc — hệ số <span className="font-medium text-orange-600">
                   {(panel.vatLieu.toUpperCase().includes('SUS') || panel.vatLieu.toUpperCase().startsWith('A')) ? '×1.2' : '×1.3'}
                 </span> sẽ được áp dụng tự động.
               </p>
+              {donGiaDatNgoai > 0 && (
+                <div className="bg-blue-50 text-blue-700 text-xs rounded-lg px-3 py-2 mb-3">
+                  Lần trước đã nhập: <span className="font-bold">{donGiaDatNgoai.toLocaleString()} ¥/kg</span>
+                </div>
+              )}
               <input
                 type="number"
                 value={inputDatNgoai}

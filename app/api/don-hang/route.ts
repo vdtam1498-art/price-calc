@@ -27,9 +27,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const body = await req.json()
-  const { maDon, tenCongTy, ghiChu } = body
+  const { maDon, tenCongTy, ghiChu, loaiDon } = body
   const donHang = await prisma.donHang.create({
-    data: { maDon, tenCongTy: tenCongTy || '', ghiChu: ghiChu || '' },
+    data: { maDon, tenCongTy: tenCongTy || '', ghiChu: ghiChu || '', loaiDon: loaiDon || 'bao_gia' },
     include: { panels: true },
   })
   return NextResponse.json(donHang)

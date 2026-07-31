@@ -21,6 +21,9 @@ export default function CongCuTinhTienPage() {
   const [result, setResult] = useState<any>(null)
   const [modalPanel, setModalPanel] = useState<any>(null)
   const [editingPanelId, setEditingPanelId] = useState<number|null>(null)
+  const [donGiaDatNgoai, setDonGiaDatNgoai] = useState<number>(0)
+  const [showModalDatNgoai, setShowModalDatNgoai] = useState(false)
+  const [inputDatNgoai, setInputDatNgoai] = useState('')
   const [saving, setSaving] = useState(false)
   const [hesoGiaVL, setHesoGiaVL] = useState<any[]>([])
   const [hesoPitchiDB, setHesoPitchiDB] = useState<any[]>([])
@@ -43,6 +46,20 @@ export default function CongCuTinhTienPage() {
   const nhomNhom = vatLieuList.filter((v:any) => v.toUpperCase().startsWith('A') && !v.toUpperCase().includes('SUS'))
 
   // Độ dày theo vật liệu đã chọn
+  // Detect đặt ngoài khi chọn doDay
+  useEffect(() => {
+    if (!panel.vatLieu || !panel.doDay) return
+    const row = bangGia.find((r:any) => r.vatLieu === panel.vatLieu && r.doDay === Number(panel.doDay))
+    if (row && row.donGia === 0) {
+      setDonGiaDatNgoai(0)
+      setInputDatNgoai('')
+      setShowModalDatNgoai(true)
+    } else {
+      setShowModalDatNgoai(false)
+      setDonGiaDatNgoai(0)
+    }
+  }, [panel.vatLieu, panel.doDay, bangGia])
+
   const doDayList = bangGia.filter((r:any) => r.vatLieu === panel.vatLieu).map((r:any) => r.doDay).sort((a:number,b:number) => a-b)
 
   const bgRow = bangGia.find(r => r.vatLieu === panel.vatLieu && r.doDay === Number(panel.doDay))
@@ -72,13 +89,20 @@ export default function CongCuTinhTienPage() {
     const vl = panel.vatLieu.toUpperCase()
     const isSUS = vl.includes('SUS')
     const isHanwa = (donHang?.tenCongTy || '').toLowerCase().startsWith('hanwa')
-    if (isUuDai) {
-      // Inox không phải Hanwa → dùng hệ số KUĐ SUS dù là công ty ưu đãi
+    const isDatNgoai = bgRow?.donGia === 0
+    if (isDatNgoai && donGiaDatNgoai > 0) {
+      // Đặt ngoài: hệ số cố định theo nhóm VL
+      heSoVL = (isSUS || panel.vatLieu.toUpperCase().startsWith('A')) ? 1.2 : 1.3
+    } else if (isUuDai) {
       heSoVL = (isSUS && !isHanwa) ? getHSVL('Không ưu đãi SUS') : getHSVL('Ưu đãi')
     } else {
       heSoVL = isSUS ? getHSVL('Không ưu đãi SUS') : getHSVL('Không ưu đãi SS')
     }
 
+    // Override bangGia nếu đặt ngoài và đã nhập giá
+    const bangGiaOverride = (bgRow?.donGia === 0 && donGiaDatNgoai > 0)
+      ? bangGia.map((r:any) => r.vatLieu === panel.vatLieu && r.doDay === Number(panel.doDay) ? {...r, donGia: donGiaDatNgoai} : r)
+      : bangGia
     const res = calculatePanel({
       vatLieu: panel.vatLieu, doDay: Number(panel.doDay),
       x: Number(panel.x), y: Number(panel.y), soLuong: Number(panel.soLuong),
@@ -126,9 +150,9 @@ export default function CongCuTinhTienPage() {
         return Math.round(heSo*6000)
       })(),
       vatMm: Number(panel.vatMm), giaCongVatDonGia: Number(bgRow?.giaVat) || 1800,
-    }, bangGia)
+    }, bangGiaOverride)
     setResult(res)
-  }, [panel, bangGia, isUuDai, bgRow])
+  }, [panel, bangGia, isUuDai, bgRow, donGiaDatNgoai])
 
   async function taoDon() {
     if (!form.maDon) return alert('Vui lòng nhập mã đơn hàng')
@@ -627,6 +651,38 @@ export default function CongCuTinhTienPage() {
           )}
         </div>
 
+        {/* Modal Đặt ngoài */}
+        {showModalDatNgoai && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6">
+              <p className="font-bold text-gray-800 mb-1">Giá đặt ngoài</p>
+              <p className="text-xs text-gray-400 mb-4">
+                Vật liệu <span className="font-medium text-gray-700">{panel.vatLieu} {panel.doDay}mm</span> chưa có đơn giá.<br/>
+                Nhập đơn giá gốc — hệ số <span className="font-medium text-orange-600">
+                  {(panel.vatLieu.toUpperCase().includes('SUS') || panel.vatLieu.toUpperCase().startsWith('A')) ? '×1.2' : '×1.3'}
+                </span> sẽ được áp dụng tự động.
+              </p>
+              <input
+                type="number"
+                value={inputDatNgoai}
+                onChange={e => setInputDatNgoai(e.target.value)}
+                placeholder="Nhập đơn giá (¥/kg)..."
+                className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+                autoFocus
+              />
+              <div className="flex gap-2 justify-end">
+                <button onClick={() => { setShowModalDatNgoai(false); setPanel((p:any) => ({...p, doDay: ''})) }}
+                  className="text-xs px-4 py-2 rounded-lg border text-gray-500 hover:bg-gray-50">Huỷ</button>
+                <button onClick={() => {
+                  const gia = Number(inputDatNgoai)
+                  if (!gia || gia <= 0) return alert('Vui lòng nhập đơn giá hợp lệ')
+                  setDonGiaDatNgoai(gia)
+                  setShowModalDatNgoai(false)
+                }} className="text-xs px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Xác nhận</button>
+              </div>
+            </div>
+          </div>
+        )}
         {/* Modal xem/sửa tấm */}
         {modalPanel && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setModalPanel(null)}>

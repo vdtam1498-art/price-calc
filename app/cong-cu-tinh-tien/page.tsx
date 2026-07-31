@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { calculatePanel } from '@/lib/calculate'
 
 
@@ -22,6 +22,7 @@ export default function CongCuTinhTienPage() {
   const [modalPanel, setModalPanel] = useState<any>(null)
   const [editingPanelId, setEditingPanelId] = useState<number|null>(null)
   const [donGiaDatNgoai, setDonGiaDatNgoai] = useState<number>(0)
+  const skipDatNgoaiDetect = React.useRef(false)
   const [showModalDatNgoai, setShowModalDatNgoai] = useState(false)
   const [inputDatNgoai, setInputDatNgoai] = useState('')
   const [saving, setSaving] = useState(false)
@@ -50,6 +51,7 @@ export default function CongCuTinhTienPage() {
   useEffect(() => {
     if (!panel.vatLieu || !panel.doDay) return
     const row = bangGia.find((r:any) => r.vatLieu === panel.vatLieu && r.doDay === Number(panel.doDay))
+    if (skipDatNgoaiDetect.current) { skipDatNgoaiDetect.current = false; return }
     if (row && row.donGia === 0) {
       setDonGiaDatNgoai(0)
       setInputDatNgoai('')
@@ -635,6 +637,7 @@ export default function CongCuTinhTienPage() {
                     cuonGio: p.cuonGio, vatMm: p.vatMm,
                   })
                   if (p.donGiaDatNgoai > 0) {
+                    skipDatNgoaiDetect.current = true
                     setDonGiaDatNgoai(p.donGiaDatNgoai)
                     setInputDatNgoai(String(p.donGiaDatNgoai))
                     setShowModalDatNgoai(false)

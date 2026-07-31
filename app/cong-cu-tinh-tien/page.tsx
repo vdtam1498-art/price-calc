@@ -85,7 +85,46 @@ export default function CongCuTinhTienPage() {
       isUuDai, heSoVL,
       loNho: Number(panel.loNho), loLon: Number(panel.loLon),
       soLoTappu: Number(panel.soLoTappu), soLoSara: Number(panel.soLoSara),
-      be: beRows.map((b:any) => ({...b, donGia: bgRow ? Number(bgRow.giaUon) : b.donGia})), tienPitchi: pitchiResult ? pitchiResult.thanhTien : 0, tienCuon: cuonResult ? cuonResult.thanhTien : 0,
+      be: beRows.map((b:any) => ({...b, donGia: bgRow ? Number(bgRow.giaUon) : b.donGia})),
+      tienPitchi: (() => {
+        if (Number(panel.pitchiSoLan) <= 0) return 0
+        const klThucTe = ((Number(panel.x)+10)*(Number(panel.y)+10)*Number(panel.doDay)*7.85)/1_000_000
+        const tlRows = hesoPitchiDB.filter((r:any)=>r.loai==='trong_luong').sort((a:any,b:any)=>a.thuTu-b.thuTu)
+        const cdRows = hesoPitchiDB.filter((r:any)=>r.loai==='chieu_dai').sort((a:any,b:any)=>a.thuTu-b.thuTu)
+        let hsTL=2
+        if(klThucTe<20) hsTL=tlRows[0]?.heSo||0.8
+        else if(klThucTe<40) hsTL=tlRows[1]?.heSo||1
+        else if(klThucTe<100) hsTL=tlRows[2]?.heSo||1.5
+        else hsTL=tlRows[3]?.heSo||2
+        const maxCD=Number(panel.pitchiChieuDai)/1000
+        let hsCD=2.5
+        if(maxCD<0.83) hsCD=cdRows[0]?.heSo||0.75
+        else if(maxCD<1.66) hsCD=cdRows[1]?.heSo||1
+        else if(maxCD<2.49) hsCD=cdRows[2]?.heSo||1.25
+        else if(maxCD<3.32) hsCD=cdRows[3]?.heSo||1.5
+        else if(maxCD<4.15) hsCD=cdRows[4]?.heSo||1.75
+        else if(maxCD<4.98) hsCD=cdRows[5]?.heSo||2
+        else if(maxCD<5.81) hsCD=cdRows[6]?.heSo||2.25
+        else hsCD=cdRows[7]?.heSo||2.5
+        const heTam=Math.max(hsTL,hsCD)
+        const heGC=hesoGiaCongDB.find((r:any)=>r.tenLoai===(panel.loaiGiaCong||'Pitchi'))?.heSo||1
+        const soLanAn=Number(panel.pitchiSoLan)
+        const soLuong=Number(panel.soLuong)
+        const thoiGianPhut=heTam*heGC*1.5*soLanAn
+        return Math.round(soLuong<=5 ? (1500/soLuong)+100*thoiGianPhut : (1500/5)+100*thoiGianPhut)
+      })(),
+      tienCuon: (() => {
+        if (Number(panel.cuonGio) <= 0) return 0
+        const klThucTe = ((Number(panel.x)+10)*(Number(panel.y)+10)*Number(panel.doDay)*7.85)/1_000_000
+        const rows = hesoCuonDB.sort((a:any,b:any)=>a.heSo-b.heSo)
+        let heSo=2
+        if(klThucTe<30) heSo=rows[0]?.heSo||0.4
+        else if(klThucTe<50) heSo=rows[1]?.heSo||0.5
+        else if(klThucTe<100) heSo=rows[2]?.heSo||0.75
+        else if(klThucTe<200) heSo=rows[3]?.heSo||1
+        else if(klThucTe<400) heSo=rows[4]?.heSo||1.5
+        return Math.round(heSo*6000)
+      })(),
       vatMm: Number(panel.vatMm), giaCongVatDonGia: Number(bgRow?.giaVat) || 1800,
     }, bangGia)
     setResult(res)

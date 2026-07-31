@@ -199,8 +199,7 @@ export default function CongCuTinhTienPage() {
   function downloadTemplate() {
     const headers = ['Tên tấm','Vật liệu','Độ dày','X (mm)','Y (mm)','Số lượng','Lỗ nhỏ','Lỗ lớn','Lỗ Tappu','Lỗ Sara','Pitchi - Số lần','Pitchi - Chiều dài (mm)','Loại gia công','Có cuộn (1/0)','Vát (mm)','Bẻ1 - Số đường','Bẻ1 - Dài (mm)','Bẻ2 - Số đường','Bẻ2 - Dài (mm)','Bẻ3 - Số đường','Bẻ3 - Dài (mm)']
     const example = [donHang?.maDon+'-1','SPCC','1.2','500','300','1','0','0','0','0','0','0','Pitchi','0','0','1','500','0','0','0','0']
-    const csv = [headers.join(','), example.join(',')].join('
-')
+    const csv = [headers.join(','), example.join(',')].join('\n')
     const blob = new Blob(['﻿'+csv], { type: 'text/csv;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a'); a.href = url
@@ -224,19 +223,96 @@ export default function CongCuTinhTienPage() {
         if (soDuong > 0 || daiMm > 0) beArr.push({ soDuong, daiMm, donGia: 0 })
       }
       if (beArr.length === 0) beArr.push({ soDuong: 1, daiMm: 0, donGia: 0 })
+      const vatLieu = String(r[1] || '')
+      const doDay = Number(r[2]) || 0
+      const x = Number(r[3]) || 0
+      const y = Number(r[4]) || 0
+      const soLuong = Number(r[5]) || 1
+      const loNho = Number(r[6]) || 0
+      const loLon = Number(r[7]) || 0
+      const soLoTappu = Number(r[8]) || 0
+      const soLoSara = Number(r[9]) || 0
+      const pitchiSoLan = Number(r[10]) || 0
+      const pitchiChieuDai = Number(r[11]) || 0
+      const loaiGiaCong = String(r[12] || 'Pitchi')
+      const cuonGio = Number(r[13]) || 0
+      const vatMm = Number(r[14]) || 0
+
+      // Tính heSoVL
+      const isSUS = vatLieu.toUpperCase().includes('SUS')
+      const isHanwa = (donHang.tenCongTy || '').toLowerCase().startsWith('hanwa')
+      const getHSVL2 = (ten: string) => hesoGiaVL.find((h:any) => h.tenLoai === ten)?.heSo || 1
+      let heSoVL2 = 1
+      if (isUuDai) {
+        heSoVL2 = (isSUS && !isHanwa) ? getHSVL2('Không ưu đãi SUS') : getHSVL2('Ưu đãi')
+      } else {
+        heSoVL2 = isSUS ? getHSVL2('Không ưu đãi SUS') : getHSVL2('Không ưu đãi SS')
+      }
+
+      // Tính beArr với donGia từ bangGia
+      const bgR = bangGia.find((bg:any) => bg.vatLieu === vatLieu && bg.doDay === doDay)
+      const beArrFinal = beArr.map((b:any) => ({...b, donGia: bgR ? Number(bgR.giaUon) : 0}))
+
+      // Tính pitchi
+      let tienPitchi2 = 0
+      if (pitchiSoLan > 0 && bgR) {
+        const klThucTe2 = ((x+10)*(y+10)*doDay*(bgR.tyTrong||7.85))/1_000_000
+        const tlRows2 = hesoPitchiDB.filter((h:any)=>h.loai==='trong_luong').sort((a:any,b:any)=>a.thuTu-b.thuTu)
+        const cdRows2 = hesoPitchiDB.filter((h:any)=>h.loai==='chieu_dai').sort((a:any,b:any)=>a.thuTu-b.thuTu)
+        let hsTL2=2
+        if(klThucTe2<20) hsTL2=tlRows2[0]?.heSo||0.8
+        else if(klThucTe2<40) hsTL2=tlRows2[1]?.heSo||1
+        else if(klThucTe2<100) hsTL2=tlRows2[2]?.heSo||1.5
+        else hsTL2=tlRows2[3]?.heSo||2
+        const maxCD2=pitchiChieuDai/1000
+        let hsCD2=2.5
+        if(maxCD2<0.83) hsCD2=cdRows2[0]?.heSo||0.75
+        else if(maxCD2<1.66) hsCD2=cdRows2[1]?.heSo||1
+        else if(maxCD2<2.49) hsCD2=cdRows2[2]?.heSo||1.25
+        else if(maxCD2<3.32) hsCD2=cdRows2[3]?.heSo||1.5
+        else if(maxCD2<4.15) hsCD2=cdRows2[4]?.heSo||1.75
+        else if(maxCD2<4.98) hsCD2=cdRows2[5]?.heSo||2
+        else if(maxCD2<5.81) hsCD2=cdRows2[6]?.heSo||2.25
+        else hsCD2=cdRows2[7]?.heSo||2.5
+        const heGC2=hesoGiaCongDB.find((h:any)=>h.tenLoai===loaiGiaCong)?.heSo||1
+        const phut2=Math.max(hsTL2,hsCD2)*heGC2*1.5*pitchiSoLan
+        tienPitchi2=Math.round(soLuong<=5?(1500/soLuong)+100*phut2:(1500/5)+100*phut2)
+      }
+
+      // Tính cuon
+      let tienCuon2 = 0
+      if (cuonGio > 0 && bgR) {
+        const klThucTe2 = ((x+10)*(y+10)*doDay*(bgR.tyTrong||7.85))/1_000_000
+        const cuonRows = hesoCuonDB.sort((a:any,b:any)=>a.heSo-b.heSo)
+        let hsCuon=2
+        if(klThucTe2<30) hsCuon=cuonRows[0]?.heSo||0.4
+        else if(klThucTe2<50) hsCuon=cuonRows[1]?.heSo||0.5
+        else if(klThucTe2<100) hsCuon=cuonRows[2]?.heSo||0.75
+        else if(klThucTe2<200) hsCuon=cuonRows[3]?.heSo||1
+        else if(klThucTe2<400) hsCuon=cuonRows[4]?.heSo||1.5
+        tienCuon2=Math.round(hsCuon*6000)
+      }
+
+      const calcRes = bgR ? calculatePanel({
+        vatLieu, doDay, x, y, soLuong, isUuDai, heSoVL: heSoVL2,
+        loNho, loLon, soLoTappu, soLoSara,
+        be: beArrFinal, tienPitchi: tienPitchi2, tienCuon: tienCuon2,
+        vatMm, giaCongVatDonGia: bgR.giaVat || 1800,
+      }, bangGia) : null
+
       const body = {
         donHangId: donHang.id,
         tenTam: String(r[0] || ''),
-        vatLieu: String(r[1] || ''), doDay: Number(r[2]) || 0,
-        x: Number(r[3]) || 0, y: Number(r[4]) || 0, soLuong: Number(r[5]) || 1,
-        maKhach: '', loNho: Number(r[6]) || 0, loLon: Number(r[7]) || 0,
-        soLoTappu: Number(r[8]) || 0, soLoSara: Number(r[9]) || 0,
-        pitchiSoLan: Number(r[10]) || 0, pitchiChieuDai: Number(r[11]) || 0,
-        loaiGiaCong: String(r[12] || 'Pitchi'),
-        cuonGio: Number(r[13]) || 0, vatMm: Number(r[14]) || 0,
-        be: beArr,
-        giaVL: 0, giaCat: 0, giaCong: 0, gia1Tam: 0, allIn: 0,
-        pitchiGio: 0, donGiaDatNgoai: 0,
+        vatLieu, doDay, x, y, soLuong,
+        maKhach: '', loNho, loLon, soLoTappu, soLoSara,
+        pitchiSoLan, pitchiChieuDai, loaiGiaCong,
+        cuonGio, vatMm, be: beArr,
+        giaVL: calcRes?.tienVL || 0,
+        giaCat: calcRes?.tienCatLaser || 0,
+        giaCong: calcRes?.tongGiaCong || 0,
+        gia1Tam: calcRes?.gia1Tam || 0,
+        allIn: calcRes?.allIn || 0,
+        pitchiGio: tienPitchi2, donGiaDatNgoai: 0,
       }
       await fetch('/api/panels', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
     }

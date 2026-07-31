@@ -448,10 +448,19 @@ export default function CongCuTinhTienPage() {
             </div>
           </div>
           <div>
-            <label className="text-xs text-gray-500">Ghi chú đơn</label>
-            <input value={form.ghiChu} onChange={e => setForm(f => ({...f, ghiChu: e.target.value}))}
-              placeholder="Không có lưu ý"
-              className="w-full mt-1 border rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <label className="text-xs text-gray-500 mb-2 block">Loại đơn</label>
+            <div className="flex gap-3">
+              <label className={`flex-1 flex items-center justify-center gap-2 border rounded-lg px-3 py-2.5 cursor-pointer text-sm transition-colors ${form.loaiDon === 'bao_gia' ? 'bg-blue-50 border-blue-400 text-blue-700 font-medium' : 'text-gray-500 border-gray-200 hover:bg-gray-50'}`}>
+                <input type="radio" name="loaiDon" value="bao_gia" checked={form.loaiDon === 'bao_gia'}
+                  onChange={e => setForm(f => ({...f, loaiDon: e.target.value}))} className="accent-blue-600" />
+                📄 Báo giá
+              </label>
+              <label className={`flex-1 flex items-center justify-center gap-2 border rounded-lg px-3 py-2.5 cursor-pointer text-sm transition-colors ${form.loaiDon === 'trien_khai' ? 'bg-orange-50 border-orange-400 text-orange-700 font-medium' : 'text-gray-500 border-gray-200 hover:bg-gray-50'}`}>
+                <input type="radio" name="loaiDon" value="trien_khai" checked={form.loaiDon === 'trien_khai'}
+                  onChange={e => setForm(f => ({...f, loaiDon: e.target.value}))} className="accent-orange-500" />
+                📦 Triển khai
+              </label>
+            </div>
           </div>
           <button onClick={taoDon} className="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition">
             › Tạo đơn &amp; bắt đầu tính

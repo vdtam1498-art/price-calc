@@ -19,6 +19,7 @@ export default function CongCuTinhTienPage() {
   const [showCTDropdown, setShowCTDropdown] = useState(false)
   const [panel, setPanel] = useState<any>(emptyPanel())
   const [result, setResult] = useState<any>(null)
+  const [modalPanel, setModalPanel] = useState<any>(null)
   const [saving, setSaving] = useState(false)
   const [hesoGiaVL, setHesoGiaVL] = useState<any[]>([])
   const [hesoPitchiDB, setHesoPitchiDB] = useState<any[]>([])
@@ -544,7 +545,7 @@ export default function CongCuTinhTienPage() {
           ) : (
             <div className="p-2">
               {donHang.panels.map((p:any, i:number) => (
-                <div key={p.id} className="flex justify-between items-center px-2 py-1 rounded hover:bg-gray-50 border-b last:border-0">
+                <div key={p.id} onClick={() => setModalPanel(p)} className="flex justify-between items-center px-2 py-1 rounded hover:bg-blue-50 border-b last:border-0 cursor-pointer">
                   <div>
                     <p className="text-xs font-semibold text-gray-700">{p.tenTam || 'Tấm '+(i+1)}</p>
                     <p className="text-xs text-gray-400">{p.vatLieu} {p.doDay}mm · ×{p.soLuong}</p>
@@ -556,6 +557,83 @@ export default function CongCuTinhTienPage() {
           )}
         </div>
 
+        {/* Modal xem/sửa tấm */}
+        {modalPanel && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setModalPanel(null)}>
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center justify-between px-5 py-4 border-b">
+                <div>
+                  <p className="font-bold text-gray-800">{modalPanel.tenTam}</p>
+                  <p className="text-xs text-gray-400">{modalPanel.vatLieu} · {modalPanel.doDay}mm · ×{modalPanel.soLuong}</p>
+                </div>
+                <button onClick={() => setModalPanel(null)} className="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
+              </div>
+              <div className="px-5 py-4 space-y-2 max-h-[60vh] overflow-y-auto text-sm">
+                {[
+                  ['Tên tấm', modalPanel.tenTam],
+                  ['Vật liệu', modalPanel.vatLieu],
+                  ['Độ dày', modalPanel.doDay + ' mm'],
+                  ['X — Dài', modalPanel.x + ' mm'],
+                  ['Y — Rộng', modalPanel.y + ' mm'],
+                  ['Số lượng', modalPanel.soLuong],
+                  ['Mã khách', modalPanel.maKhach || '—'],
+                  ['Lỗ nhỏ', modalPanel.loNho],
+                  ['Lỗ lớn', modalPanel.loLon],
+                  ['Số lỗ Tappu', modalPanel.soLoTappu],
+                  ['Số lỗ Sara', modalPanel.soLoSara],
+                  ['Chiều dài vát (mm)', modalPanel.vatMm],
+                  ['Có cuộn', modalPanel.cuonGio > 0 ? 'Có' : 'Không'],
+                ].map(([label, val]) => (
+                  <div key={label} className="flex justify-between py-1 border-b border-gray-50">
+                    <span className="text-gray-400">{label}</span>
+                    <span className="font-medium text-gray-700">{val}</span>
+                  </div>
+                ))}
+                {modalPanel.be?.length > 0 && (
+                  <div className="pt-1">
+                    <p className="text-gray-400 mb-1">Bẻ / Uốn</p>
+                    {modalPanel.be.map((b:any, i:number) => (
+                      <div key={i} className="flex justify-between text-xs py-0.5 text-gray-600">
+                        <span>Đường {i+1}</span>
+                        <span>{b.soDuong} đường · {b.daiMm}mm</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div className="mt-3 pt-3 border-t space-y-1">
+                  {[
+                    ['Giá VL', modalPanel.giaVL],
+                    ['Giá cắt', modalPanel.giaCat],
+                    ['Gia công', modalPanel.giaCong],
+                    ['Giá 1 tấm', modalPanel.gia1Tam],
+                    ['ALL-IN (×SL)', modalPanel.allIn],
+                  ].map(([label, val]) => (
+                    <div key={label} className="flex justify-between">
+                      <span className="text-gray-400 text-xs">{label}</span>
+                      <span className="font-mono text-xs font-semibold text-red-500">¥ {fmt(Number(val))}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="px-5 py-3 border-t flex gap-2 justify-end">
+                <button onClick={() => setModalPanel(null)} className="text-xs px-4 py-2 rounded-lg border text-gray-500 hover:bg-gray-50">Đóng</button>
+                <button onClick={() => {
+                  setPanel({
+                    tenTam: modalPanel.tenTam, vatLieu: modalPanel.vatLieu, doDay: String(modalPanel.doDay),
+                    x: String(modalPanel.x), y: String(modalPanel.y), soLuong: modalPanel.soLuong,
+                    maKhach: modalPanel.maKhach || '', loNho: modalPanel.loNho, loLon: modalPanel.loLon,
+                    soLoTappu: modalPanel.soLoTappu, soLoSara: modalPanel.soLoSara,
+                    be: modalPanel.be || [{ soDuong: 1, daiMm: 0, donGia: 0 }],
+                    pitchiSoLan: modalPanel.pitchiSoLan || 0, pitchiChieuDai: modalPanel.pitchiChieuDai || 0,
+                    pitchiGio: modalPanel.pitchiGio || 0, loaiGiaCong: modalPanel.loaiGiaCong || 'Pitchi',
+                    cuonGio: modalPanel.cuonGio, vatMm: modalPanel.vatMm,
+                  })
+                  setModalPanel(null)
+                }} className="text-xs px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">✏️ Chỉnh sửa</button>
+              </div>
+            </div>
+          </div>
+        )}
         <div className="p-3">
           <div className="flex justify-between items-center mb-2">
             <span className="text-xs font-bold text-gray-500">Tổng kết tấm này</span>

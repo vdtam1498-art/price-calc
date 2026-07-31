@@ -26,6 +26,7 @@ export default function CongCuTinhTienPage() {
   const [showModalDatNgoai, setShowModalDatNgoai] = useState(false)
   const [inputDatNgoai, setInputDatNgoai] = useState('')
   const [importing, setImporting] = useState(false)
+  const [ngayGiao, setNgayGiao] = useState('3-4')
   const [showModalHuy, setShowModalHuy] = useState(false)
   const [xoaTamId, setXoaTamId] = useState<number|null>(null)
   const [importResult, setImportResult] = useState<number|null>(null)
@@ -794,6 +795,27 @@ export default function CongCuTinhTienPage() {
                 <p className="text-xs text-gray-400">Thành tiền vát</p>
                 <div className="bg-orange-50 rounded px-2 py-1 font-mono text-orange-600 font-semibold">¥ {result ? fmt(result.tienVat) : 0}</div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Dau bao gia */}
+        <div className="bg-white rounded-xl shadow-sm border p-4 text-sm">
+          <div className="space-y-1.5">
+            <p><span className="text-red-600 font-bold">{congTy?.tiengNhat || donHang.tenCongTy}</span><span className="ml-1">&#40;&#x682a;&#41;&#12288;&#24481;&#20013;</span></p>
+            <p>&#12356;&#12388;&#12418;&#12362;&#19990;&#35441;&#12395;&#12394;&#12387;&#12390;&#12362;&#12426;&#12414;&#12377;&#12290;</p>
+            <p>&#32435;&#26399;&#23455;&#20064;&#12288;
+              <input value={ngayGiao} onChange={e => setNgayGiao(e.target.value)}
+                className="border-b border-gray-400 outline-none w-12 text-center text-sm bg-transparent mx-1" />
+              &#12288;&#26085;&#12411;&#12393;
+            </p>
+            <p>&#24403;&#22238;&#31572;&#37329;&#39069;&#12398;&#26377;&#21177;&#26399;&#38480;&#12399;2&#36913;&#38291;&#12414;&#12391;&#12392;&#12394;&#12426;&#12414;&#12377;&#12290;</p>
+            <p>&#12362;&#21839;&#12356;&#21512;&#12431;&#12379;&#12289;&#12372;&#27880;&#25991;&#12398;&#38555;&#12395;&#12399;&#19979;&#35352;&#30058;&#21495;&#12434;&#12362;&#30693;&#12425;&#12379;&#12367;&#12384;&#12373;&#12356;&#12290;</p>
+            <p className="mt-3">&#12300;&#12458;&#12458;&#12479;&#35211;&#31296;&#12418;&#12426;No.&#12288;&#12301;&#12288;<span className="text-red-600 font-bold text-base">{donHang.maDon}</span></p>
+            <div className="flex gap-3 mt-3">
+              {['松林','藤本'].map(name => (
+                <div key={name} className="w-12 h-12 rounded-full border-2 border-red-500 flex items-center justify-center text-red-500 font-bold text-sm">{name}</div>
+              ))}
             </div>
           </div>
         </div>

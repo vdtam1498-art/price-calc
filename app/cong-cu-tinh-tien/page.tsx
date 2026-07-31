@@ -37,7 +37,7 @@ export default function CongCuTinhTienPage() {
     const donId = params.get('donId')
     if (donId) {
       fetch('/api/don-hang/' + donId).then(r => r.json()).then(dh => {
-        if (dh?.id) setDonHang(dh)
+        if (dh?.id) setDonHang(sortPanels(dh))
       })
     }
   }, [])
@@ -175,7 +175,7 @@ export default function CongCuTinhTienPage() {
     })
     if (!res.ok) return alert('Mã đơn đã tồn tại hoặc có lỗi!')
     const dh = await res.json()
-    setDonHang(dh)
+    setDonHang(sortPanels(dh))
     setPanel(emptyPanel(dh.maDon, 0))
   }
 
@@ -200,7 +200,7 @@ export default function CongCuTinhTienPage() {
       await fetch('/api/panels', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body })
     }
     const updated = await fetch('/api/don-hang/' + donHang.id).then(r => r.json())
-    setDonHang(updated)
+    setDonHang(sortPanels(updated))
     setEditingPanelId(null)
     setPanel(emptyPanel(updated.maDon, updated.panels.length === 0 ? 1 : Math.max(...updated.panels.map((p:any) => { const n = parseInt(p.tenTam?.split('-').pop()); return isNaN(n) ? 0 : n })) + 1))
     setSaving(false)
@@ -327,7 +327,7 @@ export default function CongCuTinhTienPage() {
       await fetch('/api/panels', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
     }
     const updated = await fetch('/api/don-hang/' + donHang.id).then(r => r.json())
-    setDonHang(updated)
+    setDonHang(sortPanels(updated))
     setPanel(emptyPanel(updated.maDon, updated.panels.length === 0 ? 1 : Math.max(...updated.panels.map((p:any) => { const n = parseInt(p.tenTam?.split('-').pop()); return isNaN(n) ? 0 : n })) + 1))
     setImporting(false)
     e.target.value = ''
@@ -338,11 +338,19 @@ export default function CongCuTinhTienPage() {
     if (!confirm('Xoá tấm này?')) return
     await fetch('/api/panels/' + id, { method: 'DELETE' })
     const updated = await fetch('/api/don-hang/' + donHang.id).then(r => r.json())
-    setDonHang(updated)
+    setDonHang(sortPanels(updated))
     if (editingPanelId === id) {
       setEditingPanelId(null)
       setPanel(emptyPanel(updated.maDon, updated.panels.length === 0 ? 1 : Math.max(...updated.panels.map((p:any) => { const n = parseInt(p.tenTam?.split('-').pop()); return isNaN(n) ? 0 : n })) + 1))
     }
+  }
+  const sortPanels = (dh: any) => {
+    if (!dh?.panels) return dh
+    return { ...dh, panels: [...dh.panels].sort((a: any, b: any) => {
+      const na = parseInt(a.tenTam?.split('-').pop()) || 0
+      const nb = parseInt(b.tenTam?.split('-').pop()) || 0
+      return na - nb
+    })}
   }
   const fmt = (n: number) => Math.round(n).toLocaleString()
 

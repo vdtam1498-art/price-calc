@@ -361,7 +361,7 @@ export default function CongCuTinhTienPage() {
     if (p.be && p.be.some((b:any) => b.daiMm > 0)) gc2.push('曲げ')
     if ((p.pitchiGio || 0) > 0) gc2.push('ピッチ')
     if (p.cuonGio > 0) gc2.push('ロール')
-    const hang2 = gc2.length > 0 ? gc2.join('+') + '(材料＋加工)' : ''
+    const hang2 = gc2.length > 0 ? gc2.join('+') + '(材料＋加工)' : '切板(材料,レーザー)'
 
     // Hàng 3: tappu + sara + vát
     const gc3 = []

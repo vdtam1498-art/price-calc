@@ -347,6 +347,42 @@ export default function CongCuTinhTienPage() {
       setPanel(emptyPanel(updated.maDon, updated.panels.length === 0 ? 1 : Math.max(...updated.panels.map((p:any) => { const n = parseInt(p.tenTam?.split('-').pop()); return isNaN(n) ? 0 : n })) + 1))
     }
   }
+  function copyTam(p: any, donHang: any) {
+    const gia1Tam = Math.round(p.gia1Tam)
+    const soLuong = p.soLuong
+    const vatLieu = p.vatLieu
+    const doDay = p.doDay
+
+    // Hàng 1
+    const hang1 = `@${gia1Tam.toLocaleString()}	x${soLuong}枚`
+
+    // Hàng 2: bẻ + pitchi + cuộn
+    const gc2 = []
+    if (p.be && p.be.some((b:any) => b.daiMm > 0)) gc2.push('曲げ')
+    if ((p.pitchiGio || 0) > 0) gc2.push('ピッチ')
+    if (p.cuonGio > 0) gc2.push('ロール')
+    const hang2 = gc2.length > 0 ? gc2.join('+') + '(材料＋加工)' : ''
+
+    // Hàng 3: tappu + sara + vát
+    const gc3 = []
+    if (p.soLoTappu > 0) gc3.push('タップ')
+    if (p.soLoSara > 0) gc3.push('皿加工')
+    if (p.vatMm > 0) gc3.push('開先加工')
+    const hang3 = gc3.length > 0 ? gc3.join('+') : ''
+
+    // Hàng 4
+    const hang4 = `${vatLieu}	PL${doDay}`
+
+    const lines = [hang1, hang2, hang3, hang4].filter(l => l !== '')
+    const text = lines.join('\n')
+
+    navigator.clipboard.writeText(text).catch(() => {
+      const ta = document.createElement('textarea')
+      ta.value = text; document.body.appendChild(ta)
+      ta.select(); document.execCommand('copy')
+      document.body.removeChild(ta)
+    })
+  }
   const sortPanels = (dh: any) => {
     if (!dh?.panels) return dh
     return { ...dh, panels: [...dh.panels].sort((a: any, b: any) => {
@@ -801,6 +837,7 @@ export default function CongCuTinhTienPage() {
                     setShowModalDatNgoai(false)
                   }
                   window.scrollTo({ top: 0, behavior: 'smooth' })
+                  copyTam(p, donHang)
                 }} className={editingPanelId === p.id ? 'flex justify-between items-center px-2 py-1 rounded border-b last:border-0 cursor-pointer bg-blue-50 border-l-2 border-l-blue-500' : 'flex justify-between items-center px-2 py-1 rounded border-b last:border-0 cursor-pointer hover:bg-gray-50'}>
                   <div>
                     <p className="text-xs font-semibold text-gray-700">{p.tenTam || 'Tấm '+(i+1)}</p>

@@ -411,8 +411,7 @@ export default function CaiDatPage() {
           <div className="flex gap-2 mb-3 p-3 bg-gray-50 rounded-lg flex-wrap">
             <input placeholder="Tên công ty (EN)" value={newCT.tenCongTy} onChange={e => setNewCT(p => ({...p, tenCongTy: e.target.value}))} className="border rounded px-2 py-1 text-xs flex-1 min-w-32" />
             <input placeholder="Tiếng Nhật" value={newCT.tiengNhat} onChange={e => setNewCT(p => ({...p, tiengNhat: e.target.value}))} className="border rounded px-2 py-1 text-xs flex-1 min-w-32" />
-            <input placeholder="HeSo ≥4.5" type="number" value={newCT.heSo_4_5mm} onChange={e => setNewCT(p => ({...p, heSo_4_5mm: Number(e.target.value)}))} className="border rounded px-2 py-1 text-xs w-24" />
-            <input placeholder="HeSo <4.5" type="number" value={newCT.heSo_duoi4_5mm} onChange={e => setNewCT(p => ({...p, heSo_duoi4_5mm: Number(e.target.value)}))} className="border rounded px-2 py-1 text-xs w-24" />
+
             <label className="flex items-center gap-1 text-xs text-gray-600 cursor-pointer">
               <input type="checkbox" checked={newCT.isUuDai} onChange={e => setNewCT(p => ({...p, isUuDai: e.target.checked}))} />
               Ưu đãi
@@ -424,8 +423,7 @@ export default function CaiDatPage() {
           <thead className="sticky top-0 bg-white z-10"><tr className="text-left text-gray-400 border-b">
             <th className="pb-1.5 pr-2">Tên công ty (EN)</th>
             <th className="pb-1.5 pr-2">Tiếng Nhật</th>
-            <th className="pb-1.5 pr-2 text-green-600">Hệ số ≥4.5mm</th>
-            <th className="pb-1.5 pr-2 text-orange-500">Hệ số &lt;4.5mm</th>
+
             <th className="pb-1.5 pr-2">Ưu đãi</th>
             <th className="pb-1.5"></th>
           </tr></thead>
@@ -436,8 +434,7 @@ export default function CaiDatPage() {
                   <>
                     <td className="py-1 pr-2"><input value={editingCT.tenCongTy} onChange={e => setEditingCT((p:any) => ({...p, tenCongTy: e.target.value}))} className="border rounded px-1.5 py-0.5 w-full text-xs" /></td>
                     <td className="py-1 pr-2"><input value={editingCT.tiengNhat} onChange={e => setEditingCT((p:any) => ({...p, tiengNhat: e.target.value}))} className="border rounded px-1.5 py-0.5 w-full text-xs" /></td>
-                    <td className="py-1 pr-2"><input type="number" value={editingCT.heSo_4_5mm} onChange={e => setEditingCT((p:any) => ({...p, heSo_4_5mm: Number(e.target.value)}))} className="border rounded px-1.5 py-0.5 w-16 text-xs" /></td>
-                    <td className="py-1 pr-2"><input type="number" value={editingCT.heSo_duoi4_5mm} onChange={e => setEditingCT((p:any) => ({...p, heSo_duoi4_5mm: Number(e.target.value)}))} className="border rounded px-1.5 py-0.5 w-16 text-xs" /></td>
+
                     <td className="py-1 pr-2"><input type="checkbox" checked={editingCT.isUuDai} onChange={e => setEditingCT((p:any) => ({...p, isUuDai: e.target.checked}))} /></td>
                     <td className="py-1"><div className="flex gap-1">
                       <button onClick={() => suaCongTy(editingCT.id, editingCT)} className="text-green-600">✓</button>
@@ -448,8 +445,7 @@ export default function CaiDatPage() {
                   <>
                     <td className="py-1.5 pr-2 font-medium">{ct.tenCongTy}</td>
                     <td className="py-1.5 pr-2 text-gray-500">{ct.tiengNhat}</td>
-                    <td className="py-1.5 pr-2 text-green-600 font-mono">{ct.heSo_4_5mm}</td>
-                    <td className="py-1.5 pr-2 text-orange-500 font-mono">{ct.heSo_duoi4_5mm}</td>
+
                     <td className="py-1.5 pr-2"><span className={ct.isUuDai ? 'text-green-500 font-medium' : 'text-gray-400'}>{ct.isUuDai ? '✓ Ưu đãi' : 'Thường'}</span></td>
                     {!locked && <td className="py-1.5"><div className="flex gap-1">
                       <button onClick={() => setEditingCT(ct)} className="text-blue-400 hover:text-blue-600">✏️</button>

@@ -71,6 +71,8 @@ export default function DonBaoGiaPage() {
               <div className="flex justify-between items-center mt-1">
                 <p className="text-xs text-gray-400 cursor-pointer" onClick={() => setSelected(d)}>{new Date(d.ngayTao).toLocaleDateString('vi-VN')} · {d.panels.length} tấm</p>
                 <div className="flex gap-1">
+                  <button onClick={e => { e.stopPropagation(); router.push('/don-chi-tiet/' + d.id) }}
+                    className="text-xs text-green-600 hover:text-green-700 border border-green-200 rounded px-1.5 py-0.5 hover:bg-green-50">👁 Xem</button>
                   <button onClick={e => { e.stopPropagation(); router.push('/cong-cu-tinh-tien?donId=' + d.id) }}
                     className="text-xs text-blue-400 hover:text-blue-600 border border-blue-200 rounded px-1.5 py-0.5 hover:bg-blue-50">✏️ Sửa</button>
                   <button onClick={e => { e.stopPropagation(); xoaDon(d.id, d.maDon) }}

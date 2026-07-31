@@ -51,7 +51,7 @@ export default function DonBaoGiaPage() {
     const blob = new Blob(['\uFEFF'+csv], { type: 'text/csv;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a'); a.href = url
-    a.download = dh.maDon + '_trienkhai.csv'; a.click()
+    a.download = dh.maDon + '.csv'; a.click()
   }
 
   if (loading) return <div className="p-8 text-gray-400 text-sm">Đang tải...</div>

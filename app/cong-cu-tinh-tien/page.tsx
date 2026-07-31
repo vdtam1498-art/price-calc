@@ -20,6 +20,7 @@ export default function CongCuTinhTienPage() {
   const [panel, setPanel] = useState<any>(emptyPanel())
   const [result, setResult] = useState<any>(null)
   const [modalPanel, setModalPanel] = useState<any>(null)
+  const [editingPanelId, setEditingPanelId] = useState<number|null>(null)
   const [saving, setSaving] = useState(false)
   const [hesoGiaVL, setHesoGiaVL] = useState<any[]>([])
   const [hesoPitchiDB, setHesoPitchiDB] = useState<any[]>([])
@@ -105,9 +106,7 @@ export default function CongCuTinhTienPage() {
   async function luuTam() {
     if (!result || !donHang) return
     setSaving(true)
-    await fetch('/api/panels', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    const body = JSON.stringify({
         donHangId: donHang.id,
         tenTam: panel.tenTam || ('Tấm ' + (donHang.panels.length + 1)),
         soLuong: Number(panel.soLuong), vatLieu: panel.vatLieu,
@@ -118,10 +117,15 @@ export default function CongCuTinhTienPage() {
         vatMm: Number(panel.vatMm),
         giaVL: result.tienVL, giaCat: result.tienCatLaser,
         giaCong: result.tongGiaCong, gia1Tam: result.gia1Tam, allIn: result.allIn,
-      })
     })
+    if (editingPanelId) {
+      await fetch('/api/panels/' + editingPanelId, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body })
+    } else {
+      await fetch('/api/panels', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body })
+    }
     const updated = await fetch('/api/don-hang/' + donHang.id).then(r => r.json())
     setDonHang(updated)
+    setEditingPanelId(null)
     setPanel(emptyPanel(updated.maDon, updated.panels.length))
     setSaving(false)
   }
@@ -545,7 +549,20 @@ export default function CongCuTinhTienPage() {
           ) : (
             <div className="p-2">
               {donHang.panels.map((p:any, i:number) => (
-                <div key={p.id} onClick={() => setModalPanel(p)} className="flex justify-between items-center px-2 py-1 rounded hover:bg-blue-50 border-b last:border-0 cursor-pointer">
+                <div key={p.id} onClick={() => {
+                  setEditingPanelId(p.id)
+                  setPanel({
+                    tenTam: p.tenTam, vatLieu: p.vatLieu, doDay: String(p.doDay),
+                    x: String(p.x), y: String(p.y), soLuong: p.soLuong,
+                    maKhach: p.maKhach || '', loNho: p.loNho, loLon: p.loLon,
+                    soLoTappu: p.soLoTappu, soLoSara: p.soLoSara,
+                    be: p.be && p.be.length ? p.be : [{ soDuong: 1, daiMm: 0, donGia: 0 }],
+                    pitchiSoLan: p.pitchiSoLan || 0, pitchiChieuDai: p.pitchiChieuDai || 0,
+                    pitchiGio: p.pitchiGio || 0, loaiGiaCong: p.loaiGiaCong || 'Pitchi',
+                    cuonGio: p.cuonGio, vatMm: p.vatMm,
+                  })
+                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                }} className={editingPanelId === p.id ? 'flex justify-between items-center px-2 py-1 rounded border-b last:border-0 cursor-pointer bg-blue-50 border-l-2 border-l-blue-500' : 'flex justify-between items-center px-2 py-1 rounded border-b last:border-0 cursor-pointer hover:bg-gray-50'}>
                   <div>
                     <p className="text-xs font-semibold text-gray-700">{p.tenTam || 'Tấm '+(i+1)}</p>
                     <p className="text-xs text-gray-400">{p.vatLieu} {p.doDay}mm · ×{p.soLuong}</p>

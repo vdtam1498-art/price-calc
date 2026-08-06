@@ -125,7 +125,7 @@ export default function CaiDatPage() {
       fetch('/api/heso-cuon').then(r => r.json()),
       fetch('/api/cong-ty-dac-biet').then(r => r.json()),
       fetch('/api/heso-gia-vl').then(r => r.json()),
-    ]).then(([bg, ct, hb, hp, hg, hc, hgvl, ctdb]) => {
+    ]).then(([bg, ct, hb, hp, hg, hc, ctdb, hgvl]) => {
       setBangGia(bg); setCongTy(ct); setHesoBe(hb)
       setHesoPitchi(hp); setHesoGiaCong(hg); setHesoCuon(hc); setHesoGiaVL(hgvl); setCongTyDacBiet(ctdb)
       setLoading(false)

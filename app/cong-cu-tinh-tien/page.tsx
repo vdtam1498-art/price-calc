@@ -153,7 +153,7 @@ export default function CongCuTinhTienPage() {
         const heGC=hesoGiaCongDB.find((r:any)=>r.tenLoai===(panel.loaiGiaCong||'Pitchi'))?.heSo||1
         const soLanAn=Number(panel.pitchiSoLan)
         const soLuong=Number(panel.soLuong)
-        const thoiGianPhut=heTam*heGC*1.5*soLanAn
+        const thoiGianPhut=heTam*heGC*2*soLanAn
         return Math.round(soLuong<=5 ? (1500/soLuong)+100*thoiGianPhut : (1500/5)+100*thoiGianPhut)
       })(),
       tienCuon: (() => {
@@ -291,7 +291,7 @@ export default function CongCuTinhTienPage() {
         else if(maxCD2<5.81) hsCD2=cdRows2[6]?.heSo||2.25
         else hsCD2=cdRows2[7]?.heSo||2.5
         const heGC2=hesoGiaCongDB.find((h:any)=>h.tenLoai===loaiGiaCong)?.heSo||1
-        const phut2=Math.max(hsTL2,hsCD2)*heGC2*1.5*pitchiSoLan
+        const phut2=Math.max(hsTL2,hsCD2)*heGC2*2*pitchiSoLan
         tienPitchi2=Math.round(soLuong<=5?(1500/soLuong)+100*phut2:(1500/5)+100*phut2)
       }
 
@@ -451,7 +451,7 @@ export default function CongCuTinhTienPage() {
     const heGC = getHeSoLoaiGC(panel.loaiGiaCong || 'Pitchi')
     const soLuong = Number(panel.soLuong)
     const soLanAn = Number(panel.pitchiSoLan)
-    const thoiGianPhut = heTam * heGC * 1.5 * soLanAn
+    const thoiGianPhut = heTam * heGC * 2 * soLanAn
     const thoiGianGio = thoiGianPhut / 60
     const thanhTien = soLuong <= 5
       ? (1500 / soLuong) + 100 * thoiGianPhut

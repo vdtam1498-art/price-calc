@@ -85,6 +85,10 @@ export default function CaiDatPage() {
   const [hesoGiaCong, setHesoGiaCong] = useState<any[]>([])
   const [hesoCuon, setHesoCuon] = useState<any[]>([])
   const [hesoGiaVL, setHesoGiaVL] = useState<any[]>([])
+  const [congTyDacBiet, setCongTyDacBiet] = useState<any[]>([])
+  const [editingCTDB, setEditingCTDB] = useState<any>(null)
+  const [newCTDB, setNewCTDB] = useState({ tenCongTy: "", donGiaTamDon: 0, donGiaTamGiaCong: 0 })
+  const [showAddCTDB, setShowAddCTDB] = useState(false)
   const [editingHGVL, setEditingHGVL] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
@@ -119,10 +123,11 @@ export default function CaiDatPage() {
       fetch('/api/heso-pitchi').then(r => r.json()),
       fetch('/api/heso-gia-cong').then(r => r.json()),
       fetch('/api/heso-cuon').then(r => r.json()),
+      fetch('/api/cong-ty-dac-biet').then(r => r.json()),
       fetch('/api/heso-gia-vl').then(r => r.json()),
-    ]).then(([bg, ct, hb, hp, hg, hc, hgvl]) => {
+    ]).then(([bg, ct, hb, hp, hg, hc, hgvl, ctdb]) => {
       setBangGia(bg); setCongTy(ct); setHesoBe(hb)
-      setHesoPitchi(hp); setHesoGiaCong(hg); setHesoCuon(hc); setHesoGiaVL(hgvl)
+      setHesoPitchi(hp); setHesoGiaCong(hg); setHesoCuon(hc); setHesoGiaVL(hgvl); setCongTyDacBiet(ctdb)
       setLoading(false)
     })
   }, [])
@@ -599,6 +604,57 @@ export default function CaiDatPage() {
               </table>
             </div>}
       </div>
+      </div>
+      {/* Bang cong ty dac biet */}
+      <div className="bg-white rounded-xl shadow p-5">
+        <div className="flex justify-between items-center mb-3">
+          <div>
+            <h2 className="font-semibold text-gray-800 text-sm">Don gia cong ty dac biet (Thep)</h2>
+            <p className="text-xs text-gray-400 mt-0.5">Ap dung cho vat lieu nhom Thep, +6mm thay +10mm</p>
+          </div>
+          <div className="flex gap-2">
+            {showAddCTDB && <button onClick={async () => {
+              const res = await fetch("/api/cong-ty-dac-biet", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(newCTDB) })
+              const item = await res.json()
+              setCongTyDacBiet((p:any) => [...p, item])
+              setNewCTDB({ tenCongTy: "", donGiaTamDon: 0, donGiaTamGiaCong: 0 })
+              setShowAddCTDB(false)
+            }} className="text-xs bg-green-500 text-white px-3 py-1 rounded">Luu</button>}
+            <button onClick={() => setShowAddCTDB(!showAddCTDB)} className="text-xs bg-blue-50 text-blue-600 border border-blue-200 px-2 py-1 rounded">{showAddCTDB ? "Huy" : "+ Them"}</button>
+          </div>
+        </div>
+        {showAddCTDB && (
+          <div className="grid grid-cols-3 gap-2 mb-3 p-3 bg-gray-50 rounded-lg">
+            <input placeholder="Ten cong ty" value={newCTDB.tenCongTy} onChange={e => setNewCTDB((p:any) => ({...p, tenCongTy: e.target.value}))} className="border rounded px-2 py-1 text-xs" />
+            <input placeholder="Don gia tam don" type="number" value={newCTDB.donGiaTamDon || ""} onChange={e => setNewCTDB((p:any) => ({...p, donGiaTamDon: Number(e.target.value)}))} className="border rounded px-2 py-1 text-xs" />
+            <input placeholder="Don gia tam gia cong" type="number" value={newCTDB.donGiaTamGiaCong || ""} onChange={e => setNewCTDB((p:any) => ({...p, donGiaTamGiaCong: Number(e.target.value)}))} className="border rounded px-2 py-1 text-xs" />
+          </div>
+        )}
+        <div className="border rounded-lg overflow-hidden">
+          <table className="w-full text-xs">
+            <thead className="sticky top-0 bg-white z-10"><tr className="bg-gray-50 border-b">
+              <th className="px-4 py-2 text-left text-gray-500">Ten cong ty</th>
+              <th className="px-4 py-2 text-left text-gray-500">Don gia tam don</th>
+              <th className="px-4 py-2 text-left text-gray-500">Don gia tam gia cong</th>
+              <th className="px-4 py-2"></th>
+            </tr></thead>
+            <tbody>
+              {congTyDacBiet.map((r:any) => (
+                <tr key={r.id} className="border-b hover:bg-gray-50">
+                  <td className="px-4 py-2">{editingCTDB?.id===r.id ? <input value={editingCTDB.tenCongTy} onChange={e=>setEditingCTDB((p:any)=>({...p,tenCongTy:e.target.value}))} className="border rounded px-1 py-0.5 w-full text-xs"/> : r.tenCongTy}</td>
+                  <td className="px-4 py-2 font-mono text-blue-600">{editingCTDB?.id===r.id ? <input type="number" value={editingCTDB.donGiaTamDon} onChange={e=>setEditingCTDB((p:any)=>({...p,donGiaTamDon:Number(e.target.value)}))} className="border rounded px-1 py-0.5 w-20 text-xs"/> : r.donGiaTamDon}</td>
+                  <td className="px-4 py-2 font-mono text-orange-600">{editingCTDB?.id===r.id ? <input type="number" value={editingCTDB.donGiaTamGiaCong} onChange={e=>setEditingCTDB((p:any)=>({...p,donGiaTamGiaCong:Number(e.target.value)}))} className="border rounded px-1 py-0.5 w-20 text-xs"/> : r.donGiaTamGiaCong}</td>
+                  <td className="px-4 py-2">
+                    {editingCTDB?.id===r.id
+                      ? <><button onClick={async()=>{ await fetch("/api/cong-ty-dac-biet/"+r.id,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(editingCTDB)}); setCongTyDacBiet((p:any)=>p.map((x:any)=>x.id===r.id?editingCTDB:x)); setEditingCTDB(null) }} className="text-green-600 mr-1">OK</button><button onClick={()=>setEditingCTDB(null)} className="text-gray-400">X</button></>
+                      : <><button onClick={()=>setEditingCTDB({...r})} className="text-orange-400 mr-1 text-xs">sua</button><button onClick={async()=>{ await fetch("/api/cong-ty-dac-biet/"+r.id,{method:"DELETE"}); setCongTyDacBiet((p:any)=>p.filter((x:any)=>x.id!==r.id)) }} className="text-red-400 text-xs">xoa</button></>}
+                  </td>
+                </tr>
+              ))}
+              {congTyDacBiet.length===0 && <tr><td colSpan={4} className="px-4 py-6 text-center text-gray-300">Chua co cong ty nao</td></tr>}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   )

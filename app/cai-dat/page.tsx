@@ -609,33 +609,33 @@ export default function CaiDatPage() {
       <div className="bg-white rounded-xl shadow p-5">
         <div className="flex justify-between items-center mb-3">
           <div>
-            <h2 className="font-semibold text-gray-800 text-sm">Don gia cong ty dac biet (Thep)</h2>
-            <p className="text-xs text-gray-400 mt-0.5">Ap dung cho vat lieu nhom Thep, +6mm thay +10mm</p>
+            <h2 className="font-semibold text-gray-800 text-sm">Đơn giá công ty đặc biệt (Thép)</h2>
+            <p className="text-xs text-gray-400 mt-0.5">Áp dụng cho vật liệu nhóm Thép, +6mm thay +10mm</p>
           </div>
           <div className="flex gap-2">
-            {showAddCTDB && <button onClick={async () => {
+            {!locked && showAddCTDB && <button onClick={async () => {
               const res = await fetch("/api/cong-ty-dac-biet", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(newCTDB) })
               const item = await res.json()
               setCongTyDacBiet((p:any) => [...p, item])
               setNewCTDB({ tenCongTy: "", donGiaTamDon: 0, donGiaTamGiaCong: 0 })
               setShowAddCTDB(false)
-            }} className="text-xs bg-green-500 text-white px-3 py-1 rounded">Luu</button>}
-            <button onClick={() => setShowAddCTDB(!showAddCTDB)} className="text-xs bg-blue-50 text-blue-600 border border-blue-200 px-2 py-1 rounded">{showAddCTDB ? "Huy" : "+ Them"}</button>
+            }} className="text-xs bg-green-500 text-white px-3 py-1 rounded">💾 Lưu</button>}
+{!locked && <button onClick={() => setShowAddCTDB(!showAddCTDB)} className="text-xs bg-blue-50 text-blue-600 border border-blue-200 px-2 py-1 rounded">{showAddCTDB ? "✕ Huỷ" : "+ Thêm"}</button>}
           </div>
         </div>
         {showAddCTDB && (
           <div className="grid grid-cols-3 gap-2 mb-3 p-3 bg-gray-50 rounded-lg">
-            <input placeholder="Ten cong ty" value={newCTDB.tenCongTy} onChange={e => setNewCTDB((p:any) => ({...p, tenCongTy: e.target.value}))} className="border rounded px-2 py-1 text-xs" />
-            <input placeholder="Don gia tam don" type="number" value={newCTDB.donGiaTamDon || ""} onChange={e => setNewCTDB((p:any) => ({...p, donGiaTamDon: Number(e.target.value)}))} className="border rounded px-2 py-1 text-xs" />
-            <input placeholder="Don gia tam gia cong" type="number" value={newCTDB.donGiaTamGiaCong || ""} onChange={e => setNewCTDB((p:any) => ({...p, donGiaTamGiaCong: Number(e.target.value)}))} className="border rounded px-2 py-1 text-xs" />
+            <input placeholder="Tên công ty" value={newCTDB.tenCongTy} onChange={e => setNewCTDB((p:any) => ({...p, tenCongTy: e.target.value}))} className="border rounded px-2 py-1 text-xs" />
+            <input placeholder="Đơn giá tấm đơn" type="number" value={newCTDB.donGiaTamDon || ""} onChange={e => setNewCTDB((p:any) => ({...p, donGiaTamDon: Number(e.target.value)}))} className="border rounded px-2 py-1 text-xs" />
+            <input placeholder="Đơn giá tấm gia công" type="number" value={newCTDB.donGiaTamGiaCong || ""} onChange={e => setNewCTDB((p:any) => ({...p, donGiaTamGiaCong: Number(e.target.value)}))} className="border rounded px-2 py-1 text-xs" />
           </div>
         )}
         <div className="border rounded-lg overflow-hidden">
           <table className="w-full text-xs">
             <thead className="sticky top-0 bg-white z-10"><tr className="bg-gray-50 border-b">
-              <th className="px-4 py-2 text-left text-gray-500">Ten cong ty</th>
-              <th className="px-4 py-2 text-left text-gray-500">Don gia tam don</th>
-              <th className="px-4 py-2 text-left text-gray-500">Don gia tam gia cong</th>
+              <th className="px-4 py-2 text-left text-gray-500">Tên công ty</th>
+              <th className="px-4 py-2 text-left text-gray-500">Đơn giá tấm đơn (¥/kg)</th>
+              <th className="px-4 py-2 text-left text-gray-500">Đơn giá tấm gia công (¥/kg)</th>
               <th className="px-4 py-2"></th>
             </tr></thead>
             <tbody>
@@ -647,7 +647,7 @@ export default function CaiDatPage() {
                   <td className="px-4 py-2">
                     {editingCTDB?.id===r.id
                       ? <><button onClick={async()=>{ await fetch("/api/cong-ty-dac-biet/"+r.id,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(editingCTDB)}); setCongTyDacBiet((p:any)=>p.map((x:any)=>x.id===r.id?editingCTDB:x)); setEditingCTDB(null) }} className="text-green-600 mr-1">OK</button><button onClick={()=>setEditingCTDB(null)} className="text-gray-400">X</button></>
-                      : <><button onClick={()=>setEditingCTDB({...r})} className="text-orange-400 mr-1 text-xs">sua</button><button onClick={async()=>{ await fetch("/api/cong-ty-dac-biet/"+r.id,{method:"DELETE"}); setCongTyDacBiet((p:any)=>p.filter((x:any)=>x.id!==r.id)) }} className="text-red-400 text-xs">xoa</button></>}
+                      : (!locked ? <><button onClick={()=>setEditingCTDB({...r})} className="text-orange-400 mr-1 text-xs">✏️</button><button onClick={async()=>{ await fetch("/api/cong-ty-dac-biet/"+r.id,{method:"DELETE"}); setCongTyDacBiet((p:any)=>p.filter((x:any)=>x.id!==r.id)) }} className="text-red-400 text-xs">✕</button></> : null)}
                   </td>
                 </tr>
               ))}

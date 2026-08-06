@@ -166,7 +166,7 @@ export default function CongCuTinhTienPage() {
         else if(klThucTe<100) heSo=rows[2]?.heSo||0.75
         else if(klThucTe<200) heSo=rows[3]?.heSo||1
         else if(klThucTe<400) heSo=rows[4]?.heSo||1.5
-        return Math.round(heSo*6000)
+        return Math.round(heSo*(Number(panel.cuonGio)||6000))
       })(),
       vatMm: Number(panel.vatMm), giaCongVatDonGia: Number(bgRow?.giaVat) || 1800,
     }, bangGiaOverride)
@@ -306,7 +306,8 @@ export default function CongCuTinhTienPage() {
         else if(klThucTe2<100) hsCuon=cuonRows[2]?.heSo||0.75
         else if(klThucTe2<200) hsCuon=cuonRows[3]?.heSo||1
         else if(klThucTe2<400) hsCuon=cuonRows[4]?.heSo||1.5
-        tienCuon2=Math.round(hsCuon*6000)
+        const donGiaCuon2 = Number(r[13]) || 6000
+        tienCuon2=Math.round(hsCuon*donGiaCuon2)
       }
 
       const calcRes = bgR ? calculatePanel({
@@ -473,7 +474,8 @@ export default function CongCuTinhTienPage() {
   function tinhCuon() {
     if (!result || Number(panel.cuonGio) <= 0) return null
     const heSo = getHeSoCuon(result.klThucTe)
-    const thanhTien = heSo * 6000
+    const donGiaCuon = Number(panel.cuonGio) || 6000
+    const thanhTien = heSo * donGiaCuon
     return { heSo, thanhTien: Math.round(thanhTien) }
   }
   const cuonResult = tinhCuon()
@@ -790,16 +792,17 @@ export default function CongCuTinhTienPage() {
             <div className="border rounded-lg p-2 flex flex-col">
               <p className="text-xs font-bold text-blue-600 mb-1.5">● CUỘN</p>
               <label className="text-xs text-gray-400">Loại gia công</label>
-              <select value={Number(panel.cuonGio) > 0 ? '1' : '0'}
-                onChange={e => setPanel((p:any) => ({...p, cuonGio: e.target.value === '1' ? 1 : 0}))}
+              <select value={String(panel.cuonGio)}
+                onChange={e => setPanel((p:any) => ({...p, cuonGio: Number(e.target.value)}))}
                 className={inp}>
                 <option value="0">Không gia công cuộn</option>
-                <option value="1">Có gia công cuộn</option>
+                <option value="6000">Gia công cuộn nửa hình</option>
+                <option value="12000">Gia công cuộn cả hình</option>
               </select>
               <label className="text-xs text-gray-400 mt-1.5">Thời gian (H)</label>
               <input readOnly value={cuonResult ? cuonResult.heSo : '0'} className={inpRo} />
               <label className="text-xs text-gray-400 mt-1.5">Đơn giá (¥/giờ)</label>
-              <input readOnly value="6000" className={inpRo} />
+              <input readOnly value={Number(panel.cuonGio) > 0 ? Number(panel.cuonGio).toLocaleString() : "6000"} className={inpRo} />
               <div className={thanhTien}>
                 <p className="text-xs text-gray-400">Thành tiền (× SL)</p>
                 <div className="bg-orange-50 rounded px-2 py-1 font-mono text-orange-600 font-semibold">¥ {cuonResult ? fmt(cuonResult.thanhTien) : 0}</div>
@@ -1052,7 +1055,7 @@ export default function CongCuTinhTienPage() {
                   ['Số lỗ Tappu', modalPanel.soLoTappu],
                   ['Số lỗ Sara', modalPanel.soLoSara],
                   ['Chiều dài vát (mm)', modalPanel.vatMm],
-                  ['Có cuộn', modalPanel.cuonGio > 0 ? 'Có' : 'Không'],
+                  ['Loại cuộn', modalPanel.cuonGio === 6000 ? 'Nửa hình' : modalPanel.cuonGio === 12000 ? 'Cả hình' : 'Không'],
                 ].map(([label, val]) => (
                   <div key={label} className="flex justify-between py-1 border-b border-gray-50">
                     <span className="text-gray-400">{label}</span>

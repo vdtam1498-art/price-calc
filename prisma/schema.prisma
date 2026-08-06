@@ -114,3 +114,11 @@ model HeSoGiaVL {
   tenLoai String @unique
   heSo    Float
 }
+
+model CongTyDacBiet {
+  id               Int      @id @default(autoincrement())
+  tenCongTy        String
+  donGiaTamDon     Float    @default(0)
+  donGiaTamGiaCong Float    @default(0)
+  createdAt        DateTime @default(now())
+}

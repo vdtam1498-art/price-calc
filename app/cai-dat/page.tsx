@@ -138,6 +138,17 @@ export default function CaiDatPage() {
   }
 
   // CRUD bang gia
+  async function exportExcel() {
+    const XLSX = await import('xlsx')
+    const headers = ['Vật liệu','Độ dày','Đơn giá','Giá uốn','Giá cắt','Giá mở lỗ','Tappu/Sara','Giá vát','Tỷ trọng']
+    const rows = bangGia.map((r: any) => [
+      r.vatLieu, r.doDay, r.donGia, r.giaUon, r.giaCat, r.giaMoLo, r.giaTappu, r.giaVat, r.tyTrong
+    ])
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows])
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, 'BangGiaVL')
+    XLSX.writeFile(wb, 'bang_gia_vat_lieu.xlsx')
+  }
   async function handleImportExcel(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
@@ -288,6 +299,7 @@ export default function CaiDatPage() {
             <input value={searchBG} onChange={e => setSearchBG(e.target.value)}
               placeholder="Tìm vật liệu, độ dày..."
               className="border rounded px-2 py-1 text-xs w-40 focus:outline-none focus:ring-1 focus:ring-blue-400" />
+<button onClick={exportExcel} className="text-xs px-3 py-1 rounded border bg-green-50 text-green-600 border-green-200 hover:bg-green-100">📤 Export Excel</button>
             <label className={`text-xs px-3 py-1 rounded cursor-pointer border ${importing ? 'bg-gray-100 text-gray-400' : 'bg-purple-50 text-purple-600 border-purple-200 hover:bg-purple-100'}`}>
               {importing ? '⏳ Đang import...' : '📥 Import Excel'}
               <input type="file" accept=".xlsx,.xls" className="hidden" onChange={handleImportExcel} disabled={importing} />

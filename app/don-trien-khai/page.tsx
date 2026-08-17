@@ -32,20 +32,24 @@ export default function DonBaoGiaPage() {
   const fmt = (n: number) => Math.round(n).toLocaleString()
 
   function exportCSV(dh: any) {
-    const header = ['エクスポート用','数量','材質','板厚','noと安全','曲げ','X','Y','','単価']
+    const header = ['エクスポート用','数量','材質','板厚','noと安全','曲げ','X','Y','','単価','','切板重量','曲げ重量']
     const rows = dh.panels.map((p: any) => {
       const hasCuon = p.cuonGio > 0
       const hasPitchi = (p.pitchiGio || 0) > 0
       const hasUon = p.be && p.be.some((b:any) => b.daiMm > 0)
       const hasTappu = p.soLoTappu > 0
       const hasSara = p.soLoSara > 0
+      const hasGiaCong = hasCuon || hasPitchi || hasUon || hasTappu || hasSara
       const gcList = []
       if (hasCuon) gcList.push('r')
       if (hasPitchi || hasUon) gcList.push('m')
       if (hasTappu) gcList.push('t')
       if (hasSara) gcList.push('s')
       const gcStr = gcList.length >= 2 ? '*' : gcList.join('')
-      return [p.tenTam, p.soLuong, p.vatLieu, p.doDay, dh.maDon + '-', gcStr, p.x, p.y, '', Math.round(p.gia1Tam)]
+      const klTong = p.klThucTe > 0 ? Math.round(p.klThucTe * p.soLuong * 1000) / 1000 : ''
+      const klTamDon = !hasGiaCong ? klTong : ''
+      const klTamGiaCong = hasGiaCong ? klTong : ''
+      return [p.tenTam, p.soLuong, p.vatLieu, p.doDay, dh.maDon + '-', gcStr, p.x, p.y, '', Math.round(p.gia1Tam), '', klTamDon, klTamGiaCong]
     })
     const csv = [header, ...rows].map(r => r.join(',')).join('\n')
     const blob = new Blob(['\uFEFF'+csv], { type: 'text/csv;charset=utf-8' })

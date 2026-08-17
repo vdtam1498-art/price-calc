@@ -10,8 +10,14 @@ export default function DonBaoGiaPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // Xóa đơn trống trước khi load
     fetch('/api/don-hang')
       .then(r => r.json())
+      .then(async data => {
+        const empty = data.filter((d: any) => d.panels?.length === 0)
+        await Promise.all(empty.map((d: any) => fetch('/api/don-hang/' + d.id, { method: 'DELETE' })))
+        return fetch('/api/don-hang').then(r => r.json())
+      })
       .then(data => {
         setDonHangs(data.filter((d: any) => d.loaiDon === 'bao_gia' || !d.loaiDon))
         setLoading(false)

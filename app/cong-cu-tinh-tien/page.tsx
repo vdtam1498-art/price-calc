@@ -15,6 +15,7 @@ export default function CongCuTinhTienPage() {
   const [donHang, setDonHang] = useState<any>(null)
   const [bangGia, setBangGia] = useState<any[]>([])
   const [congTyList, setCongTyList] = useState<any[]>([])
+  const [congTyDacBietList, setCongTyDacBietList] = useState<any[]>([])
   const [form, setForm] = useState({ maDon: '', tenCongTy: '', ghiChu: '', loaiDon: 'bao_gia' })
   const [showCTDropdown, setShowCTDropdown] = useState(false)
   const [panel, setPanel] = useState<any>(emptyPanel())
@@ -51,6 +52,7 @@ export default function CongCuTinhTienPage() {
   useEffect(() => {
     fetch('/api/bang-gia').then(r => r.json()).then(setBangGia)
     fetch('/api/cong-ty').then(r => r.json()).then(setCongTyList)
+    fetch('/api/cong-ty-dac-biet').then(r => r.json()).then(setCongTyDacBietList)
     fetch('/api/heso-gia-vl').then(r => r.json()).then(setHesoGiaVL)
     fetch('/api/heso-cuon').then(r => r.json()).then(setHesoCuonDB)
     fetch('/api/heso-pitchi').then(r => r.json()).then(setHesoPitchiDB)
@@ -84,6 +86,8 @@ export default function CongCuTinhTienPage() {
   const bgRow = bangGia.find(r => r.vatLieu === panel.vatLieu && r.doDay === Number(panel.doDay))
   const congTy = congTyList.find(c => c.tenCongTy === donHang?.tenCongTy)
   const isUuDai = congTy?.isUuDai || false
+  const congTyDB = congTyDacBietList.find(c => c.tenCongTy === donHang?.tenCongTy)
+  const isDacBiet = !!congTyDB
   const loQuyDoi = Number(panel.loNho) + Number(panel.loLon) * 1.5
 
   const heSoLabel = () => {
@@ -109,7 +113,10 @@ export default function CongCuTinhTienPage() {
     const isSUS = vl.includes('SUS')
     const isHanwa = (donHang?.tenCongTy || '').toLowerCase().startsWith('hanwa')
     const isDatNgoai = bgRow?.donGia === 0
-    if (isDatNgoai && donGiaDatNgoai > 0) {
+    if (isDacBiet) {
+      // Công ty đặc biệt: tính riêng bên dưới, heSoVL không dùng
+      heSoVL = 1
+    } else if (isDatNgoai && donGiaDatNgoai > 0) {
       // Đặt ngoài: hệ số cố định theo nhóm VL
       heSoVL = (isSUS || panel.vatLieu.toUpperCase().startsWith('A')) ? 1.2 : 1.3
     } else if (isUuDai) {
@@ -118,8 +125,21 @@ export default function CongCuTinhTienPage() {
       heSoVL = isSUS ? getHSVL('Không ưu đãi SUS') : getHSVL('Không ưu đãi SS')
     }
 
+    // Tính KL đặc biệt (+6 thay +10) cho công ty đặc biệt
+    const hasGiaCong = (panel.be && panel.be.some((b:any) => b.daiMm > 0)) ||
+      Number(panel.pitchiSoLan) > 0 || Number(panel.soLoTappu) > 0 ||
+      Number(panel.soLoSara) > 0 || Number(panel.cuonGio) > 0
+
+    const bangGiaOverride2 = isDacBiet && bgRow ? (() => {
+      const donGiaDB = hasGiaCong ? congTyDB.donGiaTamGiaCong : congTyDB.donGiaTamDon
+      const klDB = ((Number(panel.x)+6)*(Number(panel.y)+6)*Number(panel.doDay)*(bgRow.tyTrong||7.85))/1_000_000
+      // Tạo fake bgRow với donGia = donGiaDB/klDB để calculatePanel tính đúng
+      return bangGia.map((r:any) => r.vatLieu === panel.vatLieu && r.doDay === Number(panel.doDay)
+        ? {...r, donGia: donGiaDB} : r)
+    })() : null
+
     // Override bangGia nếu đặt ngoài và đã nhập giá
-    const bangGiaOverride = (bgRow?.donGia === 0 && donGiaDatNgoai > 0)
+    const bangGiaOverride = bangGiaOverride2 || ((bgRow?.donGia === 0 && donGiaDatNgoai > 0))
       ? bangGia.map((r:any) => r.vatLieu === panel.vatLieu && r.doDay === Number(panel.doDay) ? {...r, donGia: donGiaDatNgoai} : r)
       : bangGia
     const res = calculatePanel({
@@ -169,9 +189,22 @@ export default function CongCuTinhTienPage() {
         return Math.round(heSo*(Number(panel.cuonGio)||6000))
       })(),
       vatMm: Number(panel.vatMm), giaCongVatDonGia: Number(bgRow?.giaVat) || 1800,
-    }, bangGiaOverride)
+    }, bangGiaOverride2 || bangGiaOverride)
+
+    // Nếu công ty đặc biệt: override tienVL với KL+6
+    if (isDacBiet && bgRow && res) {
+      const donGiaDB = hasGiaCong ? congTyDB.donGiaTamGiaCong : congTyDB.donGiaTamDon
+      const klDB = ((Number(panel.x)+6)*(Number(panel.y)+6)*Number(panel.doDay)*(bgRow.tyTrong||7.85))/1_000_000
+      const tienVLDB = donGiaDB * klDB
+      const gia1TamDB = tienVLDB + res.tienCatLaser + res.tongGiaCong
+      res.tienVL = tienVLDB
+      res.klThucTe = klDB
+      res.donGiaVLFinal = donGiaDB
+      res.gia1Tam = gia1TamDB
+      res.allIn = gia1TamDB * Number(panel.soLuong)
+    }
     setResult(res)
-  }, [panel, bangGia, isUuDai, bgRow, donGiaDatNgoai])
+  }, [panel, bangGia, isUuDai, bgRow, donGiaDatNgoai, isDacBiet, congTyDB])
 
   async function taoDon() {
     if (!form.maDon) return alert('Vui lòng nhập mã đơn hàng')
@@ -567,6 +600,7 @@ export default function CongCuTinhTienPage() {
               <div className="flex items-center gap-1">
                 <span className="text-xs text-gray-700 font-medium">{donHang.tenCongTy}</span>
                 {congTy?.tiengNhat && <span className="text-xs text-gray-400">({congTy.tiengNhat})</span>}
+                {isDacBiet && <span className="bg-purple-100 text-purple-700 text-xs px-1.5 py-0.5 rounded">⭐ Công ty đặc biệt</span>}
                 {congTy?.isUuDai && (() => {
                   const isSUS = panel.vatLieu.toUpperCase().includes('SUS')
                   const isHanwa = (donHang.tenCongTy || '').toLowerCase().startsWith('hanwa')

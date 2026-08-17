@@ -206,6 +206,21 @@ export default function CongCuTinhTienPage() {
     setResult(res)
   }, [panel, bangGia, isUuDai, bgRow, donGiaDatNgoai, isDacBiet, congTyDB])
 
+  // Tự xóa đơn trống sau 1 phút
+  useEffect(() => {
+    if (!donHang?.id) return
+    if (donHang.panels?.length > 0) return
+    const timer = setTimeout(async () => {
+      // Kiểm tra lại xem đơn vẫn còn trống không
+      const check = await fetch('/api/don-hang/' + donHang.id).then(r => r.json()).catch(() => null)
+      if (check && check.panels?.length === 0) {
+        await fetch('/api/don-hang/' + donHang.id, { method: 'DELETE' }).catch(() => {})
+        console.log('Auto deleted empty order:', donHang.maDon)
+      }
+    }, 60000) // 1 phút
+    return () => clearTimeout(timer)
+  }, [donHang?.id, donHang?.panels?.length])
+
   async function taoDon() {
     if (!form.maDon) return alert('Vui lòng nhập mã đơn hàng')
     const res = await fetch('/api/don-hang', {

@@ -620,7 +620,7 @@ export default function CongCuTinhTienPage() {
                   <span className="bg-gray-100 text-gray-600 text-xs px-1.5 py-0.5 rounded">Tính theo khối lượng</span>
                   <span className="bg-blue-50 text-blue-600 text-xs px-1.5 py-0.5 rounded">Tấm đơn: ¥{congTyDB?.donGiaTamDon}/kg</span>
                   <span className="bg-orange-50 text-orange-600 text-xs px-1.5 py-0.5 rounded">Tấm bẻ: ¥{congTyDB?.donGiaTamGiaCong}/kg</span>
-                </>
+                </>}
                 {congTy?.isUuDai && (() => {
                   const isSUS = panel.vatLieu.toUpperCase().includes('SUS')
                   const isHanwa = (donHang.tenCongTy || '').toLowerCase().startsWith('hanwa')

@@ -615,7 +615,12 @@ export default function CongCuTinhTienPage() {
               <div className="flex items-center gap-1">
                 <span className="text-xs text-gray-700 font-medium">{donHang.tenCongTy}</span>
                 {congTy?.tiengNhat && <span className="text-xs text-gray-400">({congTy.tiengNhat})</span>}
-                {isDacBiet && <span className="bg-purple-100 text-purple-700 text-xs px-1.5 py-0.5 rounded">⭐ Công ty đặc biệt</span>}
+                {isDacBiet && <>
+                  <span className="bg-purple-100 text-purple-700 text-xs px-1.5 py-0.5 rounded">⭐ Công ty đặc biệt</span>
+                  <span className="bg-gray-100 text-gray-600 text-xs px-1.5 py-0.5 rounded">Tính theo khối lượng</span>
+                  <span className="bg-blue-50 text-blue-600 text-xs px-1.5 py-0.5 rounded">Tấm đơn: ¥{congTyDB?.donGiaTamDon}/kg</span>
+                  <span className="bg-orange-50 text-orange-600 text-xs px-1.5 py-0.5 rounded">Tấm bẻ: ¥{congTyDB?.donGiaTamGiaCong}/kg</span>
+                </>
                 {congTy?.isUuDai && (() => {
                   const isSUS = panel.vatLieu.toUpperCase().includes('SUS')
                   const isHanwa = (donHang.tenCongTy || '').toLowerCase().startsWith('hanwa')

@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { calculatePanel } from '@/lib/calculate'
 
 
@@ -11,6 +11,10 @@ const emptyPanel = (maDon?: string, nextNum?: number) => ({
   be: [{ soDuong: 1, daiMm: 0, donGia: 0 }]
 })
 
+function sortPanels(dh: any) {
+  if (!dh?.panels) return dh
+  return { ...dh, panels: [...dh.panels].sort((a: any, b: any) => a.id - b.id) }
+}
 export default function CongCuTinhTienPage() {
   const [donHang, setDonHang] = useState<any>(null)
   const [bangGia, setBangGia] = useState<any[]>([])
@@ -18,6 +22,7 @@ export default function CongCuTinhTienPage() {
   const [congTyDacBietList, setCongTyDacBietList] = useState<any[]>([])
   const [form, setForm] = useState({ maDon: '', tenCongTy: '', ghiChu: '', loaiDon: 'bao_gia' })
   const [showCTDropdown, setShowCTDropdown] = useState(false)
+  const [showEditCTDropdown, setShowEditCTDropdown] = useState(false)
   const [panel, setPanel] = useState<any>(emptyPanel())
   const [result, setResult] = useState<any>(null)
   const [modalPanel, setModalPanel] = useState<any>(null)
@@ -27,6 +32,11 @@ export default function CongCuTinhTienPage() {
   const [showModalDatNgoai, setShowModalDatNgoai] = useState(false)
   const [inputDatNgoai, setInputDatNgoai] = useState('')
   const [importing, setImporting] = useState(false)
+  const [showExportMenu, setShowExportMenu] = useState(false)
+  const [editMaDon, setEditMaDon] = useState('')
+  const [editTenCongTy, setEditTenCongTy] = useState('')
+  const [editingHeader, setEditingHeader] = useState(false)
+  const exportMenuRef = useRef<HTMLDivElement>(null)
   const [ngayGiao, setNgayGiao] = useState('3-4')
   const [tuVanNgay, setTuVanNgay] = useState(false)
   const [copyingImg, setCopyingImg] = useState(false)
@@ -200,8 +210,8 @@ export default function CongCuTinhTienPage() {
       res.tienVL = tienVLDB
       res.klThucTe = klDB
       res.donGiaVLFinal = donGiaDB
-      res.gia1Tam = gia1TamDB
-      res.allIn = gia1TamDB * Number(panel.soLuong)
+      res.gia1Tam = Math.round(gia1TamDB / 10) * 10
+      res.allIn = (Math.round(gia1TamDB / 10) * 10) * Number(panel.soLuong)
     }
     setResult(res)
   }, [panel, bangGia, isUuDai, bgRow, donGiaDatNgoai, isDacBiet, congTyDB])
@@ -238,6 +248,7 @@ export default function CongCuTinhTienPage() {
     setSaving(true)
     const body = JSON.stringify({
         donHangId: donHang.id,
+        maDonGoc: donHang.maDon,
         tenTam: panel.tenTam || ('Tấm ' + (donHang.panels.length + 1)),
         soLuong: Number(panel.soLuong), vatLieu: panel.vatLieu,
         doDay: Number(panel.doDay), x: Number(panel.x), y: Number(panel.y),
@@ -249,9 +260,15 @@ export default function CongCuTinhTienPage() {
         giaCong: result.tongGiaCong, gia1Tam: result.gia1Tam, allIn: result.allIn,
     })
     if (editingPanelId) {
-      await fetch('/api/panels/' + editingPanelId, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body })
+      const putRes = await fetch('/api/panels/' + editingPanelId, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body })
+      if (!putRes.ok) { alert('Lỗi lưu tấm, vui lòng thử lại!'); setSaving(false); return }
     } else {
-      await fetch('/api/panels', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body })
+      const postRes = await fetch('/api/panels', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body })
+      if (!postRes.ok) { alert('Lỗi lưu tấm, vui lòng thử lại!'); setSaving(false); return }
+      const postData = await postRes.json()
+      if (postData.donHangId && postData.donHangId !== donHang.id) {
+        donHang.id = postData.donHangId
+      }
     }
     const updated = await fetch('/api/don-hang/' + donHang.id).then(r => r.json())
     setDonHang(sortPanels(updated))
@@ -260,6 +277,46 @@ export default function CongCuTinhTienPage() {
     setSaving(false)
   }
 
+  useEffect(() => {
+    if (!showExportMenu) return
+    function handleClick(e: MouseEvent) {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(e.target as Node)) {
+        setShowExportMenu(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [showExportMenu])
+
+  function exportCSVInline(dh: any) {
+    if (!dh || !dh.panels || dh.panels.length === 0) return
+    const header = ['エクスポート用','数量','材質','板厚','noと安全','曲げ','X','Y','','単価']
+    const rows = dh.panels.map((p: any) => {
+      const gcList = []
+      if (p.cuonGio > 0) gcList.push('r')
+      if ((p.pitchiGio || 0) > 0 || (p.be && p.be.some((b:any) => b.daiMm > 0))) gcList.push('m')
+      if (p.soLoTappu > 0) gcList.push('t')
+      if (p.soLoSara > 0) gcList.push('s')
+      const gcStr = gcList.length >= 2 ? '*' : gcList.join('')
+      return [p.tenTam, p.soLuong, p.vatLieu, p.doDay, dh.maDon + '-', gcStr, p.x, p.y, '', Math.round(p.gia1Tam)]
+    })
+    const csv = [header, ...rows].map((r: any) => r.join(',')).join('\n')
+    const blob = new Blob(['\uFEFF'+csv], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a'); a.href = url
+    a.download = dh.maDon + '.csv'; a.click()
+  }
+  async function saveHeader() {
+    if (!donHang) return
+    await fetch('/api/don-hang/' + donHang.id, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ maDon: editMaDon || donHang.maDon, tenCongTy: editTenCongTy })
+    })
+    const updated = await fetch('/api/don-hang/' + donHang.id).then(r => r.json())
+    setDonHang(sortPanels(updated))
+    setEditingHeader(false)
+  }
   function downloadTemplate() {
     const headers = ['Tên tấm','Vật liệu','Độ dày','X (mm)','Y (mm)','Số lượng','Lỗ nhỏ','Lỗ lớn','Lỗ Tappu','Lỗ Sara','Pitchi - Số lần','Pitchi - Chiều dài (mm)','Loại gia công','Có cuộn (1/0)','Vát (mm)','Bẻ1 - Số đường','Bẻ1 - Dài (mm)','Bẻ2 - Số đường','Bẻ2 - Dài (mm)','Bẻ3 - Số đường','Bẻ3 - Dài (mm)']
     const example = [donHang?.maDon+'-1','SPCC','1.2','500','300','1','0','0','0','0','0','0','Pitchi','0','0','1','500','0','0','0','0']
@@ -367,6 +424,7 @@ export default function CongCuTinhTienPage() {
 
       const body = {
         donHangId: donHang.id,
+        maDonGoc: donHang.maDon,
         tenTam: String(r[0] || ''),
         vatLieu, doDay, x, y, soLuong,
         maKhach: '', loNho, loLon, soLoTappu, soLoSara,
@@ -380,10 +438,26 @@ export default function CongCuTinhTienPage() {
         pitchiGio: tienPitchi2, donGiaDatNgoai: 0,
         donGiaVL: calcRes?.donGiaVLFinal || 0, klThucTe: calcRes?.klThucTe || 0,
       }
-      await fetch('/api/panels', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      const impRes = await fetch('/api/panels', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      if (impRes.ok) {
+        const impData = await impRes.json()
+        if (impData.donHangId && impData.donHangId !== donHang.id) {
+          donHang.id = impData.donHangId
+        }
+      }
     }
     const updated = await fetch('/api/don-hang/' + donHang.id).then(r => r.json())
-    setDonHang(sortPanels(updated))
+    // Giữ đúng thứ tự Excel
+    const tenTamOrder = rows.map((r: any) => String(r[0] || ''))
+    const sortedPanels = [...(updated.panels || [])].sort((a: any, b: any) => {
+      const ia = tenTamOrder.indexOf(a.tenTam)
+      const ib = tenTamOrder.indexOf(b.tenTam)
+      if (ia === -1 && ib === -1) return 0
+      if (ia === -1) return 1
+      if (ib === -1) return -1
+      return ia - ib
+    })
+    setDonHang({ ...updated, panels: sortedPanels })
     setPanel(emptyPanel(updated.maDon, updated.panels.length === 0 ? 1 : Math.max(...updated.panels.map((p:any) => { const n = parseInt(p.tenTam?.split('-').pop()); return isNaN(n) ? 0 : n })) + 1))
     setImporting(false)
     e.target.value = ''
@@ -445,7 +519,7 @@ export default function CongCuTinhTienPage() {
     // Hàng 4
     const hang4 = `${vatLieu}	PL${doDay}`
 
-    const lines = [hang1, hang2, hang3, hang4].filter(l => l !== '')
+    const lines = [p.tenTam || '', hang1, hang2, hang3, hang4].filter(l => l !== '')
     const text = lines.join('\n')
 
     navigator.clipboard.writeText(text).catch(() => {
@@ -609,8 +683,45 @@ export default function CongCuTinhTienPage() {
   <div className="flex items-center gap-2">
             <span className="text-sm font-semibold text-gray-700">Công cụ tính tiền</span>
             <span className="text-xs text-gray-400">|</span>
-            <span className="text-sm font-bold text-blue-600">{donHang.maDon}</span>
-            {donHang.tenCongTy && <>
+            {editingHeader ? (
+              <>
+                <input autoFocus value={editMaDon} onChange={e => setEditMaDon(e.target.value)}
+                  onKeyDown={e => e.key==='Enter' && saveHeader()}
+                  className="text-sm font-bold text-blue-600 border-b border-blue-400 outline-none bg-transparent w-28" />
+                <span className="relative inline-block ml-2">
+                  <input value={editTenCongTy}
+                    onChange={e => { setEditTenCongTy(e.target.value); setShowEditCTDropdown(true) }}
+                    onFocus={() => setShowEditCTDropdown(true)}
+                    onBlur={() => setTimeout(() => setShowEditCTDropdown(false), 200)}
+                    onKeyDown={e => e.key==='Enter' && saveHeader()}
+                    placeholder="Tên công ty..."
+                    className="text-xs text-gray-700 border-b border-gray-400 outline-none bg-transparent w-36" />
+                  {showEditCTDropdown ? (
+                    <div className="absolute z-50 w-56 bg-white border rounded-lg shadow-lg mt-1 max-h-48 overflow-y-auto">
+                      {congTyList.filter(ct =>
+                        editTenCongTy === '' ||
+                        ct.tenCongTy.toLowerCase().includes(editTenCongTy.toLowerCase()) ||
+                        (ct.tiengNhat && ct.tiengNhat.includes(editTenCongTy))
+                      ).map((ct:any) => (
+                        <div key={ct.id} onClick={() => { setEditTenCongTy(ct.tenCongTy); setShowEditCTDropdown(false) }}
+                          className="px-3 py-2 hover:bg-blue-50 cursor-pointer border-b last:border-0">
+                          <p className="text-xs font-medium text-gray-800">{ct.tenCongTy}</p>
+                          {ct.tiengNhat && <p className="text-xs text-gray-400">{ct.tiengNhat}</p>}
+                          {ct.isUuDai && <span className="text-xs bg-green-100 text-green-600 px-1 rounded">Ưu đãi</span>}
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+                </span>
+                <button onClick={saveHeader} className="text-xs text-blue-600 hover:text-blue-800 ml-1">✓</button>
+                <button onClick={() => setEditingHeader(false)} className="text-xs text-gray-400 hover:text-gray-600">✕</button>
+              </>
+            ) : (
+              <span className="text-sm font-bold text-blue-600 cursor-pointer hover:underline"
+                onClick={() => { setEditMaDon(donHang.maDon); setEditTenCongTy(donHang.tenCongTy||''); setEditingHeader(true) }}
+                title="Click để sửa mã đơn / tên công ty">{donHang.maDon} ✎</span>
+            )}
+            {donHang.tenCongTy && !editingHeader && <>
               <span className="text-xs text-gray-400">·</span>
               <div className="flex items-center gap-1">
                 <span className="text-xs text-gray-700 font-medium">{donHang.tenCongTy}</span>
@@ -634,13 +745,26 @@ export default function CongCuTinhTienPage() {
           </div>
           <div className="flex gap-2">
             <button onClick={() => setShowModalHuy(true)}
-              className="border bg-white text-red-500 border-red-200 px-3 py-1.5 rounded-lg text-xs hover:bg-red-50">✕ Huỷ đơn</button>
+              className="hidden">✕ Huỷ đơn</button>
             <button onClick={() => setDonHang(null)} className="border bg-white px-3 py-1.5 rounded-lg text-xs hover:bg-gray-50">🗂 Lưu đơn hàng</button>
-            <button onClick={downloadTemplate} className="border bg-white text-blue-600 border-blue-200 px-3 py-1.5 rounded-lg text-xs hover:bg-blue-50">📋 Tải template</button>
-            <label className={`text-xs px-3 py-1.5 rounded-lg cursor-pointer border ${importing ? 'bg-gray-100 text-gray-400 border-gray-200' : 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700'}`}>
-              {importing ? '⏳ Đang import...' : '↑ Import Excel'}
-              <input type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleImportExcel} disabled={importing} />
-            </label>
+            <div className="relative" ref={exportMenuRef}>
+              <button onClick={() => setShowExportMenu(v => !v)} className="border bg-white text-green-600 border-green-200 px-3 py-1.5 rounded-lg text-xs hover:bg-green-50">📊 Export ▾</button>
+              {showExportMenu && (
+                <div className="absolute left-0 top-full mt-1 bg-white border rounded-lg shadow-lg z-50 min-w-[170px]">
+                  <button onClick={() => { exportCSVInline(donHang); setShowExportMenu(false) }}
+                    className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 border-b">📊 Export Excel</button>
+                  <button onClick={() => { alert('Mẫu vận chuyển sẽ được cung cấp sau!'); setShowExportMenu(false) }}
+                    className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 text-gray-400">🚚 Export Vận chuyển <span className="text-gray-300">(sắp có)</span></button>
+                </div>
+              )}
+            </div>
+            <div className="relative flex">
+              <label className={`text-xs px-3 py-1.5 rounded-l-lg cursor-pointer border-y border-l ${importing ? 'bg-gray-100 text-gray-400 border-gray-200' : 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700'}`}>
+                {importing ? '⏳ Đang import...' : '↑ Import Excel'}
+                <input type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleImportExcel} disabled={importing} />
+              </label>
+              <button onClick={downloadTemplate} className="text-xs px-2 py-1.5 rounded-r-lg border border-blue-300 bg-blue-50 text-blue-600 hover:bg-blue-100 border-l-0" title="Tải template">📋</button>
+            </div>
           </div>
         </div>
 
@@ -720,7 +844,7 @@ export default function CongCuTinhTienPage() {
           {/* Row 1: 4 card cùng chiều cao */}
           <div className="grid grid-cols-4 gap-2 mb-2">
             {/* Lỗ cắt */}
-            <div className="border rounded-lg p-2 flex flex-col">
+            <div className={`border rounded-lg p-2 flex flex-col transition-colors ${result && result.tienLoCat > 0 ? "bg-blue-50 border-blue-300" : ""}`}>
               <p className="text-xs font-bold text-blue-600 mb-1.5">● LỖ CẮT</p>
               <label className="text-xs text-gray-400">Lỗ nhỏ (&lt;Ø30)</label>
               <input type="number" value={panel.loNho} onChange={e => setPanel((p:any) => ({...p, loNho: e.target.value}))} className={inp} />
@@ -737,7 +861,7 @@ export default function CongCuTinhTienPage() {
             </div>
 
             {/* Tappu */}
-            <div className="border rounded-lg p-2 flex flex-col">
+            <div className={`border rounded-lg p-2 flex flex-col transition-colors ${result && result.tienTappu > 0 ? "bg-blue-50 border-blue-300" : ""}`}>
               <p className="text-xs font-bold text-blue-600 mb-1.5">● LỖ TAPPU</p>
               <label className="text-xs text-gray-400">Số lỗ</label>
               <input type="number" value={panel.soLoTappu} onChange={e => setPanel((p:any) => ({...p, soLoTappu: e.target.value}))} className={inp} />
@@ -750,7 +874,7 @@ export default function CongCuTinhTienPage() {
             </div>
 
             {/* Sara */}
-            <div className="border rounded-lg p-2 flex flex-col">
+            <div className={`border rounded-lg p-2 flex flex-col transition-colors ${result && result.tienSara > 0 ? "bg-blue-50 border-blue-300" : ""}`}>
               <p className="text-xs font-bold text-blue-600 mb-1.5">● LỖ SARA</p>
               <label className="text-xs text-gray-400">Số lỗ</label>
               <input type="number" value={panel.soLoSara} onChange={e => setPanel((p:any) => ({...p, soLoSara: e.target.value}))} className={inp} />
@@ -763,7 +887,7 @@ export default function CongCuTinhTienPage() {
             </div>
 
             {/* Cắt Laser */}
-            <div className="border rounded-lg p-2 flex flex-col">
+            <div className={`border rounded-lg p-2 flex flex-col transition-colors ${result && result.tienCatLaser > 0 ? "bg-blue-50 border-blue-300" : ""}`}>
               <p className="text-xs font-bold text-blue-600 mb-1.5">● CẮT LASER / CNC</p>
               <label className="text-xs text-gray-400">Đơn giá cắt (¥/M)</label>
               <input readOnly value={bgRow ? bgRow.giaCat : '— theo bảng giá'} className={inpRo} />
@@ -777,7 +901,7 @@ export default function CongCuTinhTienPage() {
           {/* Row 2: Bẻ/Uốn + Pitchi + Cuộn + Gia công vát cùng 1 hàng */}
           <div className="grid grid-cols-4 gap-2">
             {/* Bẻ/Uốn */}
-            <div className="border rounded-lg p-2 flex flex-col">
+            <div className={`border rounded-lg p-2 flex flex-col transition-colors ${result && result.tienBe > 0 ? "bg-blue-50 border-blue-300" : ""}`}>
               <div className="flex justify-between items-center mb-1.5">
                 <p className="text-xs font-bold text-blue-600">● BẺ / UỐN</p>
                 <button onClick={() => setPanel((p:any) => ({...p, be: [...p.be, { soDuong: 1, daiMm: 0, donGia: 0 }]}))}
@@ -818,7 +942,7 @@ export default function CongCuTinhTienPage() {
             </div>
 
             {/* Pitchi */}
-            <div className="border rounded-lg p-2 flex flex-col">
+            <div className={`border rounded-lg p-2 flex flex-col transition-colors ${pitchiResult && pitchiResult.thanhTien > 0 ? "bg-blue-50 border-blue-300" : ""}`}>
               <p className="text-xs font-bold text-blue-600 mb-1.5">● PITCHI</p>
               <label className="text-xs text-gray-400">Loại gia công</label>
               <select value={panel.loaiGiaCong} onChange={e => setPanel((p:any) => ({...p, loaiGiaCong: e.target.value}))} className={inp}>
@@ -843,7 +967,7 @@ export default function CongCuTinhTienPage() {
             </div>
 
             {/* Cuộn */}
-            <div className="border rounded-lg p-2 flex flex-col">
+            <div className={`border rounded-lg p-2 flex flex-col transition-colors ${cuonResult && cuonResult.thanhTien > 0 ? "bg-blue-50 border-blue-300" : ""}`}>
               <p className="text-xs font-bold text-blue-600 mb-1.5">● CUỘN</p>
               <label className="text-xs text-gray-400">Loại gia công</label>
               <select value={String(panel.cuonGio)}
@@ -864,7 +988,7 @@ export default function CongCuTinhTienPage() {
             </div>
 
             {/* Gia công vát */}
-            <div className="border rounded-lg p-2 flex flex-col">
+            <div className={`border rounded-lg p-2 flex flex-col transition-colors ${result && result.tienVat > 0 ? "bg-blue-50 border-blue-300" : ""}`}>
               <p className="text-xs font-bold text-blue-600 mb-1.5">● GIA CÔNG VÁT</p>
               <label className="text-xs text-gray-400">Chiều dài vát (MM)</label>
               <input type="number" value={panel.vatMm} onChange={e => setPanel((p:any) => ({...p, vatMm: e.target.value}))} className={inp} />
@@ -888,8 +1012,7 @@ export default function CongCuTinhTienPage() {
               <p>&#32435;&#26399;&#23455;&#20064;&#12288;
                 {tuVanNgay
                   ? <span className="ml-1">&#30456;&#35611;&#24517;&#35201;</span>
-                  : <><input value={ngayGiao} onChange={e => setNgayGiao(e.target.value)}
-                      className="border-b border-gray-400 outline-none w-12 text-center text-sm bg-transparent mx-1" />
+                  : <><span style={{display:"inline-block",minWidth:"2.5rem",borderBottom:"1px solid #9ca3af",textAlign:"center",marginLeft:"4px",marginRight:"4px",fontSize:"15px"}}><input value={ngayGiao} onChange={e => setNgayGiao(e.target.value)} style={{width:"2.5rem",border:"none",outline:"none",background:"transparent",textAlign:"center",fontSize:"15px",fontFamily:"inherit",color:"inherit"}} /></span>
                     &#12288;&#26085;&#12411;&#12393;</>
                 }
               </p>
@@ -900,7 +1023,7 @@ export default function CongCuTinhTienPage() {
             <p className="mt-3">&#12300;&#12458;&#12458;&#12479;&#35211;&#31296;&#12418;&#12426;No.&#12288;&#12301;&#12288;<span className="text-red-600 font-bold text-base">{donHang.maDon}</span></p>
             <div className="flex gap-3 mt-3">
               {['松林','藤本'].map(name => (
-                <div key={name} className="w-12 h-12 rounded-full border-2 border-red-500 flex items-center justify-center text-red-500 font-bold text-sm">{name}</div>
+                <div key={name} style={{width:"48px",height:"48px",borderRadius:"50%",border:"2px solid #ef4444",color:"#ef4444",fontWeight:"bold",fontSize:"14px",position:"relative",display:"inline-block"}}><span style={{position:"absolute",top:"35%",left:"50%",transform:"translate(-50%,-50%)",lineHeight:1,whiteSpace:"nowrap"}}>{name}</span></div>
               ))}
             </div>
           </div>
@@ -963,7 +1086,7 @@ export default function CongCuTinhTienPage() {
                     <p className="text-xs text-gray-400">{p.vatLieu} {p.doDay}mm · ×{p.soLuong}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono text-red-500 font-semibold">¥{fmt(p.allIn)}</span>
+                    <span className="text-xs font-mono text-red-500 font-semibold">¥{fmt(p.gia1Tam)}</span>
                     <button onClick={e => { e.stopPropagation(); setXoaTamId(p.id) }}
                       className="text-gray-300 hover:text-red-500 transition-colors text-sm leading-none">✕</button>
                   </div>

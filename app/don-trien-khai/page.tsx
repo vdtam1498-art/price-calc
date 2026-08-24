@@ -29,6 +29,15 @@ export default function DonBaoGiaPage() {
     (d.tenCongTy || '').toLowerCase().includes(search.toLowerCase())
   )
 
+  async function chuyenDon(id: number) {
+    await fetch('/api/don-hang/' + id, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ loaiDon: 'bao_gia' })
+    })
+    setDonHangs(prev => prev.filter((x: any) => x.id !== id))
+    setSelected((s: any) => (s?.id === id ? null : s))
+  }
   async function xoaDon(id: number, maDon: string) {
     if (!confirm('Xoá đơn ' + maDon + '? Thao tác này không thể hoàn tác.')) return
     await fetch('/api/don-hang/' + id, { method: 'DELETE' })
@@ -69,7 +78,7 @@ export default function DonBaoGiaPage() {
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Danh sách đơn */}
-      <div className="w-80 border-r bg-white flex flex-col">
+      <div className="w-96 border-r bg-white flex flex-col">
         <div className="p-3 border-b">
           <h2 className="font-bold text-gray-800 mb-2">📦 Đơn triển khai</h2>
           <input value={search} onChange={e => setSearch(e.target.value)}
@@ -94,6 +103,8 @@ export default function DonBaoGiaPage() {
                     className="text-xs text-green-600 hover:text-green-700 border border-green-200 rounded px-1.5 py-0.5 hover:bg-green-50">👁 Xem</button>
                   <button onClick={e => { e.stopPropagation(); router.push('/cong-cu-tinh-tien?donId=' + d.id) }}
                     className="text-xs text-blue-400 hover:text-blue-600 border border-blue-200 rounded px-1.5 py-0.5 hover:bg-blue-50">✏️ Sửa</button>
+                  <button onClick={e => { e.stopPropagation(); chuyenDon(d.id) }}
+                    className="text-xs text-orange-500 hover:text-orange-700 border border-orange-200 rounded px-1.5 py-0.5 hover:bg-orange-50">→ Báo giá</button>
                   <button onClick={e => { e.stopPropagation(); xoaDon(d.id, d.maDon) }}
                     className="text-xs text-red-400 hover:text-red-600 border border-red-200 rounded px-1.5 py-0.5 hover:bg-red-50">✕ Xoá</button>
                 </div>
@@ -135,7 +146,7 @@ export default function DonBaoGiaPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {selected.panels.map((p: any) => (
+                  {[...selected.panels].sort((a: any, b: any) => a.tenTam.localeCompare(b.tenTam, undefined, {numeric: true, sensitivity: "base"})).map((p: any) => (
                     <tr key={p.id} className="border-b hover:bg-gray-50">
                       <td className="px-3 py-2 font-medium">{p.tenTam}</td>
                       <td className="px-3 py-2">{p.soLuong}</td>

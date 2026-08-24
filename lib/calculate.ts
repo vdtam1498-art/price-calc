@@ -57,7 +57,7 @@ export function calculatePanel(input: PanelInput, bangGia: BangGiaRow[]): PanelR
   const tienCuon = input.tienCuon
   const tienVat = (input.vatMm / 1000) * input.giaCongVatDonGia
   const tongGiaCong = tienLoCat + tienTappu + tienSara + tienBe + tienPitchi + tienCuon + tienVat
-  const gia1Tam = tienVL + tienCatLaser + tongGiaCong
+  const gia1Tam = Math.round((tienVL + tienCatLaser + tongGiaCong) / 10) * 10
   const allIn = gia1Tam * soLuong
   return { tyTrong: ty, klBaoGia, klThucTe, donGiaVLFinal, tienVL, tienCatLaser,
     tienLoCat, tienTappu, tienSara, tienBe, tienPitchi, tienCuon, tienVat,

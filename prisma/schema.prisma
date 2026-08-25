@@ -77,6 +77,7 @@ model Panel {
   giaCong       Float    @default(0)
   gia1Tam       Float    @default(0)
   allIn         Float    @default(0)
+  lamTron250    Boolean  @default(false)
   createdAt     DateTime @default(now())
 }
 
@@ -121,4 +122,12 @@ model CongTyDacBiet {
   donGiaTamDon     Float    @default(0)
   donGiaTamGiaCong Float    @default(0)
   createdAt        DateTime @default(now())
+}
+
+model Note {
+  id        Int      @id @default(autoincrement())
+  tiengViet String   @default("")
+  tiengNhat String   @default("")
+  thuTu     Int      @default(0)
+  createdAt DateTime @default(now())
 }

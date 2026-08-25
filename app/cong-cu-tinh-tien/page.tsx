@@ -8,7 +8,7 @@ const emptyPanel = (maDon?: string, nextNum?: number) => ({
   tenTam: maDon && nextNum !== undefined ? maDon + '-' + nextNum : '', vatLieu: '', doDay: '', x: '0', y: '0', soLuong: 1, maKhach: '',
   loNho: 0, loLon: 0, soLoTappu: 0, soLoSara: 0,
   pitchiSoLan: 0, pitchiChieuDai: 0, pitchiGio: 0, loaiGiaCong: 'Pitchi', cuonGio: 0, vatMm: 0,
-  be: [{ soDuong: 1, daiMm: 0, donGia: 0 }]
+  be: [{ soDuong: 1, daiMm: 0, donGia: 0 }], lamTron250: false
 })
 
 function sortPanels(dh: any) {
@@ -23,6 +23,15 @@ export default function CongCuTinhTienPage() {
   const [form, setForm] = useState({ maDon: '', tenCongTy: '', ghiChu: '', loaiDon: 'bao_gia' })
   const [showCTDropdown, setShowCTDropdown] = useState(false)
   const [showEditCTDropdown, setShowEditCTDropdown] = useState(false)
+  const [loaiTinh, setLoaiTinh] = useState('binh_thuong')
+  const [noteList, setNoteList] = useState<any[]>([])
+  const [selectedNoteIds, setSelectedNoteIds] = useState<number[]>([])
+  const [showNoteModal, setShowNoteModal] = useState(false)
+  const [editingNote, setEditingNote] = useState<any>(null)
+  const [noteForm, setNoteForm] = useState({ tiengViet: '', tiengNhat: '' })
+  const [copiedNote, setCopiedNote] = useState(false)
+  const [copiedText, setCopiedText] = useState(false)
+  const [noteSearch, setNoteSearch] = useState('')
   const [panel, setPanel] = useState<any>(emptyPanel())
   const [result, setResult] = useState<any>(null)
   const [modalPanel, setModalPanel] = useState<any>(null)
@@ -213,6 +222,14 @@ export default function CongCuTinhTienPage() {
       res.gia1Tam = Math.round(gia1TamDB / 10) * 10
       res.allIn = (Math.round(gia1TamDB / 10) * 10) * Number(panel.soLuong)
     }
+    // Luu gia goc + ap lam tron 250 neu duoc chon
+    if (res) {
+      res.gia1TamGoc = res.gia1Tam
+      if (panel.lamTron250 && res.gia1Tam < 250) {
+        res.gia1Tam = 250
+        res.allIn = 250 * Number(panel.soLuong)
+      }
+    }
     setResult(res)
   }, [panel, bangGia, isUuDai, bgRow, donGiaDatNgoai, isDacBiet, congTyDB])
 
@@ -257,7 +274,7 @@ export default function CongCuTinhTienPage() {
         be: panel.be, pitchiSoLan: Number(panel.pitchiSoLan), pitchiChieuDai: Number(panel.pitchiChieuDai), loaiGiaCong: panel.loaiGiaCong || 'Pitchi', pitchiGio: pitchiResult ? pitchiResult.thanhTien : 0, cuonGio: Number(panel.cuonGio), donGiaDatNgoai: donGiaDatNgoai || 0,
         vatMm: Number(panel.vatMm),
         giaVL: result.tienVL, giaCat: result.tienCatLaser, donGiaVL: result.donGiaVLFinal || 0, klThucTe: result.klThucTe || 0,
-        giaCong: result.tongGiaCong, gia1Tam: result.gia1Tam, allIn: result.allIn,
+        giaCong: result.tongGiaCong, gia1Tam: result.gia1Tam, allIn: result.allIn, lamTron250: !!panel.lamTron250,
     })
     if (editingPanelId) {
       const putRes = await fetch('/api/panels/' + editingPanelId, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body })
@@ -492,6 +509,63 @@ export default function CongCuTinhTienPage() {
         setCopyingImg(false)
       }, 'image/png')
     } catch { setCopyingImg(false) }
+  }
+  useEffect(() => { fetchNotes() }, [])
+  function fetchNotes() {
+    fetch('/api/note').then(r => r.json()).then(setNoteList).catch(() => {})
+  }
+  function toggleNote(id: number) {
+    setSelectedNoteIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
+  }
+  function openAddNote() {
+    setEditingNote(null); setNoteForm({ tiengViet: '', tiengNhat: '' }); setShowNoteModal(true)
+  }
+  function openEditNote(n: any) {
+    setEditingNote(n); setNoteForm({ tiengViet: n.tiengViet, tiengNhat: n.tiengNhat }); setShowNoteModal(true)
+  }
+  async function saveNote() {
+    if (!noteForm.tiengViet.trim() && !noteForm.tiengNhat.trim()) return
+    if (editingNote) {
+      await fetch('/api/note/' + editingNote.id, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(noteForm) })
+    } else {
+      await fetch('/api/note', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...noteForm, thuTu: noteList.length }) })
+    }
+    setShowNoteModal(false); fetchNotes()
+  }
+  async function deleteNote(id: number) {
+    if (!confirm('Xoá note này?')) return
+    await fetch('/api/note/' + id, { method: 'DELETE' })
+    setSelectedNoteIds(prev => prev.filter(x => x !== id)); fetchNotes()
+  }
+  function copyNoteJapanese() {
+    const text = noteList.filter(n => selectedNoteIds.includes(n.id)).map(n => n.tiengNhat).join('\n')
+    navigator.clipboard.writeText(text).catch(() => {
+      const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta)
+    })
+    setCopiedNote(true); setTimeout(() => setCopiedNote(false), 1500)
+  }
+  function copyDauBaoGiaText() {
+    const text = buildTamText({ ...panel, gia1Tam: result?.gia1Tam || 0 })
+    navigator.clipboard.writeText(text).catch(() => {
+      const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta)
+    })
+    setCopiedText(true); setTimeout(() => setCopiedText(false), 1500)
+  }
+  function buildTamText(p: any) {
+    const gia1Tam = Math.round(p.gia1Tam)
+    const hang1 = `@${gia1Tam.toLocaleString()} x${p.soLuong}枚`
+    const gc2 = []
+    if (p.be && p.be.some((b:any) => b.daiMm > 0)) gc2.push('曲げ')
+    if ((p.pitchiGio || 0) > 0) gc2.push('ピッチ')
+    if (p.cuonGio > 0) gc2.push('ロール')
+    const hang2 = gc2.length > 0 ? gc2.join('+') + '(材料＋加工)' : '切板(材料,レーザー)'
+    const gc3 = []
+    if (p.soLoTappu > 0) gc3.push('タップ')
+    if (p.soLoSara > 0) gc3.push('皿加工')
+    if (p.vatMm > 0) gc3.push('開先加工')
+    const hang3 = gc3.length > 0 ? gc3.join('+') : ''
+    const hang4 = `${p.vatLieu}   PL${p.doDay}`
+    return [p.tenTam || '', hang1, hang2, hang3, hang4].filter(l => l !== '').join('\n')
   }
   function copyTam(p: any, donHang: any) {
     const gia1Tam = Math.round(p.gia1Tam)
@@ -1004,7 +1078,7 @@ export default function CongCuTinhTienPage() {
 
         {/* Dau bao gia */}
         <div className="flex items-start gap-3">
-        <div id="dau-bao-gia" className="bg-white rounded-xl shadow-sm border p-4 text-sm font-medium w-1/2">
+        <div id="dau-bao-gia" className="bg-white rounded-xl shadow-sm border-2 border-red-500 p-4 text-sm font-medium w-[460px] flex-shrink-0">
           <div className="space-y-2 text-[15px] leading-relaxed">
             <p><span className="text-red-600 font-bold">{congTy?.tiengNhat || donHang.tenCongTy}</span><span className="ml-1">&#40;&#x682a;&#41;&#12288;&#24481;&#20013;</span></p>
             <p>&#12356;&#12388;&#12418;&#12362;&#19990;&#35441;&#12395;&#12394;&#12387;&#12390;&#12362;&#12426;&#12414;&#12377;&#12290;</p>
@@ -1028,7 +1102,18 @@ export default function CongCuTinhTienPage() {
             </div>
           </div>
         </div>
+        <div className="flex flex-col gap-3">
+        <div className="pt-1">
+          <p className="text-xs text-gray-400 mb-1.5">Xem trước nội dung copy</p>
+          <div className="border rounded-lg p-3 bg-gray-50 inline-block min-w-[200px]">
+            <pre className="text-xs font-mono whitespace-pre-wrap text-gray-700 leading-relaxed">{buildTamText({ ...panel, gia1Tam: result?.gia1Tam || 0 })}</pre>
+          </div>
+        </div>
         <div className="flex flex-col gap-2 pt-1">
+          <button onClick={copyDauBaoGiaText}
+            className="text-xs bg-indigo-600 text-white px-3 py-1.5 rounded hover:bg-indigo-700 whitespace-nowrap">
+            {copiedText ? '✓ Đã copy' : '📝 Copy chữ'}
+          </button>
           <button onClick={copyDauBaoGia} disabled={copyingImg}
             className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 disabled:opacity-50 whitespace-nowrap">
             {copyingImg ? '⏳' : '📋 Copy ảnh'}
@@ -1039,8 +1124,79 @@ export default function CongCuTinhTienPage() {
           </label>
         </div>
         </div>
+        <div className="pt-1 flex-1 min-w-[280px]">
+          <div className="flex items-center gap-2 mb-1.5">
+            <p className="text-xs text-gray-400 whitespace-nowrap">Xem trước nội dung note</p>
+            <input value={noteSearch} onChange={e => setNoteSearch(e.target.value)}
+              placeholder="🔍 Tìm note..."
+              className="flex-1 border rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <button onClick={openAddNote} className="text-xs text-blue-600 hover:text-blue-800 border border-blue-200 rounded px-1.5 py-0.5 hover:bg-blue-50 whitespace-nowrap">+ Thêm</button>
+          </div>
+          <div className="border rounded-lg p-2 max-h-40 overflow-y-auto flex flex-col gap-1 mb-2">
+            {noteList.length === 0 ? (
+              <p className="text-xs text-gray-300">Chưa có note nào</p>
+            ) : noteList.filter((n:any) => noteSearch === '' || n.tiengViet.toLowerCase().includes(noteSearch.toLowerCase()) || (n.tiengNhat && n.tiengNhat.includes(noteSearch))).map((n:any) => (
+              <div key={n.id} className="flex items-start gap-1.5 group">
+                <input type="checkbox" checked={selectedNoteIds.includes(n.id)} onChange={() => toggleNote(n.id)} className="accent-blue-600 mt-0.5" />
+                <label onClick={() => toggleNote(n.id)} className="flex-1 cursor-pointer">
+                  <p className="text-xs text-gray-700">{n.tiengViet}</p>
+                </label>
+                <button onClick={() => openEditNote(n)} className="text-xs text-gray-400 hover:text-blue-600 opacity-0 group-hover:opacity-100">✏️</button>
+                <button onClick={() => deleteNote(n.id)} className="text-xs text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100">✕</button>
+              </div>
+            ))}
+          </div>
+          {selectedNoteIds.length > 0 && (
+            <div className="border rounded-lg p-2 bg-gray-50">
+              {noteList.filter(n => selectedNoteIds.includes(n.id)).map((n:any) => (
+                <div key={n.id} className="mb-1.5 last:mb-0">
+                  <p className="text-xs text-gray-500">{n.tiengViet}</p>
+                  <p className="text-xs font-medium text-gray-800">{n.tiengNhat}</p>
+                </div>
+              ))}
+              <button onClick={copyNoteJapanese} className="mt-1 w-full text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700">
+                {copiedNote ? '✓ Đã copy' : '📋 Copy note (tiếng Nhật)'}
+              </button>
+            </div>
+          )}
+        </div>
+        <div className="pt-1 ml-auto">
+          <div className="border rounded-lg p-2 flex flex-col gap-1.5">
+            <span className="text-xs text-gray-400 font-medium">Options</span>
+            <label className="flex items-center gap-1.5 text-xs text-gray-700 cursor-pointer whitespace-nowrap">
+              <input type="radio" name="loaiTinh" value="binh_thuong" checked={loaiTinh === 'binh_thuong'} onChange={e => setLoaiTinh(e.target.value)} className="accent-blue-600" />
+              Bình thường
+            </label>
+            <label className="flex items-center gap-1.5 text-xs text-gray-700 cursor-pointer whitespace-nowrap">
+              <input type="radio" name="loaiTinh" value="chi_gia_cong" checked={loaiTinh === 'chi_gia_cong'} onChange={e => setLoaiTinh(e.target.value)} className="accent-blue-600" />
+              Chỉ gia công (Không Laze)
+            </label>
+            <label className="flex items-center gap-1.5 text-xs text-gray-700 cursor-pointer whitespace-nowrap">
+              <input type="radio" name="loaiTinh" value="vat_lieu_khach_cap" checked={loaiTinh === 'vat_lieu_khach_cap'} onChange={e => setLoaiTinh(e.target.value)} className="accent-blue-600" />
+              Vật liệu khách cấp
+            </label>
+          </div>
+        </div>
+        </div>
       </div>
 
+      {showNoteModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={() => setShowNoteModal(false)}>
+          <div className="bg-white rounded-xl p-4 w-[400px]" onClick={e => e.stopPropagation()}>
+            <p className="text-sm font-bold text-gray-700 mb-3">{editingNote ? 'Sửa note' : 'Thêm note'}</p>
+            <label className="text-xs text-gray-500">Tiếng Việt</label>
+            <textarea value={noteForm.tiengViet} onChange={e => setNoteForm(f => ({ ...f, tiengViet: e.target.value }))}
+              className="w-full border rounded-lg px-2 py-1 text-xs mb-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500" rows={2} />
+            <label className="text-xs text-gray-500">Tiếng Nhật</label>
+            <textarea value={noteForm.tiengNhat} onChange={e => setNoteForm(f => ({ ...f, tiengNhat: e.target.value }))}
+              className="w-full border rounded-lg px-2 py-1 text-xs mb-3 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500" rows={2} />
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setShowNoteModal(false)} className="text-xs px-3 py-1.5 rounded-lg border text-gray-500 hover:bg-gray-50">Huỷ</button>
+              <button onClick={saveNote} className="text-xs px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Lưu</button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* RIGHT PANEL */}
       <div className="w-80 border-l bg-white flex flex-col overflow-hidden">
         <div className="flex-1 overflow-y-auto border-b">
@@ -1070,7 +1226,7 @@ export default function CongCuTinhTienPage() {
                     be: p.be && p.be.length ? p.be : [{ soDuong: 1, daiMm: 0, donGia: 0 }],
                     pitchiSoLan: p.pitchiSoLan || 0, pitchiChieuDai: p.pitchiChieuDai || 0,
                     pitchiGio: p.pitchiGio || 0, loaiGiaCong: p.loaiGiaCong || 'Pitchi',
-                    cuonGio: p.cuonGio, vatMm: p.vatMm,
+                    cuonGio: p.cuonGio, vatMm: p.vatMm, lamTron250: !!p.lamTron250,
                   })
                   if (p.donGiaDatNgoai > 0) {
                     skipDatNgoaiDetect.current = true
@@ -1276,7 +1432,7 @@ export default function CongCuTinhTienPage() {
                     be: modalPanel.be || [{ soDuong: 1, daiMm: 0, donGia: 0 }],
                     pitchiSoLan: modalPanel.pitchiSoLan || 0, pitchiChieuDai: modalPanel.pitchiChieuDai || 0,
                     pitchiGio: modalPanel.pitchiGio || 0, loaiGiaCong: modalPanel.loaiGiaCong || 'Pitchi',
-                    cuonGio: modalPanel.cuonGio, vatMm: modalPanel.vatMm,
+                    cuonGio: modalPanel.cuonGio, vatMm: modalPanel.vatMm, lamTron250: !!modalPanel.lamTron250,
                   })
                   setModalPanel(null)
                 }} className="text-xs px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">✏️ Chỉnh sửa</button>
@@ -1304,9 +1460,20 @@ export default function CongCuTinhTienPage() {
               <p className="font-mono font-bold text-xs">¥ {result ? fmt(result.tongGiaCong) : 0}</p>
               
             </div>
-            <div className="bg-gray-50 rounded p-1.5">
+            <div className={`rounded p-1.5 ${result && result.gia1TamGoc < 250 ? 'bg-amber-50 border-2 border-amber-400' : 'bg-gray-50'}`}>
               <p className="text-xs font-bold text-blue-600">GIÁ 1 TẤM</p>
               <p className="font-mono font-bold text-xs">¥ {result ? fmt(result.gia1Tam) : 0}</p>
+              {result && result.gia1TamGoc < 250 && (
+                <div className="mt-1">
+                  <p className="text-xs text-amber-600 font-medium leading-tight">⚠️ Giá gốc ¥{fmt(result.gia1TamGoc)} &lt; 250</p>
+                  <div className="flex gap-1 mt-1">
+                    <button onClick={() => setPanel((pv:any) => ({ ...pv, lamTron250: false }))}
+                      className={`flex-1 text-xs px-1 py-0.5 rounded border ${!panel.lamTron250 ? 'bg-blue-600 text-white border-blue-600' : 'text-gray-500 border-gray-300 hover:bg-gray-50'}`}>Giữ gốc</button>
+                    <button onClick={() => setPanel((pv:any) => ({ ...pv, lamTron250: true }))}
+                      className={`flex-1 text-xs px-1 py-0.5 rounded border ${panel.lamTron250 ? 'bg-amber-500 text-white border-amber-500' : 'text-gray-500 border-gray-300 hover:bg-gray-50'}`}>Làm tròn 250</button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
           <div className="bg-red-50 border border-red-100 rounded-xl p-2 mb-2 text-center">

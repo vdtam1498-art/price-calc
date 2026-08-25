@@ -16,6 +16,7 @@ export interface PanelResult {
   tienVL: number; tienCatLaser: number; tienLoCat: number; tienTappu: number
   tienSara: number; tienBe: number; tienPitchi: number; tienCuon: number
   tienVat: number; tongGiaCong: number; gia1Tam: number; allIn: number
+  gia1TamGoc?: number
 }
 function heSoKL(kg: number): number {
   if (kg < 40) return 1

@@ -5,12 +5,21 @@ import { calculatePanel } from '@/lib/calculate'
 
 
 const emptyPanel = (maDon?: string, nextNum?: number) => ({
-  tenTam: maDon && nextNum !== undefined ? maDon + '-' + nextNum : '', vatLieu: '', doDay: '', x: '0', y: '0', soLuong: 1, maKhach: '',
+  tenTam: maDon && nextNum !== undefined ? maDon + '-' + nextNum : '', vatLieu: '', doDay: '', x: '', y: '', soLuong: 1, maKhach: '',
   loNho: 0, loLon: 0, soLoTappu: 0, soLoSara: 0,
   pitchiSoLan: 0, pitchiChieuDai: 0, pitchiGio: 0, loaiGiaCong: 'Pitchi', cuonGio: 0, vatMm: 0,
   be: [{ soDuong: 1, daiMm: 0, donGia: 0 }], lamTron250: false
 })
 
+function evalExpr(val: string): string {
+  try {
+    if (/^[0-9+\-*\/\.\s()]+$/.test(val)) {
+      const result = Function('"use strict"; return (' + val + ')')()
+      if (typeof result === 'number' && isFinite(result)) return String(Math.round(result * 100) / 100)
+    }
+  } catch {}
+  return val
+}
 function sortPanels(dh: any) {
   if (!dh?.panels) return dh
   return { ...dh, panels: [...dh.panels].sort((a: any, b: any) => a.id - b.id) }
@@ -49,6 +58,7 @@ export default function CongCuTinhTienPage() {
   const [ngayGiao, setNgayGiao] = useState('3-4')
   const [tuVanNgay, setTuVanNgay] = useState(false)
   const [isFax, setIsFax] = useState(false)
+  const [giuThongSo, setGiuThongSo] = useState(false)
   const [copyingImg, setCopyingImg] = useState(false)
   const [showModalHuy, setShowModalHuy] = useState(false)
   const [xoaTamId, setXoaTamId] = useState<number|null>(null)
@@ -291,7 +301,12 @@ export default function CongCuTinhTienPage() {
     const updated = await fetch('/api/don-hang/' + donHang.id).then(r => r.json())
     setDonHang(sortPanels(updated))
     setEditingPanelId(null)
-    setPanel(emptyPanel(updated.maDon, updated.panels.length === 0 ? 1 : Math.max(...updated.panels.map((p:any) => { const n = parseInt(p.tenTam?.split('-').pop()); return isNaN(n) ? 0 : n })) + 1))
+    const nextNum = updated.panels.length === 0 ? 1 : Math.max(...updated.panels.map((p:any) => { const n = parseInt(p.tenTam?.split('-').pop()); return isNaN(n) ? 0 : n })) + 1
+    if (giuThongSo) {
+      setPanel((prev: any) => ({ ...emptyPanel(updated.maDon, nextNum), vatLieu: prev.vatLieu, doDay: prev.doDay, x: prev.x, y: prev.y }))
+    } else {
+      setPanel(emptyPanel(updated.maDon, nextNum))
+    }
     setSaving(false)
   }
 
@@ -557,7 +572,7 @@ export default function CongCuTinhTienPage() {
     const hang1 = `@${gia1Tam.toLocaleString()} x${p.soLuong}枚`
     const gc2 = []
     if (p.be && p.be.some((b:any) => b.daiMm > 0)) gc2.push('曲げ')
-    if ((p.pitchiGio || 0) > 0) gc2.push('ピッチ')
+    if ((p.pitchiGio || 0) > 0 || (p.pitchiSoLan || 0) > 0) gc2.push('ピッチ')
     if (p.cuonGio > 0) gc2.push('ロール')
     const hang2 = gc2.length > 0 ? gc2.join('+') + '(材料＋加工)' : '切板(材料,レーザー)'
     const gc3 = []
@@ -580,7 +595,7 @@ export default function CongCuTinhTienPage() {
     // Hàng 2: bẻ + pitchi + cuộn
     const gc2 = []
     if (p.be && p.be.some((b:any) => b.daiMm > 0)) gc2.push('曲げ')
-    if ((p.pitchiGio || 0) > 0) gc2.push('ピッチ')
+    if ((p.pitchiGio || 0) > 0 || (p.pitchiSoLan || 0) > 0) gc2.push('ピッチ')
     if (p.cuonGio > 0) gc2.push('ロール')
     const hang2 = gc2.length > 0 ? gc2.join('+') + '(材料＋加工)' : '切板(材料,レーザー)'
 
@@ -822,6 +837,10 @@ export default function CongCuTinhTienPage() {
             <button onClick={() => setShowModalHuy(true)}
               className="hidden">✕ Huỷ đơn</button>
             <button onClick={() => setDonHang(null)} className="border bg-white px-3 py-1.5 rounded-lg text-xs hover:bg-gray-50">🗂 Lưu đơn hàng</button>
+            <label className="flex items-center gap-1 text-xs text-gray-500 cursor-pointer whitespace-nowrap border px-2 py-1.5 rounded-lg hover:bg-gray-50">
+              <input type="checkbox" checked={giuThongSo} onChange={e => setGiuThongSo(e.target.checked)} className="accent-blue-500" />
+              Giữ thông số
+            </label>
             <div className="relative" ref={exportMenuRef}>
               <button onClick={() => setShowExportMenu(v => !v)} className="border bg-white text-green-600 border-green-200 px-3 py-1.5 rounded-lg text-xs hover:bg-green-50">📊 Export ▾</button>
               {showExportMenu && (
@@ -880,11 +899,11 @@ export default function CongCuTinhTienPage() {
             </div>
             <div>
               <label className="text-xs text-gray-400">X — Dài (MM)</label>
-              <input type="number" value={panel.x} onChange={e => setPanel((p:any) => ({...p, x: e.target.value}))} className={inp} />
+              <input type="text" value={panel.x} onChange={e => setPanel((p:any) => ({...p, x: e.target.value}))} onBlur={e => setPanel((p:any) => ({...p, x: evalExpr(e.target.value)}))} onKeyDown={e => { if(e.key==='Enter') setPanel((p:any) => ({...p, x: evalExpr((e.target as HTMLInputElement).value)})) }} className={inp} />
             </div>
             <div>
               <label className="text-xs text-gray-400">Y — Rộng (MM)</label>
-              <input type="number" value={panel.y} onChange={e => setPanel((p:any) => ({...p, y: e.target.value}))} className={inp} />
+              <input type="text" value={panel.y} onChange={e => setPanel((p:any) => ({...p, y: e.target.value}))} onBlur={e => setPanel((p:any) => ({...p, y: evalExpr(e.target.value)}))} onKeyDown={e => { if(e.key==='Enter') setPanel((p:any) => ({...p, y: evalExpr((e.target as HTMLInputElement).value)})) }} className={inp} />
             </div>
             <div>
               <label className="text-xs text-gray-400">Số lượng</label>

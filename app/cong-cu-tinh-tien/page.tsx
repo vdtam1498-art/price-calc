@@ -48,6 +48,7 @@ export default function CongCuTinhTienPage() {
   const exportMenuRef = useRef<HTMLDivElement>(null)
   const [ngayGiao, setNgayGiao] = useState('3-4')
   const [tuVanNgay, setTuVanNgay] = useState(false)
+  const [isFax, setIsFax] = useState(false)
   const [copyingImg, setCopyingImg] = useState(false)
   const [showModalHuy, setShowModalHuy] = useState(false)
   const [xoaTamId, setXoaTamId] = useState<number|null>(null)
@@ -1080,8 +1081,8 @@ export default function CongCuTinhTienPage() {
         <div className="flex items-start gap-3">
         <div id="dau-bao-gia" className="bg-white rounded-xl shadow-sm border-2 border-red-500 p-4 text-sm font-medium w-[460px] flex-shrink-0">
           <div className="space-y-2 text-[15px] leading-relaxed">
-            <p><span className="text-red-600 font-bold">{congTy?.tiengNhat || donHang.tenCongTy}</span><span className="ml-1">&#40;&#x682a;&#41;&#12288;&#24481;&#20013;</span></p>
-            <p>&#12356;&#12388;&#12418;&#12362;&#19990;&#35441;&#12395;&#12394;&#12387;&#12390;&#12362;&#12426;&#12414;&#12377;&#12290;</p>
+            {!isFax && <p><span className="text-red-600 font-bold">{congTy?.tiengNhat || donHang.tenCongTy}</span><span className="ml-1">&#40;&#x682a;&#41;&#12288;&#24481;&#20013;</span></p>}
+            {!isFax && <p>&#12356;&#12388;&#12418;&#12362;&#19990;&#35441;&#12395;&#12394;&#12387;&#12390;&#12362;&#12426;&#12414;&#12377;&#12290;</p>}
             <div className="flex items-center justify-between">
               <p>&#32435;&#26399;&#23455;&#20064;&#12288;
                 {tuVanNgay
@@ -1121,6 +1122,10 @@ export default function CongCuTinhTienPage() {
           <label className="flex items-center gap-1 text-xs text-gray-500 cursor-pointer whitespace-nowrap">
             <input type="checkbox" checked={tuVanNgay} onChange={e => setTuVanNgay(e.target.checked)} className="accent-red-500" />
             Cần trao đổi thời gian giao
+          </label>
+          <label className="flex items-center gap-1 text-xs text-gray-500 cursor-pointer whitespace-nowrap">
+            <input type="checkbox" checked={isFax} onChange={e => setIsFax(e.target.checked)} className="accent-red-500" />
+            Fax
           </label>
         </div>
         </div>

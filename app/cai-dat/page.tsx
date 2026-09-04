@@ -245,7 +245,8 @@ export default function CaiDatPage() {
   function tinhGia(donGia: number) {
     if (donGia <= 0) return null
     return {
-      uuDai:          (donGia * getHS('Ưu đãi')).toFixed(1),
+      uuDaiSUS:       (donGia * getHS('Ưu đãi SUS')).toFixed(1),
+      uuDaiSS:        (donGia * getHS('Ưu đãi SS')).toFixed(1),
       khongUuDaiSUS:  (donGia * getHS('Không ưu đãi SUS')).toFixed(1),
       khongUuDaiSS:   (donGia * getHS('Không ưu đãi SS')).toFixed(1),
       datNgoaiSUS:    (donGia * getHS('Đặt ngoài SUS')).toFixed(1),
@@ -314,7 +315,8 @@ export default function CaiDatPage() {
             <input placeholder="Vật liệu" value={newBG.vatLieu} onChange={e => setNewBG(p => ({...p, vatLieu: e.target.value}))} className="border rounded px-2 py-1 text-xs" />
             <input placeholder="Dày(mm)" type="number" value={newBG.doDay || ''} onChange={e => setNewBG(p => ({...p, doDay: e.target.value as any}))} className="border rounded px-2 py-1 text-xs" />
             <input placeholder="Đơn giá" type="number" value={newBG.donGia || ''} onChange={e => setNewBG(p => ({...p, donGia: Number(e.target.value)}))} className="border rounded px-2 py-1 text-xs" />
-            <input readOnly value={newBG.donGia ? (newBG.donGia * getHS('Ưu đãi')).toFixed(1) : ''} placeholder="Ưu đãi" className="border rounded px-2 py-1 text-xs bg-green-50 text-green-600 cursor-not-allowed" />
+            <input readOnly value={newBG.donGia ? (newBG.donGia * getHS('Ưu đãi SUS')).toFixed(1) : ''} placeholder="UĐ SUS" className="border rounded px-2 py-1 text-xs bg-green-50 text-green-500 cursor-not-allowed" />
+            <input readOnly value={newBG.donGia ? (newBG.donGia * getHS('Ưu đãi SS')).toFixed(1) : ''} placeholder="UĐ SS" className="border rounded px-2 py-1 text-xs bg-green-50 text-green-700 cursor-not-allowed" />
             <input readOnly value={newBG.donGia ? (newBG.donGia * getHS('Không ưu đãi SUS')).toFixed(1) : ''} placeholder="KUĐ SUS" className="border rounded px-2 py-1 text-xs bg-orange-50 text-orange-400 cursor-not-allowed" />
             <input readOnly value={newBG.donGia ? (newBG.donGia * getHS('Không ưu đãi SS')).toFixed(1) : ''} placeholder="KUĐ SS" className="border rounded px-2 py-1 text-xs bg-orange-50 text-orange-600 cursor-not-allowed" />
             <input readOnly value={newBG.donGia ? (newBG.donGia * getHS('Đặt ngoài SUS')).toFixed(1) : ''} placeholder="Đặt ngoài SUS" className="border rounded px-2 py-1 text-xs bg-red-50 text-red-400 cursor-not-allowed" />
@@ -335,7 +337,8 @@ export default function CaiDatPage() {
                 <th className="pb-1.5 pr-2">Vật liệu</th>
                 <th className="pb-1.5 pr-2">Dày(mm)</th>
                 <th className="pb-1.5 pr-2">Đơn giá</th>
-                <th className="pb-1.5 pr-2 text-green-600">Ưu đãi</th>
+                <th className="pb-1.5 pr-2 text-green-500">UĐ SUS</th>
+                <th className="pb-1.5 pr-2 text-green-700">UĐ SS</th>
                 <th className="pb-1.5 pr-2 text-orange-400">KUĐ SUS</th>
                 <th className="pb-1.5 pr-2 text-orange-600">KUĐ SS</th>
                 <th className="pb-1.5 pr-2 text-red-400">Đặt ngoài SUS</th>
@@ -362,7 +365,8 @@ export default function CaiDatPage() {
                         </td>
                       ))}
                       {(() => { const g = tinhGia(editingBG.donGia); return (<>
-                        <td className="py-1 pr-2"><input readOnly value={g ? g.uuDai : ''} className="border rounded px-1.5 py-0.5 w-full text-xs bg-green-50 text-green-600" /></td>
+                        <td className="py-1 pr-2"><input readOnly value={g ? g.uuDaiSUS : ''} className="border rounded px-1.5 py-0.5 w-full text-xs bg-green-50 text-green-500" /></td>
+                        <td className="py-1 pr-2"><input readOnly value={g ? g.uuDaiSS : ''} className="border rounded px-1.5 py-0.5 w-full text-xs bg-green-50 text-green-700" /></td>
                         <td className="py-1 pr-2"><input readOnly value={g ? g.khongUuDaiSUS : ''} className="border rounded px-1.5 py-0.5 w-full text-xs bg-orange-50 text-orange-400" /></td>
                         <td className="py-1 pr-2"><input readOnly value={g ? g.khongUuDaiSS : ''} className="border rounded px-1.5 py-0.5 w-full text-xs bg-orange-50 text-orange-600" /></td>
                         <td className="py-1 pr-2"><input readOnly value={g ? g.datNgoaiSUS : ''} className="border rounded px-1.5 py-0.5 w-full text-xs bg-red-50 text-red-400" /></td>
@@ -388,7 +392,8 @@ export default function CaiDatPage() {
                       <td className="py-1.5 pr-2 font-mono">{Number(row.doDay).toFixed(1)}</td>
                       <td className="py-1.5 pr-2 font-mono">{row.donGia > 0 ? row.donGia : <span className="text-gray-400 italic text-xs">Đặt ngoài</span>}</td>
                       {(() => { const g = tinhGia(row.donGia); return (<>
-                        <td className="py-1.5 pr-2 text-green-600 font-mono">{g ? g.uuDai : <span className="text-gray-300">—</span>}</td>
+                        <td className="py-1.5 pr-2 text-green-500 font-mono">{g ? g.uuDaiSUS : <span className="text-gray-300">—</span>}</td>
+                        <td className="py-1.5 pr-2 text-green-700 font-mono">{g ? g.uuDaiSS : <span className="text-gray-300">—</span>}</td>
                         <td className="py-1.5 pr-2 text-orange-400 font-mono">{g ? g.khongUuDaiSUS : <span className="text-gray-300">—</span>}</td>
                         <td className="py-1.5 pr-2 text-orange-600 font-mono">{g ? g.khongUuDaiSS : <span className="text-gray-300">—</span>}</td>
                         <td className="py-1.5 pr-2 text-red-400 font-mono">{g ? g.datNgoaiSUS : <span className="text-gray-300">—</span>}</td>

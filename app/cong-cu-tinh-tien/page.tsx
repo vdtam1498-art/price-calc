@@ -126,8 +126,8 @@ export default function CongCuTinhTienPage() {
     const isSUS = vl.includes('SUS')
     const isHanwa = (donHang?.tenCongTy || '').toLowerCase().startsWith('hanwa')
     if (isUuDai) {
-      const key = (isSUS && !isHanwa) ? 'Không ưu đãi SUS' : 'Ưu đãi'
-      return '×' + (hesoGiaVL.find((h:any) => h.tenLoai === key)?.heSo || (isSUS && !isHanwa ? 1.15 : 1.1))
+      const key = isSUS ? 'Ưu đãi SUS' : 'Ưu đãi SS'
+      return '×' + (hesoGiaVL.find((h:any) => h.tenLoai === key)?.heSo || (isSUS ? 1.05 : 1.15))
     }
     const key = isSUS ? 'Không ưu đãi SUS' : 'Không ưu đãi SS'
     return '×' + (hesoGiaVL.find((h:any) => h.tenLoai === key)?.heSo || 1.2)
@@ -150,7 +150,7 @@ export default function CongCuTinhTienPage() {
       // Đặt ngoài: hệ số cố định theo nhóm VL
       heSoVL = (isSUS || panel.vatLieu.toUpperCase().startsWith('A')) ? 1.2 : 1.3
     } else if (isUuDai) {
-      heSoVL = (isSUS && !isHanwa) ? getHSVL('Không ưu đãi SUS') : getHSVL('Ưu đãi')
+      heSoVL = isSUS ? getHSVL('Ưu đãi SUS') : getHSVL('Ưu đãi SS')
     } else {
       heSoVL = isSUS ? getHSVL('Không ưu đãi SUS') : getHSVL('Không ưu đãi SS')
     }
@@ -398,7 +398,7 @@ export default function CongCuTinhTienPage() {
       const getHSVL2 = (ten: string) => hesoGiaVL.find((h:any) => h.tenLoai === ten)?.heSo || 1
       let heSoVL2 = 1
       if (isUuDai) {
-        heSoVL2 = (isSUS && !isHanwa) ? getHSVL2('Không ưu đãi SUS') : getHSVL2('Ưu đãi')
+        heSoVL2 = isSUS ? getHSVL2('Ưu đãi SUS') : getHSVL2('Ưu đãi SS')
       } else {
         heSoVL2 = isSUS ? getHSVL2('Không ưu đãi SUS') : getHSVL2('Không ưu đãi SS')
       }

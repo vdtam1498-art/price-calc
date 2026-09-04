@@ -60,7 +60,9 @@ export function calculatePanel(input: PanelInput, bangGia: BangGiaRow[]): PanelR
   const tongGiaCong = tienLoCat + tienTappu + tienSara + tienBe + tienPitchi + tienCuon + tienVat
   const tongGia3 = tienVL + tienCatLaser + tongGiaCong
   const ratio = tongGia3 > 0 ? tienVL / tongGia3 : 0
-  const gia1TamRaw = ratio > 0.5 ? tienVL * 2 : tongGia3
+  // Quy tac VL x1.4 (khi VL chiem >70%) CHI ap cho sat thep, khong ap cho inox (SUS)
+  const isInox = (input.vatLieu || '').toUpperCase().startsWith('SUS')
+  const gia1TamRaw = (!isInox && ratio > 0.7) ? tienVL * 1.4 : tongGia3
   const gia1Tam = Math.round(gia1TamRaw / 10) * 10
   const allIn = gia1Tam * soLuong
   return { tyTrong: ty, klBaoGia, klThucTe, donGiaVLFinal, tienVL, tienCatLaser,
